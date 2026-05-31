@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from '../constants/theme';
 
 import CreatorHomeScreen from '../screens/creator/HomeScreen';
-import SearchEventsScreen from '../screens/creator/SearchEventsScreen';
+import MarketStack from './MarketStack';
 import ApplicationsScreen from '../screens/creator/ApplicationsScreen';
 import MessagesScreen from '../screens/shared/MessagesScreen';
 import ProfileScreen from '../screens/shared/ProfileScreen';
@@ -20,11 +20,11 @@ export default function CreatorNavigator() {
         tabBarInactiveTintColor: colors.text.secondary,
       }}
     >
-      <Tab.Screen name="Accueil" component={CreatorHomeScreen} />
-      <Tab.Screen name="Marchés" component={SearchEventsScreen} />
-      <Tab.Screen name="Candidatures" component={ApplicationsScreen} />
-      <Tab.Screen name="Messages" component={MessagesScreen} />
-      <Tab.Screen name="Profil" component={ProfileScreen} />
+      <Tab.Screen name="Accueil"       component={CreatorHomeScreen} />
+      <Tab.Screen name="Marchés"       component={MarketStack} />
+      <Tab.Screen name="Candidatures"  component={ApplicationsScreen} />
+      <Tab.Screen name="Messages"      component={MessagesScreen} />
+      <Tab.Screen name="Profil"        component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
