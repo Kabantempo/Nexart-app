@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { supabase } from '../lib/supabase';
+
+// Expo Go ne supporte plus les push depuis SDK 53 — on skip silencieusement
+const IS_EXPO_GO = Constants.appOwnership === 'expo';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -35,7 +39,7 @@ export async function getPushTokenForUser(userId: string): Promise<string | null
 
 export function usePushNotifications(userId: string | undefined) {
   useEffect(() => {
-    if (!userId || Platform.OS === 'web') return;
+    if (!userId || Platform.OS === 'web' || IS_EXPO_GO) return;
 
     const register = async () => {
       const { status: existing } = await Notifications.getPermissionsAsync();
