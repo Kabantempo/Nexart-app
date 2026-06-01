@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, TextInput, Alert,
+  ActivityIndicator, TextInput, Alert, Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../stores/auth';
 import { useConversations, ConversationSummary } from '../../hooks/useConversations';
@@ -23,6 +24,25 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}j`;
 }
 
+function Avatar({ uri, name, hasUnread }: { uri?: string | null; name: string; hasUnread: boolean }) {
+  if (uri) {
+    return (
+      <View style={[s.avatarWrap, hasUnread && s.avatarWrapUnread]}>
+        <Image source={{ uri }} style={s.avatarImg} />
+        {hasUnread && <View style={s.unreadDot} />}
+      </View>
+    );
+  }
+  return (
+    <View style={[s.avatarWrap, hasUnread && s.avatarWrapUnread]}>
+      <View style={s.avatarFallback}>
+        <Ionicons name="person" size={22} color={hasUnread ? colors.primary : colors.text.secondary} />
+      </View>
+      {hasUnread && <View style={s.unreadDot} />}
+    </View>
+  );
+}
+
 function ConversationRow({ item, userId, onPress }: { item: ConversationSummary; userId: string; onPress: () => void }) {
   const isCreator = item.creator_id === userId;
   const other     = isCreator ? item.organizer : item.creator;
@@ -31,9 +51,7 @@ function ConversationRow({ item, userId, onPress }: { item: ConversationSummary;
 
   return (
     <TouchableOpacity style={s.row} onPress={onPress} activeOpacity={0.8}>
-      <View style={[s.avatar, hasUnread && s.avatarUnread]}>
-        <Text style={[s.avatarText, hasUnread && s.avatarTextUnread]}>{otherName[0]?.toUpperCase() ?? '?'}</Text>
-      </View>
+      <Avatar uri={(other as any)?.avatar_url} name={otherName} hasUnread={hasUnread} />
       <View style={s.rowContent}>
         <View style={s.rowTop}>
           <Text style={[s.otherName, hasUnread && s.bold]} numberOfLines={1}>{otherName}</Text>
@@ -61,9 +79,7 @@ function InquiryRow({ item, onReply }: { item: any; onReply: (id: string, msg: s
   return (
     <View style={s.inquiryCard}>
       <View style={s.inquiryHeader}>
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{item.visitor?.full_name?.[0]?.toUpperCase() ?? '?'}</Text>
-        </View>
+        <Avatar uri={item.visitor?.avatar_url} name={item.visitor?.full_name ?? 'V'} hasUnread={!item.reply} />
         <View style={{ flex: 1 }}>
           <Text style={s.otherName}>{item.visitor?.full_name ?? 'Visiteur'}</Text>
           <Text style={s.time}>{timeAgo(item.created_at)}</Text>
@@ -226,14 +242,22 @@ const s = StyleSheet.create({
   separator: { height: 1, backgroundColor: colors.border + '60', marginLeft: 76 },
 
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.md + 2, gap: spacing.md },
-  avatar: {
-    width: 48, height: 48, borderRadius: 24,
-    backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
+
+  avatarWrap:       { width: 52, height: 52, position: 'relative' },
+  avatarWrapUnread: {},
+  avatarImg:        { width: 52, height: 52, borderRadius: 26, borderWidth: 2, borderColor: colors.border },
+  avatarFallback:   {
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: colors.muted,
+    alignItems: 'center', justifyContent: 'center',
     borderWidth: 1.5, borderColor: colors.border,
   },
-  avatarUnread: { borderColor: colors.primary, backgroundColor: colors.primary + '15' },
-  avatarText:      { ...typography.h3, color: colors.text.secondary },
-  avatarTextUnread:{ color: colors.primary },
+  unreadDot: {
+    position: 'absolute', bottom: 1, right: 1,
+    width: 14, height: 14, borderRadius: 7,
+    backgroundColor: colors.primary,
+    borderWidth: 2, borderColor: colors.background,
+  },
   rowContent: { flex: 1 },
   rowTop:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   otherName:  { ...typography.label, color: colors.text.primary, fontWeight: '500', flex: 1 },

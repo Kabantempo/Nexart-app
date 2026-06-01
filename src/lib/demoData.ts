@@ -262,6 +262,7 @@ export const DEMO_APPLICATIONS = [
 // ─── Conversations & Messages ─────────────────────────────
 
 export const DEMO_CONVERSATIONS = [
+  // 1. Créateur ↔ Organisateur (candidature acceptée — Bastille)
   {
     id: 'demo-conv-1',
     event_id: 'demo-event-1',
@@ -271,9 +272,10 @@ export const DEMO_CONVERSATIONS = [
     unread_count: 1,
     last_message: { id: 'msg-5', content: 'Tu recevras le lien de paiement dans la journée.', sender_id: 'demo-org-1', created_at: '2026-05-13T11:00:00Z' },
     event:     { id: 'demo-event-1', title: 'Marché des Créateurs Bastille' },
-    creator:   { id: 'demo-creator-1', full_name: 'Sophie Leroux',  avatar_url: PHOTOS.av1 },
-    organizer: { id: 'demo-org-1',     full_name: 'Claire Moreau',   avatar_url: PHOTOS.av6 },
+    creator:   { id: 'demo-creator-1', full_name: 'Sophie Leroux', avatar_url: PHOTOS.av1 },
+    organizer: { id: 'demo-org-1',     full_name: 'Claire Moreau',  avatar_url: PHOTOS.av6 },
   },
+  // 2. Créateur ↔ Organisateur (salon Lyon)
   {
     id: 'demo-conv-2',
     event_id: 'demo-event-2',
@@ -283,12 +285,32 @@ export const DEMO_CONVERSATIONS = [
     unread_count: 0,
     last_message: { id: 'msg-9', content: 'Parfait, à bientôt !', sender_id: 'demo-creator-2', created_at: '2026-05-18T16:00:00Z' },
     event:     { id: 'demo-event-2', title: 'Salon du Design & Craft Lyon' },
-    creator:   { id: 'demo-creator-2', full_name: 'Marc Dumont',    avatar_url: PHOTOS.av2 },
-    organizer: { id: 'demo-org-2',     full_name: 'Thomas Blanc',   avatar_url: PHOTOS.av7 },
+    creator:   { id: 'demo-creator-2', full_name: 'Marc Dumont',   avatar_url: PHOTOS.av2 },
+    organizer: { id: 'demo-org-2',     full_name: 'Thomas Blanc',  avatar_url: PHOTOS.av7 },
+  },
+  // 3. Visiteur ↔ Créateur (demande de contact portfolio)
+  {
+    id: 'demo-conv-3',
+    event_id: 'demo-event-3',
+    creator_id: 'demo-creator-3',
+    organizer_id: 'demo-org-1',
+    created_at: '2026-06-01T10:00:00Z',
+    unread_count: 2,
+    last_message: { id: 'msg-14', content: 'Bonjour, je suis très intéressée par vos créations !', sender_id: 'demo-visitor-1', created_at: '2026-06-01T10:00:00Z' },
+    event:     { id: 'demo-event-3', title: 'Pop-up Artisanat Bordeaux' },
+    creator:   { id: 'demo-creator-3', full_name: 'Isabelle Chen',  avatar_url: PHOTOS.av3 },
+    organizer: { id: 'demo-org-1',     full_name: 'Léa Visiteur',   avatar_url: PHOTOS.av5 },
   },
 ];
 
 export const DEMO_MESSAGES: Record<string, any[]> = {
+  'demo-conv-3': [
+    { id: 'msg-10', conversation_id: 'demo-conv-3', sender_id: 'demo-visitor-1', content: 'Bonjour Isabelle, j\'ai découvert votre travail sur Instagram et je suis absolument fan !', read_at: '2026-06-01T10:05:00Z', created_at: '2026-06-01T09:45:00Z' },
+    { id: 'msg-11', conversation_id: 'demo-conv-3', sender_id: 'demo-creator-3', content: 'Merci beaucoup ! C\'est très touchant. Vous cherchez quelque chose en particulier ?', read_at: '2026-06-01T10:10:00Z', created_at: '2026-06-01T10:05:00Z' },
+    { id: 'msg-12', conversation_id: 'demo-conv-3', sender_id: 'demo-visitor-1', content: 'Je cherche une bague de fiançailles en or recyclé. Est-ce que vous faites des pièces sur commande ?', read_at: '2026-06-01T10:15:00Z', created_at: '2026-06-01T10:10:00Z' },
+    { id: 'msg-13', conversation_id: 'demo-conv-3', sender_id: 'demo-creator-3', content: 'Oui absolument ! C\'est même ce que je préfère faire. Je peux vous envoyer un devis si vous me donnez vos préférences : style, pierres, budget.', read_at: null, created_at: '2026-06-01T09:58:00Z' },
+    { id: 'msg-14', conversation_id: 'demo-conv-3', sender_id: 'demo-visitor-1', content: 'Bonjour, je suis très intéressée par vos créations !', read_at: null, created_at: '2026-06-01T10:00:00Z' },
+  ],
   'demo-conv-1': [
     { id: 'msg-1', conversation_id: 'demo-conv-1', sender_id: 'demo-org-1',     content: 'Bonjour Sophie ! Ta candidature est acceptée, bienvenue au Marché Bastille ! Ton emplacement : stand B-12.', read_at: '2026-05-12T10:00:00Z', created_at: '2026-05-12T09:00:00Z' },
     { id: 'msg-2', conversation_id: 'demo-conv-1', sender_id: 'demo-creator-1', content: 'Merci beaucoup Claire ! Est-ce que je peux amener mon propre éclairage ? J\'ai un spot LED USB.', read_at: '2026-05-12T10:30:00Z', created_at: '2026-05-12T10:00:00Z' },
