@@ -23,7 +23,7 @@ export function HorizontalCardList<T>({
   onSeeAll, emptyText = 'Aucun résultat', keyExtractor,
 }: HorizontalCardListProps<T>) {
   const { width: W } = useWindowDimensions();
-  const cardWidth    = W * CARD_RATIO;
+  const cardWidth    = Math.min(W * CARD_RATIO, 300);
 
   return (
     <View style={s.container}>

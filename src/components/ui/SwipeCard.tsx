@@ -29,7 +29,8 @@ export function SwipeCard({
   title, subtitle, images, stats, description, accent, onPress,
 }: SwipeCardProps) {
   const { width: W } = useWindowDimensions();
-  const CARD_W   = W * 0.78;
+  // Sur web le viewport = navigateur entier, on plafonne à 300px
+  const CARD_W   = Math.min(W * 0.78, 300);
   const IMG_W    = CARD_W * 0.40;
   const IMG_H    = 90;
 
