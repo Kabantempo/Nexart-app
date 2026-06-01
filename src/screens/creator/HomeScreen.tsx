@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { useCreatorApplications } from '../../hooks/useApplications';
@@ -8,6 +9,25 @@ import { useCreatorProfile } from '../../hooks/useCreatorProfile';
 import { useEventRecommendations } from '../../hooks/useRecommendations';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { Event } from '../../types';
+import { SwipeCard, CardStat } from '../../components/ui/SwipeCard';
+import { HorizontalCardList } from '../../components/ui/HorizontalCardList';
+
+const TYPE_COLORS: Record<string, string> = {
+  permanent: '#3B82F6', seasonal: '#F59E0B',
+  popup: '#A855F7', salon: '#10B981', fair: '#EF4444',
+};
+
+function eventToCardProps(event: Event, onPress: () => void) {
+  const accent = TYPE_COLORS[event.event_type] ?? colors.primary;
+  const stats: CardStat[] = [
+    { icon: 'location-outline', label: event.city ?? '—' },
+    { icon: 'calendar-outline', label: new Date(event.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) },
+    { icon: 'grid-outline',     label: `${event.stand_count} stands` },
+  ];
+  if (event.stand_price != null) stats.push({ icon: 'pricetag-outline', label: event.stand_price === 0 ? 'Gratuit' : `${event.stand_price} €` });
+  const images = event.cover_image ? [event.cover_image, ...(event.media ?? []).slice(0, 2)] : (event.media ?? []).slice(0, 3);
+  return { title: event.title, subtitle: event.event_type, images: images.length ? images : ['', '', ''], stats, description: event.description ?? event.discipline_tags.join(', '), accent, onPress };
+}
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   pending:  { label: 'En attente', bg: colors.text.secondary + '18', color: colors.text.secondary },
@@ -97,6 +117,7 @@ function SectionTitle({ children, accent }: { children: string; accent?: boolean
 
 export default function CreatorHomeScreen() {
   const insets = useSafeAreaInsets();
+  const nav    = useNavigation<any>();
   const { profile } = useAuth();
   const { creatorProfile } = useCreatorProfile(profile?.id);
   const { events, loading: evLoading } = useEvents({ limit: 5 });
@@ -128,23 +149,34 @@ export default function CreatorHomeScreen() {
         </View>
       </View>
 
-      {/* Recommandés */}
+      {/* Recommandés — swipe cards */}
       {!recLoading && recommended.length > 0 && (
-        <>
-          <SectionTitle accent>Pour vous</SectionTitle>
-          {recommended.map(e => <EventCard key={e.id} event={e} />)}
-          <View style={s.spacer} />
-        </>
+        <HorizontalCardList
+          title="Pour vous"
+          data={recommended}
+          keyExtractor={e => e.id}
+          emptyText="Aucune recommandation"
+          renderCard={(event) => (
+            <SwipeCard {...eventToCardProps(event, () => nav.navigate('Marchés', { screen: 'EventDetail', params: { eventId: event.id } }))} />
+          )}
+        />
       )}
 
-      {/* Prochains marchés */}
-      <SectionTitle>Prochains marchés</SectionTitle>
+      {/* Prochains marchés — swipe cards */}
       {evLoading ? (
         <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
-      ) : events.length === 0 ? (
-        <EmptyState message="Aucun marché disponible pour l'instant" />
       ) : (
-        events.map(e => <EventCard key={e.id} event={e} />)
+        <HorizontalCardList
+          title="Prochains marchés"
+          seeAllLabel="Voir tout →"
+          onSeeAll={() => nav.navigate('Marchés')}
+          data={events}
+          keyExtractor={e => e.id}
+          emptyText="Aucun marché disponible"
+          renderCard={(event) => (
+            <SwipeCard {...eventToCardProps(event, () => nav.navigate('Marchés', { screen: 'EventDetail', params: { eventId: event.id } }))} />
+          )}
+        />
       )}
 
       <View style={s.spacer} />
