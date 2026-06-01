@@ -12,14 +12,9 @@ import { usePublicCreators } from '../../hooks/usePublicCreators';
 import { usePosts } from '../../hooks/usePosts';
 import { useFollowedCreators } from '../../hooks/useFollow';
 import PostCard from '../../components/PostCard';
-import { SwipeCard, CardStat } from '../../components/ui/SwipeCard';
 import { AppHeader } from '../../components/ui/AppHeader';
+import { MarketCard } from '../../components/ui/MarketCard';
 import { colors, spacing, typography, radius } from '../../constants/theme';
-
-const TYPE_COLORS: Record<string, string> = {
-  permanent: '#3B82F6', seasonal: '#F59E0B',
-  popup: '#A855F7', salon: '#10B981', fair: '#EF4444',
-};
 
 const today     = new Date();
 const inDays    = (d: string, n: number) => new Date(d) <= new Date(today.getTime() + n * 86400000);
@@ -27,21 +22,20 @@ const isOngoing = (e: any) => new Date(e.start_date) <= today && new Date(e.end_
 const isSoon    = (e: any) => !isOngoing(e) && inDays(e.start_date, 14);
 const isUpcoming= (e: any) => !isOngoing(e) && !isSoon(e) && new Date(e.start_date) > today;
 
-function toCardProps(event: any, onPress: () => void) {
-  const accent = TYPE_COLORS[event.event_type] ?? colors.primary;
-  const stats: CardStat[] = [
-    { icon: 'location-outline', label: event.city ?? '—' },
-    { icon: 'calendar-outline', label: new Date(event.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) },
-    { icon: 'grid-outline',     label: `${event.stand_count ?? '?'} stands` },
-  ];
-  const images = event.cover_image
-    ? [event.cover_image, ...(event.media ?? []).slice(0, 2)]
-    : (event.media ?? []).slice(0, 3);
+function eventToMarketCard(event: any, onPress: () => void) {
+  const dateStr = new Date(event.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  const subtitle = `${event.city ?? '—'} · ${dateStr}`;
+  const coverImage = event.cover_image ?? (event.media ?? [])[0] ?? null;
+  const discount = event.stand_price === 0 ? 'Gratuit' : null;
   return {
-    title: event.title, subtitle: event.event_type,
-    images: images.length ? images : ['', '', ''],
-    stats, description: event.description ?? (event.discipline_tags ?? []).slice(0, 4).join(', '),
-    accent, onPress,
+    id:            event.id,
+    imageUrl:      coverImage,
+    title:         event.title,
+    subtitle,
+    rating:        event.rating ?? 0,
+    price:         event.stand_price ?? null,
+    discountLabel: discount ?? undefined,
+    onPress,
   };
 }
 
@@ -71,7 +65,7 @@ function SectionTitle({ icon, title, count, onSeeAll }: {
 
 function EventRow({ events, onPressEvent }: { events: any[]; onPressEvent: (id: string) => void }) {
   const { width: W } = useWindowDimensions();
-  const cardWidth = Math.min(W * 0.78, 300);
+  const cardWidth = Math.min(W * 0.60, 220);
   if (!events.length) return null;
   return (
     <FlatList
@@ -84,7 +78,7 @@ function EventRow({ events, onPressEvent }: { events: any[]; onPressEvent: (id: 
       contentContainerStyle={s.hRow}
       ItemSeparatorComponent={() => <View style={{ width: spacing.md }} />}
       renderItem={({ item }) => (
-        <SwipeCard {...toCardProps(item, () => onPressEvent(item.id))} />
+        <MarketCard {...eventToMarketCard(item, () => onPressEvent(item.id))} />
       )}
     />
   );
