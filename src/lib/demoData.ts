@@ -4,42 +4,25 @@
 // ============================================================
 export const DEMO_MODE = true;
 
-const U = (id: string, w = 400, h = 300) =>
-  `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&q=80&auto=format&fit=crop`;
+// ─── 3 images de test (picsum.photos — toujours disponibles) ─
 
-// ─── Photos ──────────────────────────────────────────────
+const IMG1 = 'https://picsum.photos/seed/nexart-a/800/500'; // paysage chaud
+const IMG2 = 'https://picsum.photos/seed/nexart-b/800/500'; // texture craft
+const IMG3 = 'https://picsum.photos/seed/nexart-c/800/500'; // portrait
 
 export const PHOTOS = {
   // Marchés / événements
-  marche1:    U('1555041469-b8442bd48c6', 800, 500),
-  marche2:    U('1519389950473-47ba0277781c', 800, 500),
-  marche3:    U('1558618666-fcd25c85cd64', 800, 500),
-  marche4:    U('1536240478613-bf1b3c22e9e9', 800, 500),
-  marche5:    U('1578662996-1b8e3df40bd3', 800, 500),
-  // Céramique
-  cera1:  U('1565193566173-7a0ee3dbe261', 400, 400),
-  cera2:  U('1513519245088-0e12902e35a7', 400, 400),
-  cera3:  U('1493106641515-5cd99ef12e28', 400, 400),
-  // Bijoux / Joaillerie
-  bij1:   U('1535157412991-2ef801c64ae0', 400, 400),
-  bij2:   U('1573408301185-9521e7d27ab5', 400, 400),
-  bij3:   U('1515562141207-7a88fb7ce338', 400, 400),
-  // Tatouage / Illustration
-  tat1:   U('1598531938980-d6b677ce5a25', 400, 400),
-  tat2:   U('1611048267451-284ef2b8a214', 400, 400),
-  tat3:   U('1507003211169-0a1dd7228f2d', 400, 400),
-  // Textile / Broderie
-  tex1:   U('1558769132-cb1aea153895', 400, 400),
-  tex2:   U('1551218808-886c2db2a9c4', 400, 400),
-  // Avatars créateurs
-  av1:    U('1494790108377-be9c29b29330', 200, 200),
-  av2:    U('1507003211169-0a1dd7228f2d', 200, 200),
-  av3:    U('1438761681033-6461ffad8d80', 200, 200),
-  av4:    U('1472099645785-5658abf4ff4e', 200, 200),
-  av5:    U('1544005313-94ddf0286df2', 200, 200),
-  // Avatars organisateurs
-  av6:    U('1580489944761-15a19d654956', 200, 200),
-  av7:    U('1560250097-0b93528c311a', 200, 200),
+  marche1: IMG1, marche2: IMG2, marche3: IMG3,
+  marche4: IMG1, marche5: IMG2,
+  // Portfolios créateurs
+  cera1: IMG2, cera2: IMG3, cera3: IMG1,
+  bij1:  IMG3, bij2:  IMG1, bij3:  IMG2,
+  tat1:  IMG1, tat2:  IMG2, tat3:  IMG3,
+  tex1:  IMG2, tex2:  IMG3,
+  // Avatars
+  av1: IMG3, av2: IMG1, av3: IMG2,
+  av4: IMG3, av5: IMG1,
+  av6: IMG2, av7: IMG3,
 };
 
 // ─── Événements ──────────────────────────────────────────
