@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Image, Alert, TextInput, ActivityIndicator, FlatList, Dimensions,

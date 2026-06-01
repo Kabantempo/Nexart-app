@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
@@ -150,6 +151,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
 }
 
 export default function ApplicationsScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { applications, loading, refetch } = useCreatorApplications(profile?.id);
   const [filter, setFilter] = useState<ApplicationStatus | 'all'>('all');
@@ -163,7 +165,7 @@ export default function ApplicationsScreen() {
   };
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { paddingTop: insets.top + spacing.sm }]}>
       <Text style={s.title}>Mes candidatures</Text>
       {applications.length > 0 && (
         <View style={s.statsRow}>

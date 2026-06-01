@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator,
@@ -38,6 +39,7 @@ function renderItem({ item }: { item: FeedItem }) {
 }
 
 export default function FeedScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const nav = useNavigation<any>();
   const followedIds = useFollowedCreators(profile?.id);

@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { supabase } from './src/lib/supabase';
 import { AuthContext } from './src/stores/auth';
 import { Profile } from './src/types';
@@ -13,6 +15,7 @@ function AppInner({ profile }: { profile: Profile | null }) {
 
   return (
     <>
+      <StatusBar style="dark" />
       <RootNavigator />
       {profile?.role && visible && (
         <OnboardingModal role={profile.role} visible={visible} onDismiss={dismiss} />
@@ -57,8 +60,10 @@ export default function App() {
   }, [fetchProfile]);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, refetchProfile, setProfile }}>
-      <AppInner profile={profile} />
-    </AuthContext.Provider>
+    <SafeAreaProvider>
+      <AuthContext.Provider value={{ session, user, profile, loading, refetchProfile, setProfile }}>
+        <AppInner profile={profile} />
+      </AuthContext.Provider>
+    </SafeAreaProvider>
   );
 }

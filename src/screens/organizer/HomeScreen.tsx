@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
@@ -83,6 +84,7 @@ function SectionTitle({ children }: { children: string }) {
 // ─── Main screen ──────────────────────────────────────────
 
 export default function OrganizerHomeScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { events, loading: evLoading }     = useEvents({ organizerId: profile?.id, limit: 5 });
   const { applications, loading: appLoading } = useOrganizerApplications();
@@ -92,7 +94,7 @@ export default function OrganizerHomeScreen() {
   const firstName      = profile?.full_name?.split(' ')[0] ?? 'organisateur';
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: insets.top + spacing.sm }]} showsVerticalScrollIndicator={false}>
 
       {/* Greeting */}
       <View style={s.greetingWrap}>
@@ -142,7 +144,7 @@ export default function OrganizerHomeScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content:   { padding: spacing.xl, paddingTop: spacing.xxl + 8, paddingBottom: spacing.xxl },
+  content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
 
   greetingWrap: { marginBottom: spacing.xl },
   greeting:     { ...typography.h2, color: colors.text.primary, fontWeight: '700', marginBottom: spacing.xs },

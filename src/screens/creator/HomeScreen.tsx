@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
@@ -95,6 +96,7 @@ function SectionTitle({ children, accent }: { children: string; accent?: boolean
 // ─── Main screen ──────────────────────────────────────────
 
 export default function CreatorHomeScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { creatorProfile } = useCreatorProfile(profile?.id);
   const { events, loading: evLoading } = useEvents({ limit: 5 });
@@ -106,7 +108,7 @@ export default function CreatorHomeScreen() {
   const firstName     = profile?.full_name?.split(' ')[0] ?? 'artisan';
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: insets.top + spacing.sm }]} showsVerticalScrollIndicator={false}>
 
       {/* Greeting */}
       <View style={s.greetingWrap}>
@@ -165,7 +167,7 @@ export default function CreatorHomeScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content:   { padding: spacing.xl, paddingTop: spacing.xxl + 8, paddingBottom: spacing.xxl },
+  content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
 
   // Greeting
   greetingWrap: { marginBottom: spacing.xl },

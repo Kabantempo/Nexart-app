@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
@@ -24,6 +25,7 @@ function useVisitorSentInquiries(visitorId: string | undefined) {
 }
 
 export default function VisitorMessagesScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const nav = useNavigation<any>();
   const { inquiries, loading } = useVisitorSentInquiries(profile?.id);

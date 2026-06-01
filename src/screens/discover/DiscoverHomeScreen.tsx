@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, Image, ActivityIndicator,
@@ -91,6 +92,7 @@ function SectionHeader({ title, linkLabel, onLink }: { title: string; linkLabel?
 // ─── Main screen ──────────────────────────────────────────
 
 export default function DiscoverHomeScreen() {
+  const insets = useSafeAreaInsets();
   const nav = useNavigation<any>();
   const [search, setSearch]     = useState('');
   const [discipline, setDiscipline] = useState('');
@@ -103,7 +105,7 @@ export default function DiscoverHomeScreen() {
     : events;
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.container} contentContainerStyle={[s.content, { paddingTop: insets.top + spacing.sm }]} showsVerticalScrollIndicator={false}>
 
       {/* Header */}
       <View style={s.hero}>

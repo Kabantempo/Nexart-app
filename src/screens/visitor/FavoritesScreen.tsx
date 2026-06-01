@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
@@ -6,6 +7,7 @@ import { useFavorites } from '../../hooks/useFavorites';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 export default function FavoritesScreen() {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const nav = useNavigation<any>();
   const { favEvents, favCreators, loading, refetch } = useFavorites(profile?.id);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator, TextInput, Alert,
@@ -122,6 +123,7 @@ function InquiryRow({ item, onReply }: { item: any; onReply: (id: string, msg: s
 }
 
 export default function MessagesScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { conversations, loading, refetch } = useConversations(profile?.id);
   const { inquiries, reply: replyToInquiry } = useCreatorInquiries(
@@ -140,7 +142,7 @@ export default function MessagesScreen({ navigation }: Props) {
   if (loading) return <View style={s.centered}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { paddingTop: insets.top + spacing.sm }]}>
       <Text style={s.title}>Messages</Text>
 
       {isCreator && (
