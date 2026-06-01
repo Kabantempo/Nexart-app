@@ -4,31 +4,36 @@ import { Message } from '../types';
 import { getPushTokenForUser, sendPushNotification } from './usePushNotifications';
 import { DEMO_MODE, DEMO_MESSAGES } from '../lib/demoData';
 
+const isDemo = (convId: string) => DEMO_MODE && convId.startsWith('demo-conv-');
+
 export function useMessages(conversationId: string | undefined, currentUserId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
+  const [loading, setLoading]   = useState(true);
+  const [sending, setSending]   = useState(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const fetchMessages = useCallback(async () => {
     if (!conversationId) return;
+
+    // ── Mode démo : charge instantanément sans Supabase ──────────────────────
+    if (isDemo(conversationId)) {
+      setMessages((DEMO_MESSAGES[conversationId] ?? []) as Message[]);
+      setLoading(false);
+      return;
+    }
+
+    // ── Mode réel ─────────────────────────────────────────────────────────────
     const { data } = await supabase
       .from('messages')
       .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
-    const real = (data as Message[]) ?? [];
-    if (DEMO_MODE && real.length === 0 && DEMO_MESSAGES[conversationId]) {
-      setMessages(DEMO_MESSAGES[conversationId] as Message[]);
-    } else {
-      setMessages(real);
-    }
+    setMessages((data as Message[]) ?? []);
     setLoading(false);
   }, [conversationId]);
 
-  // Mark incoming messages as read
   const markRead = useCallback(async () => {
-    if (!conversationId || !currentUserId) return;
+    if (!conversationId || !currentUserId || isDemo(conversationId)) return;
     await supabase
       .from('messages')
       .update({ read_at: new Date().toISOString() })
@@ -42,32 +47,24 @@ export function useMessages(conversationId: string | undefined, currentUserId: s
 
     fetchMessages().then(markRead);
 
-    // Realtime subscription
+    // Pas de Realtime sur les conversations démo
+    if (isDemo(conversationId)) return;
+
     const channel = supabase
       .channel(`conv-${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          setMessages(prev => {
-            const incoming = payload.new as Message;
-            if (prev.find(m => m.id === incoming.id)) return prev;
-            return [...prev, incoming];
-          });
-          // Mark as read if from the other party
-          if ((payload.new as Message).sender_id !== currentUserId) {
-            supabase
-              .from('messages')
-              .update({ read_at: new Date().toISOString() })
-              .eq('id', (payload.new as Message).id);
-          }
-        },
-      )
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      }, (payload) => {
+        setMessages(prev => {
+          const incoming = payload.new as Message;
+          if (prev.find(m => m.id === incoming.id)) return prev;
+          return [...prev, incoming];
+        });
+        if ((payload.new as Message).sender_id !== currentUserId) {
+          supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', (payload.new as Message).id);
+        }
+      })
       .subscribe();
 
     channelRef.current = channel;
@@ -77,10 +74,27 @@ export function useMessages(conversationId: string | undefined, currentUserId: s
   const sendMessage = async (content: string, otherPartyId?: string): Promise<boolean> => {
     if (!conversationId || !currentUserId || !content.trim()) return false;
     setSending(true);
+
+    // ── Mode démo : ajoute le message localement ──────────────────────────────
+    if (isDemo(conversationId)) {
+      const fakeMsg: Message = {
+        id:              `demo-sent-${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id:       currentUserId,
+        content:         content.trim(),
+        read_at:         null,
+        created_at:      new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, fakeMsg]);
+      setSending(false);
+      return true;
+    }
+
+    // ── Mode réel ─────────────────────────────────────────────────────────────
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
-      sender_id: currentUserId,
-      content: content.trim(),
+      sender_id:       currentUserId,
+      content:         content.trim(),
     });
     if (!error && otherPartyId) {
       getPushTokenForUser(otherPartyId).then(token => {

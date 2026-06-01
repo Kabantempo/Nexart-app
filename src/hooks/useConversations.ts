@@ -23,6 +23,13 @@ export function useConversations(userId: string | undefined) {
     if (!userId) { setLoading(false); return; }
     setLoading(true);
 
+    // ── Mode démo : affiche instantanément sans Supabase ─────────────────────
+    if (DEMO_MODE) {
+      setConversations(DEMO_CONVERSATIONS as unknown as ConversationSummary[]);
+      setLoading(false);
+      return;
+    }
+
     const { data: convs } = await supabase
       .from('conversations')
       .select(`
