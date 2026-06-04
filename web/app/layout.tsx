@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar21st } from "@/components/navbar-21st";
+import { NavbarUXUI } from "@/components/navbar-uxui";
 import { Footer } from "@/components/footer";
 
 const geistSans = Geist({
@@ -36,7 +36,7 @@ export default function RootLayout({
           color: '#1A1A1A',
         }}
       >
-        <Navbar21st />
+        <NavbarUXUI />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>
