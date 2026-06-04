@@ -402,6 +402,44 @@ export default function Home() {
             ]}
             columns={3}
           />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginTop: '64px' }}
+          >
+            <Link
+              href="/events"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '16px 32px',
+                borderRadius: '8px',
+                border: '2px solid #6366F1',
+                backgroundColor: 'transparent',
+                color: '#6366F1',
+                textDecoration: 'none',
+                fontSize: '16px',
+                fontWeight: '600',
+                transition: 'all 300ms ease',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
+              }}
+            >
+              Découvrir tous les événements
+              <ArrowRight size={20} />
+            </Link>
+          </motion.div>
         </div>
       </section>
 
@@ -476,6 +514,44 @@ export default function Home() {
             ]}
             columns={3}
           />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginTop: '64px' }}
+          >
+            <Link
+              href="/creators"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '16px 32px',
+                borderRadius: '8px',
+                border: '2px solid #6366F1',
+                backgroundColor: 'transparent',
+                color: '#6366F1',
+                textDecoration: 'none',
+                fontSize: '16px',
+                fontWeight: '600',
+                transition: 'all 300ms ease',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'
+                ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
+              }}
+            >
+              Découvrir tous les créateurs
+              <ArrowRight size={20} />
+            </Link>
+          </motion.div>
         </div>
       </section>
 
