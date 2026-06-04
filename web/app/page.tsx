@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, Users, MapPin, MessageSquare, Award, Zap, Heart } from 'lucide-react'
 import { AnimatedGradientBg } from '@/components/animated-gradient-bg'
+import { SmokeBackground } from '@/components/smoke-background'
 
 export default function Home() {
   return (
@@ -157,105 +158,158 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* App Download Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              style={{ textAlign: 'center', marginTop: '80px', display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center' }}
-            >
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-              >
-                <p style={{
-                  color: '#FFFFFF',
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  marginBottom: '8px',
-                  background: 'linear-gradient(135deg, #FFFFFF 0%, #E5E7EB 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>
-                  Télécharger Nexart
-                </p>
-                <p style={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '16px',
-                  fontWeight: '400',
-                  marginTop: '8px',
-                }}>
-                  Disponible sur iOS et Android
-                </p>
-              </motion.div>
-              <div style={{ display: 'flex', gap: '28px', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
-                {/* App Store Button - Official Badge */}
-                <motion.a
-                  href="https://apps.apple.com/app/nexart/id6736595834"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <img
-                    src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1234567890"
-                    alt="Télécharger sur l'App Store"
-                    style={{
-                      height: '64px',
-                      width: 'auto',
-                      filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2))',
-                      transition: 'filter 300ms ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3))'
-                    }}
-                    onMouseLeave={(e) => {
-                      ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2))'
-                    }}
-                  />
-                </motion.a>
-
-                {/* Google Play Button - Official Badge */}
-                <motion.a
-                  href="https://play.google.com/store/apps/details?id=com.nexart.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <img
-                    src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                    alt="Télécharger sur Google Play"
-                    style={{
-                      height: '64px',
-                      width: 'auto',
-                      filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2))',
-                      transition: 'filter 300ms ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3))'
-                    }}
-                    onMouseLeave={(e) => {
-                      ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2))'
-                    }}
-                  />
-                </motion.a>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </section>
       </AnimatedGradientBg>
+
+      {/* Download Section with Smoke Background */}
+      <section
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: '600px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '100px 16px',
+        }}
+      >
+        {/* Smoke Background */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
+          <SmokeBackground smokeColor="#6366F1" />
+        </div>
+
+        {/* Content */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+            alignItems: 'center',
+            maxWidth: '800px',
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <p
+              style={{
+                color: '#FFFFFF',
+                fontSize: '32px',
+                fontWeight: '700',
+                marginBottom: '8px',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #E5E7EB 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Télécharger Nexart
+            </p>
+            <p
+              style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '16px',
+                fontWeight: '400',
+                marginTop: '8px',
+              }}
+            >
+              Disponible sur iOS et Android
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            style={{
+              display: 'flex',
+              gap: '28px',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            {/* App Store Button */}
+            <a
+              href="https://apps.apple.com/app/nexart/id6736595834"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                cursor: 'pointer',
+                transition: 'transform 300ms ease',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-8px)'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'
+              }}
+            >
+              <img
+                src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1234567890"
+                alt="Télécharger sur l'App Store"
+                style={{
+                  height: '60px',
+                  width: 'auto',
+                  filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
+                  transition: 'filter 300ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))'
+                }}
+              />
+            </a>
+
+            {/* Google Play Button */}
+            <a
+              href="https://play.google.com/store/apps/details?id=com.nexart.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                cursor: 'pointer',
+                transition: 'transform 300ms ease',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-8px)'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'
+              }}
+            >
+              <img
+                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                alt="Télécharger sur Google Play"
+                style={{
+                  height: '60px',
+                  width: 'auto',
+                  filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
+                  transition: 'filter 300ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.target as HTMLImageElement).style.filter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))'
+                }}
+              />
+            </a>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Stats Section */}
       <section
