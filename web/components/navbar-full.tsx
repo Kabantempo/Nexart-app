@@ -234,9 +234,9 @@ export function NavbarFull() {
                     { title: 'Blog', href: '#' },
                     { title: 'Partenariats', href: '#' },
                     { title: 'Nous contacter', href: '#' },
-                  ].map((item) => (
+                  ].map((item, idx) => (
                     <Link
-                      key={item.href}
+                      key={`resource-${idx}`}
                       href={item.href}
                       onClick={() => setOpenDropdown(null)}
                       style={{
