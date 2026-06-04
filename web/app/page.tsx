@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, Users, MapPin, MessageSquare, Award, Zap, Heart } from 'lucide-react'
 import { SmokeBackground } from '@/components/smoke-background'
+import { ImageTestimonialGrid } from '@/components/image-testimonial-grid'
 
 export default function Home() {
   return (
@@ -350,184 +351,57 @@ export default function Home() {
               Marchés & Événements à ne pas rater
             </h2>
             <p style={{ fontSize: '18px', color: '#888888', maxWidth: '600px', margin: '0 auto' }}>
-              Explorez les meilleurs marchés et événements artisanaux en France pour exposer vos créations
+              Les meilleurs rendez-vous artisanaux en France cette année
             </p>
           </motion.div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '24px',
-              marginBottom: '64px',
-            }}
-          >
-            {[
-              { title: 'Salon d\'Automne Créateurs', location: 'Paris, France', type: 'Salon', date: '15-17 Nov 2024', stands: '50+ disponibles', featured: true },
-              { title: 'Pop-up Marché Artisan', location: 'Lyon, France', type: 'Pop-up', date: '1-3 Décembre', stands: '30 places', featured: false },
-              { title: 'Marché Permanent Bastille', location: 'Paris, France', type: 'Permanent', date: 'Chaque weekend', stands: 'Continu', featured: true },
-              { title: 'Foire Métiers d\'Art', location: 'Bordeaux, France', type: 'Foire', date: '5-8 Décembre', stands: '100+ places', featured: false },
-            ].map((market, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                style={{
-                  borderRadius: '12px',
-                  border: market.featured ? '2px solid #6366F1' : '1px solid #E5E7EB',
-                  backgroundColor: '#FFFFFF',
-                  overflow: 'hidden',
-                  transition: 'all 300ms ease',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = '0 20px 40px rgba(99, 102, 241, 0.15)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-8px)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                {market.featured && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '16px',
-                      right: '16px',
-                      padding: '6px 12px',
-                      borderRadius: '9999px',
-                      backgroundColor: '#6366F1',
-                      color: '#FFFFFF',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      zIndex: 10,
-                    }}
-                  >
-                    En vedette
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    width: '100%',
-                    height: '180px',
-                    background: 'linear-gradient(135deg, #6366F1 0%, #818CF8 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFFFFF',
-                    fontSize: '48px',
-                    fontWeight: '700',
-                    position: 'relative',
-                  }}
-                >
-                  🎪
-                </div>
-
-                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-                  <div>
-                    <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#1A1A1A', margin: 0 }}>
-                      {market.title}
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#888888', margin: 0 }}>
-                      📍 {market.location}
-                    </p>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          padding: '4px 10px',
-                          borderRadius: '4px',
-                          backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                          color: '#6366F1',
-                        }}
-                      >
-                        {market.type}
-                      </span>
-                      <span style={{ fontSize: '13px', color: '#888888' }}>📅 {market.date}</span>
-                    </div>
-                    <p style={{ fontSize: '13px', color: '#888888', margin: 0 }}>
-                      📊 {market.stands}
-                    </p>
-                  </div>
-
-                  <Link
-                    href="/events"
-                    style={{
-                      marginTop: 'auto',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      backgroundColor: '#F5F5F7',
-                      color: '#6366F1',
-                      textDecoration: 'none',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      textAlign: 'center',
-                      transition: 'all 300ms ease',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={(e) => {
-                      ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
-                      ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
-                    }}
-                    onMouseLeave={(e) => {
-                      ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#F5F5F7'
-                      ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
-                    }}
-                  >
-                    Voir les détails
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            style={{ textAlign: 'center' }}
-          >
-            <Link
-              href="/events"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '16px 32px',
-                borderRadius: '8px',
-                border: '2px solid #6366F1',
-                backgroundColor: 'transparent',
-                color: '#6366F1',
-                textDecoration: 'none',
-                fontSize: '16px',
-                fontWeight: '600',
-                transition: 'all 300ms ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
-                ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'
-                ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
-              }}
-            >
-              Découvrir tous les événements
-              <ArrowRight size={20} />
-            </Link>
-          </motion.div>
+          <ImageTestimonialGrid
+            items={[
+              {
+                name: 'Salon d\'Automne Créateurs',
+                title: 'Paris • 15-17 Nov 2024',
+                image: 'https://images.unsplash.com/photo-1469749292166-56156c16147f?w=500&h=700&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=10',
+                size: 'large',
+              },
+              {
+                name: 'Pop-up Marché Artisan',
+                title: 'Lyon • 1-3 Décembre',
+                image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=600&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=11',
+                size: 'medium',
+              },
+              {
+                name: 'Marché Permanent Bastille',
+                title: 'Paris • Chaque weekend',
+                image: 'https://images.unsplash.com/photo-1495576066350-f5f7ab7da3f8?w=400&h=400&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=12',
+                size: 'small',
+              },
+              {
+                name: 'Foire Métiers d\'Art',
+                title: 'Bordeaux • 5-8 Décembre',
+                image: 'https://images.unsplash.com/photo-1519167758993-c74ba48f8a84?w=400&h=400&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=13',
+                size: 'small',
+              },
+              {
+                name: 'Marché de Noel Premium',
+                title: 'Marseille • 1 Nov - 31 Dec',
+                image: 'https://images.unsplash.com/photo-1502882657612-449c28e3e055?w=400&h=600&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=14',
+                size: 'medium',
+              },
+              {
+                name: 'Festival des Créateurs',
+                title: 'Toulouse • 20-22 Octobre',
+                image: 'https://images.unsplash.com/photo-1479237916879-f9b06251a113?w=500&h=500&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=15',
+                size: 'large',
+              },
+            ]}
+            columns={3}
+          />
         </div>
       </section>
 
@@ -535,7 +409,7 @@ export default function Home() {
       <section
         style={{
           padding: '80px 16px',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#F9F9FB',
           borderTop: '1px solid #E5E7EB',
         }}
       >
@@ -551,160 +425,57 @@ export default function Home() {
               Découvrez nos meilleurs créateurs
             </h2>
             <p style={{ fontSize: '18px', color: '#888888', maxWidth: '600px', margin: '0 auto' }}>
-              Explorez les talents de notre communauté et trouvez l'inspiration dans leurs créations uniques
+              Les talents les plus en vue de la plateforme Nexart
             </p>
           </motion.div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '24px',
-              marginBottom: '64px',
-            }}
-          >
-            {[
-              { initials: 'MD', name: 'Marie Dubois', bio: 'Artiste céramiste passionnée par les formes organiques et les textures naturelles.', disciplines: ['Céramique', 'Sculpture'] },
-              { initials: 'TM', name: 'Thomas Martin', bio: 'Tatoeur réputé pour ses designs custom et son attention au détail.', disciplines: ['Tatouage', 'Illustration'] },
-              { initials: 'SL', name: 'Sophie Laurent', bio: 'Créatrice de bijoux artisanaux en or et argent recyclés avec des pierres naturelles.', disciplines: ['Joaillerie', 'Bijoux'] },
-              { initials: 'JB', name: 'Julien Beaumont', bio: 'Graveur spécialisé dans les techniques traditionnelles et les finitions précises.', disciplines: ['Gravure', 'Design'] },
-            ].map((creator, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                style={{
-                  borderRadius: '12px',
-                  border: '1px solid #E5E7EB',
-                  backgroundColor: '#FFFFFF',
-                  padding: '24px',
-                  transition: 'all 300ms ease',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = '0 20px 40px rgba(99, 102, 241, 0.15)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-8px)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                {/* Avatar Circle with Initials */}
-                <div
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    backgroundColor: '#6366F1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#FFFFFF',
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    marginBottom: '16px',
-                  }}
-                >
-                  {creator.initials}
-                </div>
-
-                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#1A1A1A', margin: 0 }}>
-                  {creator.name}
-                </h3>
-
-                <p style={{ fontSize: '14px', color: '#888888', marginBottom: '16px', lineHeight: '1.6', flex: 1 }}>
-                  {creator.bio}
-                </p>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                  {creator.disciplines.map((discipline, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        padding: '6px 12px',
-                        borderRadius: '20px',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        color: '#6366F1',
-                      }}
-                    >
-                      {discipline}
-                    </span>
-                  ))}
-                </div>
-
-                <Link
-                  href="/creators"
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    backgroundColor: '#F5F5F7',
-                    color: '#6366F1',
-                    textDecoration: 'none',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    textAlign: 'center',
-                    transition: 'all 300ms ease',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
-                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
-                  }}
-                  onMouseLeave={(e) => {
-                    ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#F5F5F7'
-                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
-                  }}
-                >
-                  Voir le profil
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            style={{ textAlign: 'center' }}
-          >
-            <Link
-              href="/creators"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '16px 32px',
-                borderRadius: '8px',
-                border: '2px solid #6366F1',
-                backgroundColor: 'transparent',
-                color: '#6366F1',
-                textDecoration: 'none',
-                fontSize: '16px',
-                fontWeight: '600',
-                transition: 'all 300ms ease',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#6366F1'
-                ;(e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF'
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent'
-                ;(e.currentTarget as HTMLAnchorElement).style.color = '#6366F1'
-              }}
-            >
-              Découvrir tous les créateurs
-              <ArrowRight size={20} />
-            </Link>
-          </motion.div>
+          <ImageTestimonialGrid
+            items={[
+              {
+                name: 'Marie Dubois',
+                title: 'Céramiste & Sculptrice',
+                image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=700&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=1',
+                size: 'large',
+              },
+              {
+                name: 'Thomas Martin',
+                title: 'Tatoueur & Designer',
+                image: 'https://images.unsplash.com/photo-1578814050033-9c499bb9a3a7?w=400&h=600&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=2',
+                size: 'medium',
+              },
+              {
+                name: 'Sophie Laurent',
+                title: 'Joaillière',
+                image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=3',
+                size: 'small',
+              },
+              {
+                name: 'Julien Beaumont',
+                title: 'Graveur & Artisan',
+                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=4',
+                size: 'small',
+              },
+              {
+                name: 'Elena Rodriguez',
+                title: 'Textile & Mode',
+                image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=5',
+                size: 'medium',
+              },
+              {
+                name: 'Marc Leclerc',
+                title: 'Bois & Menuiserie',
+                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop',
+                avatar: 'https://i.pravatar.cc/150?img=6',
+                size: 'large',
+              },
+            ]}
+            columns={3}
+          />
         </div>
       </section>
 
