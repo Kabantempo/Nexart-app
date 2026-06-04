@@ -203,7 +203,7 @@ export function NavbarUXUI() {
                     {discoverItems.map((item) => {
                       const Icon = item.icon
                       return (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
                           style={{
@@ -229,6 +229,7 @@ export function NavbarUXUI() {
                             e.currentTarget.style.boxShadow = 'none'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }}
+                          onClick={() => setActiveDropdown(null)}
                         >
                           {Icon && (
                             <div
@@ -253,7 +254,7 @@ export function NavbarUXUI() {
                               {item.description}
                             </p>
                           </div>
-                        </a>
+                        </Link>
                       )
                     })}
                   </div>
@@ -330,7 +331,7 @@ export function NavbarUXUI() {
                     {resourceItems.map((item) => {
                       const Icon = item.icon
                       return (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
                           style={{
@@ -356,6 +357,7 @@ export function NavbarUXUI() {
                             e.currentTarget.style.boxShadow = 'none'
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }}
+                          onClick={() => setActiveDropdown(null)}
                         >
                           {Icon && (
                             <div
@@ -380,7 +382,7 @@ export function NavbarUXUI() {
                               {item.description}
                             </p>
                           </div>
-                        </a>
+                        </Link>
                       )
                     })}
                   </div>
