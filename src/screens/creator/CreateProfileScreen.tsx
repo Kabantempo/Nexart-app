@@ -70,7 +70,7 @@ export default function CreateProfileScreen({ navigation }: Props) {
       quality: 0.7,
     });
 
-    if (!result.cancelled && result.assets?.[0]) {
+    if (!result.canceled && result.assets?.[0]) {
       setPhotoUri(result.assets[0].uri);
     }
   };

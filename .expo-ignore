@@ -1,0 +1,7 @@
+web/
+.git/
+node_modules/
+*.md
+AUDIT.md
+LAUNCH.md
+scripts/

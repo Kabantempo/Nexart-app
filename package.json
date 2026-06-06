@@ -40,7 +40,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "web:build": "cd web && npm run build",
+    "web:start": "cd web && npm run start",
+    "web:dev": "cd web && npm run dev"
   },
   "private": true
 }
