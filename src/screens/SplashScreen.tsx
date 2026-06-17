@@ -14,19 +14,44 @@ type Props = {
 export default function SplashScreen({ onFinish }: Props) {
   const scaleAnim = useRef(new Animated.Value(0.5)).current
   const opacityAnim = useRef(new Animated.Value(0)).current
+  const rotateAnim = useRef(new Animated.Value(0)).current
+  const bounceAnim = useRef(new Animated.Value(1)).current
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: ANIMATION_DURATIONS.slow,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: ANIMATION_DURATIONS.slow,
-        useNativeDriver: true,
-      }),
+    Animated.sequence([
+      // Phase 1: Zoom in + fade in + rotation (500ms)
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATIONS.slow,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATIONS.slow,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATIONS.slow,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Phase 2: Petit bounce (200ms)
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(bounceAnim, {
+            toValue: 1.15,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bounceAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
     ]).start()
 
     // Finish after 2.5 seconds
@@ -35,17 +60,26 @@ export default function SplashScreen({ onFinish }: Props) {
     }, 2500)
 
     return () => clearTimeout(timer)
-  }, [scaleAnim, opacityAnim, onFinish])
+  }, [scaleAnim, opacityAnim, rotateAnim, bounceAnim, onFinish])
+
+  const rotationInterpolate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
 
   return (
     <View style={styles.container}>
-      {/* Logo avec animation */}
+      {/* Logo avec animation rotation + bounce */}
       <Animated.View
         style={[
           styles.logoContainer,
           {
             opacity: opacityAnim,
-            transform: [{ scale: scaleAnim }],
+            transform: [
+              { scale: scaleAnim },
+              { rotate: rotationInterpolate },
+              { scale: bounceAnim },
+            ],
           },
         ]}
       >
