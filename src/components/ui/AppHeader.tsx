@@ -19,12 +19,16 @@ export function AppHeader({
   showCreate    = false,
   onCreatePress,
 }: AppHeaderProps) {
-  const insets       = useSafeAreaInsets();
-  const nav          = useNavigation<any>();
-  const { profile }  = useAuth();
+  const insets              = useSafeAreaInsets();
+  const nav                 = useNavigation<any>();
+  const { profile, session } = useAuth();
+  const isAuth              = !!session || !!profile;
 
-  const goToFavorites = () => nav.navigate('Favoris');
-  const goToProfile   = () => nav.navigate('Profil');
+  const goToFavorites = () => { if (isAuth) nav.navigate('Favoris'); };
+  const goToProfile   = () => {
+    if (!isAuth) { nav.navigate('Auth'); return; }
+    nav.navigate('Profil');
+  };
 
   return (
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>

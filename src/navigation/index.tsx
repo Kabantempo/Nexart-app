@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
 import { colors } from '../constants/theme';
@@ -22,7 +22,7 @@ export default function RootNavigator() {
 
   const isAuthenticated = !!session || !!profile;
 
-  const linking = !isAuthenticated
+  const linking: LinkingOptions<ReactNavigation.RootParamList> = !isAuthenticated
     ? unauthLinking
     : profile?.role === 'visitor'
       ? visitorLinking
