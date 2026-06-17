@@ -97,13 +97,12 @@ export default function DiscoverHomeScreen() {
     : events;
 
   return (
-    <ScrollView
-      style={s.container}
-      contentContainerStyle={s.content}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Header */}
+    <View style={s.container}>
       <AppHeader showFavorites />
+      <ScrollView
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={s.hero}>
         <Text style={s.subtitle}>Marchés artisanaux & créateurs indépendants</Text>
       </View>
@@ -201,6 +200,7 @@ export default function DiscoverHomeScreen() {
 
       <View style={{ height: spacing.xxl }} />
     </ScrollView>
+    </View>
   );
 }
 
