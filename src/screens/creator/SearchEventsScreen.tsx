@@ -11,6 +11,8 @@ import { MarketStackParams } from '../../navigation/MarketStack';
 import { supabase } from '../../lib/supabase';
 import { Event, EventType, DISCIPLINE_TAGS } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ANIMATION_DURATIONS } from '../../constants/animations';
+import { filterEvents, SearchEvent } from '../../lib/searchUtils';
 import { DEMO_MODE, DEMO_EVENTS } from '../../lib/demoData';
 
 type Props = { navigation: StackNavigationProp<MarketStackParams, 'EventList'> };
