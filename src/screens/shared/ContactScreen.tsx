@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { supabase } from '../../lib/supabase'
 import { colors, spacing, typography, radius } from '../../constants/theme'
+import { Toast } from '../../components/Toast'
 
 type Props = {
   navigation: NativeStackNavigationProp<any, 'Contact'>
@@ -14,10 +15,15 @@ export default function ContactScreen({ navigation }: Props) {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  })
 
   const handleSubmit = async () => {
     if (!name || !email || !subject || !message) {
-      Alert.alert('Erreur', 'Tous les champs sont requis')
+      setToast({ visible: true, message: 'Tous les champs sont requis', type: 'error' })
       return
     }
 
@@ -33,9 +39,9 @@ export default function ContactScreen({ navigation }: Props) {
     setLoading(false)
 
     if (error) {
-      Alert.alert('Erreur', error.message)
+      setToast({ visible: true, message: error.message, type: 'error' })
     } else {
-      Alert.alert('Succès', 'Votre message a été envoyé. Nous vous répondrons rapidement.')
+      setToast({ visible: true, message: 'Message envoyé avec succès! ✨', type: 'success' })
       setName('')
       setEmail('')
       setSubject('')
@@ -48,6 +54,7 @@ export default function ContactScreen({ navigation }: Props) {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} duration={3000} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={styles.backButton}
