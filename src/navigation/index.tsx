@@ -3,6 +3,7 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
 import { colors } from '../constants/theme';
+import { pageTransitionOptions } from '../lib/navigationConfig';
 import linking from './linking';
 
 import AuthNavigator      from './AuthNavigator';
@@ -37,7 +38,7 @@ export default function RootNavigator() {
         },
       }}
     >
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, ...pageTransitionOptions }}>
         {!isAuthenticated ? (
           <>
             <Stack.Screen name="Auth"     component={AuthNavigator} />
