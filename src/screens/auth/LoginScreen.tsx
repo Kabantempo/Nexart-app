@@ -9,7 +9,9 @@ import {
   Platform,
   ScrollView,
   StatusBar,
+  Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
@@ -23,16 +25,23 @@ import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Login'> };
 
 export default function LoginScreen({ navigation }: Props) {
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [showPwd, setShowPwd]   = useState(false);
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [showPwd, setShowPwd]     = useState(false);
+  const [focusedField, setFocused] = useState<'email' | 'password' | null>(null);
+  const [emailError, setEmailError] = useState('');
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' }>({
     visible: false,
     message: '',
     type: 'success',
   });
   const { handleGoogleSignIn, loading: googleLoading } = useGoogleAuth();
+
+  const validateEmail = (val: string) => {
+    if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) setEmailError('Email invalide');
+    else setEmailError('');
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -70,14 +79,10 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Brand */}
           <View style={s.brand}>
-            <View style={s.logoMark}>
-              <View style={s.logoGrid}>
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-              </View>
-            </View>
+            <Image
+              source={require('../../assets/nexart-icon-512.png')}
+              style={s.logoMark}
+            />
             <Text style={s.brandName}>Nexart</Text>
           </View>
 
@@ -95,29 +100,34 @@ export default function LoginScreen({ navigation }: Props) {
             <View style={s.fieldWrap}>
               <Text style={s.fieldLabel}>Adresse email</Text>
               <TextInput
-                style={s.input}
+                style={[s.input, focusedField === 'email' && s.inputFocused, !!emailError && s.inputError]}
                 placeholder="votre@email.fr"
                 placeholderTextColor={colors.text.secondary + '60'}
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(v) => { setEmail(v); validateEmail(v); }}
+                onFocus={() => setFocused('email')}
+                onBlur={() => setFocused(null)}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 autoComplete="email"
                 textContentType="emailAddress"
                 returnKeyType="next"
               />
+              {!!emailError && <Text style={s.errorText}>{emailError}</Text>}
             </View>
 
             {/* Password */}
             <View style={s.fieldWrap}>
               <Text style={s.fieldLabel}>Mot de passe</Text>
-              <View style={s.pwdRow}>
+              <View style={[s.pwdRow, focusedField === 'password' && s.pwdRowFocused]}>
                 <TextInput
-                  style={[s.input, s.pwdInput]}
+                  style={[s.input, s.pwdInput, focusedField === 'password' && s.inputFocused]}
                   placeholder="••••••••"
                   placeholderTextColor={colors.text.secondary + '60'}
                   value={password}
                   onChangeText={setPassword}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
                   secureTextEntry={!showPwd}
                   autoComplete="password"
                   textContentType="password"
@@ -125,7 +135,7 @@ export default function LoginScreen({ navigation }: Props) {
                   onSubmitEditing={handleLogin}
                 />
                 <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPwd(v => !v)} activeOpacity={0.7}>
-                  <Text style={s.eyeText}>{showPwd ? 'Cacher' : 'Voir'}</Text>
+                  <Ionicons name={showPwd ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.secondary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -204,23 +214,7 @@ const s = StyleSheet.create({
   logoMark: {
     width: 32,
     height: 32,
-    borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoGrid: {
-    width: 18,
-    height: 18,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 3,
-  },
-  logoDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 8,
   },
   brandName: {
     fontSize: 20,
@@ -260,15 +254,28 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
     borderRadius: radius.xl,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     fontSize: 15,
   },
+  inputFocused: {
+    borderColor: colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginLeft: 4,
+    marginTop: 2,
+  },
 
   pwdRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  pwdRowFocused: {},
   pwdInput: { flex: 1, marginBottom: 0 },
   eyeBtn:  { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
-  eyeText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
 
   btnPrimary: {
     backgroundColor: colors.primary,
