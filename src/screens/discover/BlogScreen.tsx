@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { ARTICLES } from '../../lib/blog-data'
 import { colors, spacing, typography, radius } from '../../constants/theme'
+import { AnimatedCard } from '../../components/AnimatedCard'
 
 type Props = {
   navigation: NativeStackNavigationProp<any, 'Blog'>
@@ -13,30 +14,31 @@ export default function BlogScreen({ navigation }: Props) {
     navigation.navigate('BlogDetail', { slug })
   }
 
-  const renderArticle = ({ item }: any) => (
-    <TouchableOpacity
-      style={styles.articleCard}
-      onPress={() => handleArticlePress(item.slug)}
-      activeOpacity={0.7}
-    >
-      {item.image && (
-        <Image
-          source={{ uri: item.image }}
-          style={styles.articleImage}
-        />
-      )}
-      <View style={styles.articleContent}>
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{item.category}</Text>
+  const renderArticle = ({ item, index }: any) => (
+    <AnimatedCard index={index} style={styles.articleCard}>
+      <TouchableOpacity
+        onPress={() => handleArticlePress(item.slug)}
+        activeOpacity={0.7}
+      >
+        {item.image && (
+          <Image
+            source={{ uri: item.image }}
+            style={styles.articleImage}
+          />
+        )}
+        <View style={styles.articleContent}>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{item.category}</Text>
+          </View>
+          <Text style={styles.articleTitle}>{item.icon} {item.title}</Text>
+          <Text style={styles.articleExcerpt}>{item.excerpt}</Text>
+          <View style={styles.articleMeta}>
+            <Text style={styles.metaText}>⏱️ {item.readTime} min</Text>
+            <Text style={styles.metaText}>📅 {new Date(item.date).toLocaleDateString('fr-FR')}</Text>
+          </View>
         </View>
-        <Text style={styles.articleTitle}>{item.icon} {item.title}</Text>
-        <Text style={styles.articleExcerpt}>{item.excerpt}</Text>
-        <View style={styles.articleMeta}>
-          <Text style={styles.metaText}>⏱️ {item.readTime} min</Text>
-          <Text style={styles.metaText}>📅 {new Date(item.date).toLocaleDateString('fr-FR')}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </AnimatedCard>
   )
 
   return (
