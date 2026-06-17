@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
 import { colors } from '../constants/theme';
 import { pageTransitionOptions } from '../lib/navigationConfig';
-import linking from './linking';
+import { unauthLinking, visitorLinking, creatorLinking, defaultLinking } from './linking';
 
 import AuthNavigator      from './AuthNavigator';
 import AdminNavigator     from './AdminNavigator';
@@ -20,8 +20,15 @@ export default function RootNavigator() {
 
   if (loading) return null;
 
-  // Accès autorisé si session réelle OU profil injecté (mode test)
   const isAuthenticated = !!session || !!profile;
+
+  const linking = !isAuthenticated
+    ? unauthLinking
+    : profile?.role === 'visitor'
+      ? visitorLinking
+      : profile?.role === 'creator'
+        ? creatorLinking
+        : defaultLinking;
 
   return (
     <NavigationContainer
