@@ -1,7 +1,8 @@
 import React from 'react'
-import { TouchableOpacity, Text, StyleSheet, View, ActivityIndicator } from 'react-native'
+import { Text, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, spacing, typography, radius } from '../constants/theme'
+import { AnimatedTouchableOpacity } from './AnimatedTouchableOpacity'
 
 interface GoogleLoginButtonProps {
   onPress: () => void
@@ -18,14 +19,14 @@ export function GoogleLoginButton({
   disabled = false,
 }: GoogleLoginButtonProps) {
   return (
-    <TouchableOpacity
+    <AnimatedTouchableOpacity
       style={[
         styles.button,
         disabled || loading ? styles.buttonDisabled : null,
       ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
+      scaleFactor={0.96}
     >
       <View style={styles.content}>
         {loading ? (
@@ -37,7 +38,7 @@ export function GoogleLoginButton({
           {loading ? 'Connexion...' : 'Continuer avec Google'}
         </Text>
       </View>
-    </TouchableOpacity>
+    </AnimatedTouchableOpacity>
   )
 }
 

@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,6 +15,10 @@ import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
+import { Toast } from '../../components/Toast';
+import { GoogleLoginButton } from '../../components/GoogleLoginButton';
+import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Login'> };
 
@@ -24,20 +27,31 @@ export default function LoginScreen({ navigation }: Props) {
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [showPwd, setShowPwd]   = useState(false);
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
+  const { handleGoogleSignIn, loading: googleLoading } = useGoogleAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Champs requis', 'Veuillez remplir email et mot de passe.');
+      setToast({ visible: true, message: 'Veuillez remplir email et mot de passe', type: 'error' });
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setLoading(false);
-    if (error) Alert.alert('Erreur de connexion', error.message);
+    if (error) {
+      setToast({ visible: true, message: error.message, type: 'error' });
+    } else {
+      setToast({ visible: true, message: 'Connexion réussie! ✨', type: 'success' });
+    }
   };
 
   return (
     <EtherealBackground intensity={0.18}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} duration={3000} />
       <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -117,16 +131,16 @@ export default function LoginScreen({ navigation }: Props) {
             </View>
 
             {/* Submit */}
-            <TouchableOpacity
+            <AnimatedTouchableOpacity
               style={[s.btnPrimary, loading && s.btnLoading]}
               onPress={handleLogin}
               disabled={loading}
-              activeOpacity={0.85}
+              scaleFactor={0.96}
             >
               <Text style={s.btnPrimaryText}>
                 {loading ? 'Connexion…' : 'Se connecter'}
               </Text>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
 
             {/* Divider */}
             <View style={s.divider}>
@@ -135,14 +149,17 @@ export default function LoginScreen({ navigation }: Props) {
               <View style={s.dividerLine} />
             </View>
 
+            {/* Google Login */}
+            <GoogleLoginButton onPress={handleGoogleSignIn} loading={googleLoading} />
+
             {/* Register link */}
-            <TouchableOpacity
+            <AnimatedTouchableOpacity
               style={s.btnSecondary}
               onPress={() => navigation.navigate('Register')}
-              activeOpacity={0.85}
+              scaleFactor={0.97}
             >
               <Text style={s.btnSecondaryText}>Créer un compte</Text>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
           </View>
 
           {/* Terms */}

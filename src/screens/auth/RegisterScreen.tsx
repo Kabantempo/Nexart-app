@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView, Linking, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
 import { UserRole } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
+import { Toast } from '../../components/Toast';
+import { GoogleLoginButton } from '../../components/GoogleLoginButton';
+import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Register'> };
 
@@ -14,18 +18,24 @@ export default function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
+  const { handleGoogleSignIn, loading: googleLoading } = useGoogleAuth();
 
   const handleRegister = async () => {
     if (!role) {
-      Alert.alert('Erreur', 'Choisissez votre profil');
+      setToast({ visible: true, message: 'Choisissez votre profil', type: 'error' });
       return;
     }
     if (!fullName || !email || !password) {
-      Alert.alert('Erreur', 'Tous les champs sont requis');
+      setToast({ visible: true, message: 'Tous les champs sont requis', type: 'error' });
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Erreur', 'Le mot de passe doit faire au moins 6 caractères');
+      setToast({ visible: true, message: 'Le mot de passe doit faire au moins 6 caractères', type: 'error' });
       return;
     }
     setLoading(true);
@@ -35,11 +45,16 @@ export default function RegisterScreen({ navigation }: Props) {
       options: { data: { full_name: fullName, role } },
     });
     setLoading(false);
-    if (error) Alert.alert('Erreur', error.message);
+    if (error) {
+      setToast({ visible: true, message: error.message, type: 'error' });
+    } else {
+      setToast({ visible: true, message: 'Compte créé avec succès! 🎉', type: 'success' });
+    }
   };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <Toast visible={toast.visible} message={toast.message} type={toast.type} duration={3000} />
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
         <Text style={styles.backText}>← Retour</Text>
@@ -91,13 +106,22 @@ export default function RegisterScreen({ navigation }: Props) {
         secureTextEntry
       />
 
-      <TouchableOpacity
+      <AnimatedTouchableOpacity
         style={[styles.btn, !role && styles.btnDisabled]}
         onPress={handleRegister}
         disabled={loading || !role}
+        scaleFactor={0.96}
       >
         <Text style={styles.btnText}>{loading ? 'Création…' : 'Créer mon compte'}</Text>
-      </TouchableOpacity>
+      </AnimatedTouchableOpacity>
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>ou</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <GoogleLoginButton onPress={handleGoogleSignIn} loading={googleLoading} />
 
       <Text style={styles.legal}>
         En créant un compte, vous acceptez nos{' '}
@@ -111,9 +135,9 @@ export default function RegisterScreen({ navigation }: Props) {
         .
       </Text>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+      <AnimatedTouchableOpacity onPress={() => navigation.navigate('Login')} scaleFactor={0.98}>
         <Text style={styles.link}>Déjà un compte ? Se connecter</Text>
-      </TouchableOpacity>
+      </AnimatedTouchableOpacity>
     </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -164,6 +188,14 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.5 },
   btnText: { ...typography.label, color: colors.text.inverse, fontSize: 16, fontWeight: '600' },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginVertical: spacing.md,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { ...typography.caption, color: colors.text.secondary },
   link: { color: colors.secondary, textAlign: 'center', marginTop: spacing.lg },
   legal: { ...typography.caption, color: colors.text.secondary, textAlign: 'center', marginTop: spacing.lg, lineHeight: 18 },
   legalLink: { color: colors.primary, textDecorationLine: 'underline' },
