@@ -8,7 +8,7 @@ WebBrowser.maybeCompleteAuthSession()
 
 /**
  * useGoogleAuth — Hook pour connexion Google avec Supabase OAuth
- * Utilise Expo Google Auth + Supabase OAuth
+ * Utilise Expo Google Auth + Supabase OAuth (Mobile)
  */
 export function useGoogleAuth() {
   const [loading, setLoading] = useState(false)
