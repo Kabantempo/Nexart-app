@@ -7,6 +7,7 @@ import { pageTransitionOptions } from '../lib/navigationConfig';
 import linking from './linking';
 
 import AuthNavigator      from './AuthNavigator';
+import AdminNavigator     from './AdminNavigator';
 import CreatorNavigator   from './CreatorNavigator';
 import OrganizerNavigator from './OrganizerNavigator';
 import VisitorNavigator   from './VisitorNavigator';
@@ -44,6 +45,8 @@ export default function RootNavigator() {
             <Stack.Screen name="Auth"     component={AuthNavigator} />
             <Stack.Screen name="Discover" component={DiscoverStack} />
           </>
+        ) : profile?.is_admin ? (
+          <Stack.Screen name="Admin"     component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (
           <Stack.Screen name="Creator"   component={CreatorNavigator} />
         ) : profile?.role === 'organizer' ? (
