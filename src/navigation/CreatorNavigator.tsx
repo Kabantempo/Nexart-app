@@ -3,11 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/theme';
 
-import FeedStack          from './FeedStack';
-import MarketStack        from './MarketStack';
-import ApplicationsScreen from '../screens/creator/ApplicationsScreen';
-import MessageStack       from './MessageStack';
-import ProfileScreen      from '../screens/shared/ProfileScreen';
+import FeedStack           from './FeedStack';
+import MarketStack         from './MarketStack';
+import ApplicationsStack   from './ApplicationsStack';
+import MessageStack        from './MessageStack';
+import ProfileScreen       from '../screens/shared/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,7 +21,7 @@ const TABS: { name: string; icon: IoniconName; iconActive: IoniconName }[] = [
   { name: 'Profil',       icon: 'person-outline',      iconActive: 'person' },
 ];
 
-const SCREENS = [FeedStack, MarketStack, ApplicationsScreen, MessageStack, ProfileScreen];
+const SCREENS = [FeedStack, MarketStack, ApplicationsStack, MessageStack, ProfileScreen];
 
 export default function CreatorNavigator() {
   return (

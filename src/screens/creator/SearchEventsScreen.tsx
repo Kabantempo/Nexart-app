@@ -11,6 +11,7 @@ import { MarketStackParams } from '../../navigation/MarketStack';
 import { supabase } from '../../lib/supabase';
 import { Event, EventType, DISCIPLINE_TAGS } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
+import { DEMO_MODE, DEMO_EVENTS } from '../../lib/demoData';
 
 type Props = { navigation: StackNavigationProp<MarketStackParams, 'EventList'> };
 type BudgetPreset = 'all' | 'free' | 'under50' | '50to150' | 'over150';
@@ -420,6 +421,31 @@ export default function SearchEventsScreen({ navigation }: Props) {
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
+
+    if (DEMO_MODE) {
+      let demo = DEMO_EVENTS as unknown as Event[];
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        demo = demo.filter(e =>
+          e.title.toLowerCase().includes(q) || (e.city?.toLowerCase().includes(q) ?? false),
+        );
+      }
+      if (eventType !== 'all')        demo = demo.filter(e => e.event_type === eventType);
+      if (filters.disciplines.length) demo = demo.filter(e =>
+        e.discipline_tags.some(t => filters.disciplines.includes(t)),
+      );
+      if (filters.region)             demo = demo.filter(e => e.region === filters.region);
+      if (filters.budget === 'free')       demo = demo.filter(e => !e.stand_price || e.stand_price === 0);
+      else if (filters.budget === 'under50')  demo = demo.filter(e => e.stand_price != null && e.stand_price <= 50);
+      else if (filters.budget === '50to150')  demo = demo.filter(e => e.stand_price != null && e.stand_price >= 50 && e.stand_price <= 150);
+      else if (filters.budget === 'over150')  demo = demo.filter(e => e.stand_price != null && e.stand_price > 150);
+      const range = getDateRange(filters.date);
+      if (range) demo = demo.filter(e => e.start_date <= range.to && e.end_date >= range.from);
+      setEvents(demo);
+      setLoading(false);
+      return;
+    }
+
     let q = supabase.from('events').select('*')
       .eq('status', 'published')
       .order('start_date', { ascending: true })
@@ -454,34 +480,36 @@ export default function SearchEventsScreen({ navigation }: Props) {
   return (
     <View style={[s.container, { paddingTop: insets.top + spacing.sm }]}>
 
-      {/* Search + Filter button */}
-      <View style={s.topRow}>
-        <View style={s.searchBar}>
-          <Ionicons name="search-outline" size={16} color={colors.text.secondary} />
-          <TextInput
-            style={s.searchInput}
-            placeholder="Ville, nom du marché…"
-            placeholderTextColor={colors.text.secondary + '80'}
-            value={search}
-            onChangeText={setSearch}
-            autoCapitalize="none"
-          />
-          {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={16} color={colors.text.secondary} />
-            </TouchableOpacity>
-          )}
-        </View>
+      {/* Search + Filter intégré */}
+      <View style={s.searchBar}>
+        <Ionicons name="search-outline" size={16} color={colors.text.secondary} />
+        <TextInput
+          style={s.searchInput}
+          placeholder="Ville, nom du marché…"
+          placeholderTextColor={colors.text.secondary + '80'}
+          value={search}
+          onChangeText={setSearch}
+          autoCapitalize="none"
+        />
+        {search.length > 0 && (
+          <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close-circle" size={16} color={colors.text.secondary} />
+          </TouchableOpacity>
+        )}
+        <View style={s.searchDivider} />
         <TouchableOpacity
-          style={[s.filterBtn, activeCount > 0 && s.filterBtnActive]}
+          style={s.filterInline}
           onPress={() => setShowFilters(true)}
+          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
         >
-          <Ionicons name="options-outline" size={16} color={activeCount > 0 ? '#fff' : colors.text.primary} />
-          {activeCount > 0 && (
-            <View style={s.filterBadge}>
-              <Text style={s.filterBadgeText}>{activeCount}</Text>
-            </View>
-          )}
+          <Ionicons
+            name="options-outline"
+            size={15}
+            color={activeCount > 0 ? colors.primary : colors.text.secondary}
+          />
+          <Text style={[s.filterInlineText, activeCount > 0 && s.filterInlineTextActive]}>
+            {activeCount > 0 ? `Filtres (${activeCount})` : 'Filtres'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -584,25 +612,17 @@ export default function SearchEventsScreen({ navigation }: Props) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
-  topRow:     { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.xl, marginBottom: spacing.sm },
   searchBar: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: colors.surface, borderRadius: radius.xl,
     paddingHorizontal: spacing.md, borderWidth: 1, borderColor: colors.border,
+    marginHorizontal: spacing.xl, marginBottom: spacing.sm,
   },
-  searchInput:  { flex: 1, ...typography.body, color: colors.text.primary, paddingVertical: 13 },
-  filterBtn: {
-    width: 46, height: 46, borderRadius: radius.md,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  filterBtnActive:  { backgroundColor: colors.primary, borderColor: colors.primary },
-  filterBadge: {
-    position: 'absolute', top: -4, right: -4,
-    width: 16, height: 16, borderRadius: 8,
-    backgroundColor: colors.error, alignItems: 'center', justifyContent: 'center',
-  },
-  filterBadgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  searchInput:      { flex: 1, ...typography.body, color: colors.text.primary, paddingVertical: 13 },
+  searchDivider:    { width: 1, height: 20, backgroundColor: colors.border, marginHorizontal: spacing.xs },
+  filterInline:     { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingLeft: 2 },
+  filterInlineText: { ...typography.caption, color: colors.text.secondary, fontWeight: '500' },
+  filterInlineTextActive: { color: colors.primary, fontWeight: '700' },
 
   typeRow: { paddingHorizontal: spacing.xl, gap: spacing.xs, paddingBottom: spacing.sm },
   typeChip: {

@@ -10,9 +10,9 @@ import { OrganizerEventStackParams } from '../../navigation/OrganizerEventStack'
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
 import { getOrCreateConversation } from '../../hooks/useConversations';
-import { submitReview, useHasReviewed } from '../../hooks/useReviews';
+import { useHasReviewed } from '../../hooks/useReviews';
 import { getPushTokenForUser, sendPushNotification } from '../../hooks/usePushNotifications';
-import { ApplicationStatus, ORGANIZER_REVIEW_TAGS } from '../../types';
+import { ApplicationStatus } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { DEMO_MODE, DEMO_ORGANIZER_APPLICATIONS } from '../../lib/demoData';
 
@@ -180,93 +180,11 @@ function AcceptancePostModal({
   );
 }
 
-// ─── Review modal ─────────────────────────────────────────────────────────────
-
-function ReviewModal({
-  visible,
-  creatorName,
-  onClose,
-  onSubmit,
-}: {
-  visible: boolean;
-  creatorName: string;
-  onClose: () => void;
-  onSubmit: (rating: number, comment: string, tags: string[]) => Promise<void>;
-}) {
-  const [rating, setRating]   = useState(0);
-  const [comment, setComment] = useState('');
-  const [tags, setTags]       = useState<string[]>([]);
-  const [saving, setSaving]   = useState(false);
-
-  const toggleTag = (t: string) =>
-    setTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
-
-  const handleSubmit = async () => {
-    if (rating === 0) { Alert.alert('Note requise', 'Donnez une note entre 1 et 5.'); return; }
-    setSaving(true);
-    await onSubmit(rating, comment, tags);
-    setSaving(false);
-    setRating(0); setComment(''); setTags([]);
-  };
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={modal.overlay}>
-        <View style={modal.panel}>
-          <Text style={modal.title}>Évaluer {creatorName}</Text>
-
-          <Text style={modal.label}>Note</Text>
-          <View style={modal.stars}>
-            {[1,2,3,4,5].map(n => (
-              <TouchableOpacity key={n} onPress={() => setRating(n)}>
-                <Text style={[modal.star, n <= rating && modal.starActive]}>★</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={modal.label}>Tags</Text>
-          <View style={modal.tagWrap}>
-            {ORGANIZER_REVIEW_TAGS.map(t => (
-              <TouchableOpacity
-                key={t}
-                style={[modal.tag, tags.includes(t) && modal.tagActive]}
-                onPress={() => toggleTag(t)}
-              >
-                <Text style={[modal.tagText, tags.includes(t) && modal.tagTextActive]}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={modal.label}>Commentaire <Text style={modal.hint}>(100 max, optionnel)</Text></Text>
-          <TextInput
-            style={modal.input}
-            value={comment}
-            onChangeText={setComment}
-            placeholder="Votre avis…"
-            placeholderTextColor={colors.text.secondary}
-            maxLength={100}
-          />
-          <Text style={modal.charCount}>{comment.length}/100</Text>
-
-          <View style={modal.actions}>
-            <TouchableOpacity style={modal.btnCancel} onPress={onClose}>
-              <Text style={modal.btnCancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[modal.btnSubmit, saving && { opacity: 0.6 }]} onPress={handleSubmit} disabled={saving}>
-              <Text style={modal.btnSubmitText}>{saving ? 'Envoi…' : 'Envoyer'}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Application card ─────────────────────────────────────────────────────────
 
 function ApplicationCard({
-  item, eventId, organizerId, eventTitle,
-  onDecide, onOpenConversation, onConfirmPayment,
+  item, eventId, organizerId,
+  onDecide, onOpenConversation, onConfirmPayment, onReview,
 }: {
   item: ApplicationItem;
   eventId: string;
@@ -275,22 +193,13 @@ function ApplicationCard({
   onDecide: (id: string, status: ApplicationStatus) => void;
   onOpenConversation: (creatorId: string, creatorName: string) => void;
   onConfirmPayment?: (applicationId: string) => void;
+  onReview: (creatorId: string, creatorName: string) => void;
 }) {
   const cfg = STATUS_CONFIG[item.status];
   const disciplines = item.creator?.creator_profile?.disciplines ?? [];
   const city = item.creator?.creator_profile?.city;
   const hasReviewed = useHasReviewed(eventId, organizerId);
-  const [showReview, setShowReview] = useState(false);
   const swipeRef = useRef<Swipeable>(null);
-
-  const handleReview = async (rating: number, comment: string, tags: string[]) => {
-    const { error } = await submitReview({
-      eventId, reviewerId: organizerId, reviewedId: item.creator.id,
-      reviewerRole: 'organizer', rating, comment, tags,
-    });
-    if (error) Alert.alert('Erreur', error);
-    else { setShowReview(false); Alert.alert('Avis envoyé', 'Merci pour votre évaluation.'); }
-  };
 
   // Swipe actions (only for pending cards)
   const renderLeftActions = (progress: Animated.AnimatedInterpolation<number>) => {
@@ -388,7 +297,7 @@ function ApplicationCard({
             <View style={styles.paidBadge}><Text style={styles.paidBadgeText}>💳 Payé</Text></View>
           )}
           {hasReviewed === false && (
-            <TouchableOpacity style={styles.btnReview} onPress={() => setShowReview(true)}>
+            <TouchableOpacity style={styles.btnReview} onPress={() => onReview(item.creator.id, item.creator.full_name)}>
               <Text style={styles.btnReviewText}>★ Évaluer</Text>
             </TouchableOpacity>
           )}
@@ -398,12 +307,6 @@ function ApplicationCard({
         </View>
       )}
 
-      <ReviewModal
-        visible={showReview}
-        creatorName={item.creator?.full_name ?? ''}
-        onClose={() => setShowReview(false)}
-        onSubmit={handleReview}
-      />
     </View>
   );
 
@@ -588,6 +491,15 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     });
   };
 
+  const handleOpenReview = (creatorId: string, creatorName: string) => {
+    navigation.navigate('Review', {
+      eventId,
+      reviewedId: creatorId,
+      reviewedName: creatorName,
+      reviewerRole: 'organizer',
+    });
+  };
+
   const filtered = filter === 'all' ? applications : applications.filter(a => a.status === filter);
   const counts = {
     all:      applications.length,
@@ -654,6 +566,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
               onDecide={handleDecide}
               onOpenConversation={handleOpenConversation}
               onConfirmPayment={handleConfirmPayment}
+              onReview={handleOpenReview}
             />
           )}
           contentContainerStyle={styles.list}
@@ -825,16 +738,4 @@ const modal = StyleSheet.create({
   btnRefuse: { flex: 2, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.error, alignItems: 'center' },
   btnRefuseText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 
-  // ── Review modal ──
-  stars: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
-  star: { fontSize: 32, color: colors.border },
-  starActive: { color: colors.primary },
-  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  tag: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 5 },
-  tagActive: { backgroundColor: colors.secondary, borderColor: colors.secondary },
-  tagText: { ...typography.caption, color: colors.text.secondary },
-  tagTextActive: { color: colors.text.inverse, fontWeight: '600' },
-  input: { backgroundColor: colors.background, color: colors.text.primary, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  btnSubmit: { flex: 2, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center' },
-  btnSubmitText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 });
