@@ -50,7 +50,7 @@ export default function SplashScreen({ onFinish }: Props) {
         ]}
       >
         <Image
-          source={require('../assets/nexart-icon.png')}
+          source={require('../assets/nexart-icon-512.png')}
           style={styles.logo}
         />
       </Animated.View>
@@ -70,8 +70,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 160,
+    height: 160,
     resizeMode: 'contain',
+    borderRadius: 40,
+    overflow: 'hidden',
   },
 })
