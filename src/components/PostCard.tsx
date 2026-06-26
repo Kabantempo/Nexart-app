@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Post, PostType, usePostLike } from '../hooks/usePosts';
 import { useAuth } from '../stores/auth';
@@ -96,7 +97,7 @@ export default function PostCard({ post, showCreator = true }: { post: Post; sho
       {/* Footer */}
       <View style={s.footer}>
         <TouchableOpacity style={s.likeBtn} onPress={toggle} activeOpacity={0.75}>
-          <Text style={[s.likeIcon, liked && s.likeIconActive]}>{liked ? '♥' : '♡'}</Text>
+          <Ionicons name={liked ? 'heart' : 'heart-outline'} size={16} color={liked ? '#ef4444' : colors.text.secondary} />
           {count > 0 && <Text style={[s.likeCount, liked && s.likeCountActive]}>{count}</Text>}
         </TouchableOpacity>
       </View>

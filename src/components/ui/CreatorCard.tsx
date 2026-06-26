@@ -2,9 +2,10 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   Image, ScrollView, useWindowDimensions, NativeScrollEvent,
-  NativeSyntheticEvent,
+  NativeSyntheticEvent, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 // ─── Types ────────────────────────────────────────────────
@@ -63,10 +64,15 @@ export function CreatorCard({
     }
   };
 
+  const handlePress = () => {
+    if (Platform.OS === 'ios') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  };
+
   return (
     <TouchableOpacity
       style={[s.card, { width: CARD_W }]}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.92}
     >
       {/* ── Carousel images ── */}

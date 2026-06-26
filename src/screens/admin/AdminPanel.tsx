@@ -60,7 +60,7 @@ export default function AdminPanel() {
     setSaving(null)
     setToast({
       visible: true,
-      message: value ? '✓ Vérifié' : '✗ Refusé',
+      message: value ? 'Vérifié' : 'Refusé',
       type: 'success',
     })
   }
@@ -164,7 +164,7 @@ export default function AdminPanel() {
       {displayed.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="checkmark-circle" size={40} color="#10B981" />
-          <Text style={styles.emptyTitle}>Tout est vérifié ✓</Text>
+          <Text style={styles.emptyTitle}>Tout est vérifié</Text>
           <Text style={styles.emptySubtitle}>Aucune demande en attente.</Text>
         </View>
       ) : (
@@ -174,11 +174,7 @@ export default function AdminPanel() {
               {/* Creator Info */}
               <View style={styles.creatorHeader}>
                 <View style={styles.creatorAvatar}>
-                  {creator.profiles?.avatar_url ? (
-                    <Text>👤</Text>
-                  ) : (
-                    <Ionicons name="person" size={20} color="#FFF" />
-                  )}
+                  <Ionicons name="person" size={20} color="#FFF" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.creatorName}>

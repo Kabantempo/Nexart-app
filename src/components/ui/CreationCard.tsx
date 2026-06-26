@@ -18,11 +18,11 @@ const POST_TYPE_COLORS: Record<string, string> = {
 };
 
 const POST_TYPE_LABELS: Record<string, string> = {
-  guest_appearance: '🎪 Guest',
-  call_for_collab:  '🤝 Collab',
-  tip:              '💡 Conseil',
-  experience:       '✨ Expérience',
-  general:          '🎨 Création',
+  guest_appearance: 'Guest',
+  call_for_collab:  'Collab',
+  tip:              'Conseil',
+  experience:       'Expérience',
+  general:          'Création',
 };
 
 export function CreationCard({ post }: { post: Post }) {
@@ -37,7 +37,7 @@ export function CreationCard({ post }: { post: Post }) {
   const creator    = post.creator as any;
   const cover      = post.images?.[0] ?? null;
   const typeColor  = POST_TYPE_COLORS[post.post_type] ?? colors.text.secondary;
-  const typeLabel  = POST_TYPE_LABELS[post.post_type] ?? '🎨 Création';
+  const typeLabel  = POST_TYPE_LABELS[post.post_type] ?? 'Création';
 
   const shortText = post.content
     .split('\n')[0]

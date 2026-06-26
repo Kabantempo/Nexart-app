@@ -742,16 +742,55 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
 // ─── Creator profile view (mode lecture, style Instagram) ────────────────────
 
 function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => void }) {
-  const { creatorProfile, loading } = useCreatorProfile(userId);
+  const { creatorProfile, loading, upsert } = useCreatorProfile(userId);
   const { profile }  = useAuth();
   const { average, count, isTrusted } = useProfileReviews(userId);
   const insets = useSafeAreaInsets();
   const W = Dimensions.get('window').width;
-  const CELL = (W - spacing.xl * 2 - spacing.xs * 2) / 3;
+  const GRID_GAP = 2;
+  const CELL = (W - GRID_GAP * 2) / 3;
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview]     = useState<string | null>(null);
 
   if (loading) return <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.xxl }} />;
 
   const portfolioImages = creatorProfile?.portfolio_images ?? [];
+
+  const addPhoto = async () => {
+    if (portfolioImages.length >= 20) { Alert.alert('Maximum atteint', '20 photos max.'); return; }
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') { Alert.alert('Permission requise'); return; }
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.85,
+      selectionLimit: Math.min(5, 20 - portfolioImages.length),
+    });
+    if (result.canceled) return;
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (const asset of result.assets) {
+      const ext = asset.uri.split('.').pop() ?? 'jpg';
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const resp = await fetch(asset.uri);
+      const blob = await resp.blob();
+      const { error } = await supabase.storage.from('portfolios').upload(path, blob, { upsert: false });
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('portfolios').getPublicUrl(path);
+        newUrls.push(publicUrl);
+      }
+    }
+    if (newUrls.length) await upsert({ portfolio_images: [...portfolioImages, ...newUrls] });
+    setUploading(false);
+  };
+
+  const removePhoto = (url: string) =>
+    Alert.alert('Supprimer cette photo ?', '', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: () => upsert({ portfolio_images: portfolioImages.filter(u => u !== url) }) },
+    ]);
 
   return (
     <ScrollView
@@ -856,24 +895,73 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
         </TouchableOpacity>
       </View>
 
+      {/* ── Séparateur grid ── */}
+      <View style={{ height: 1, backgroundColor: colors.border, marginBottom: GRID_GAP }} />
+
       {/* ── Grille portfolio ── */}
-      {portfolioImages.length > 0 ? (
-        <View style={profileViewStyles.grid}>
-          {portfolioImages.map((uri, i) => (
-            <Image key={i} source={{ uri }} style={{ width: CELL, height: CELL, borderRadius: radius.sm }} resizeMode="cover" />
-          ))}
-        </View>
-      ) : (
+      <View style={profileViewStyles.grid}>
+        {portfolioImages.map((uri, i) => (
+          <TouchableOpacity
+            key={`${uri}-${i}`}
+            onPress={() => setPreview(uri)}
+            onLongPress={() => removePhoto(uri)}
+            activeOpacity={0.85}
+          >
+            <Image source={{ uri }} style={{ width: CELL, height: CELL }} resizeMode="cover" />
+          </TouchableOpacity>
+        ))}
+
+        {/* Cellule "+" */}
+        {portfolioImages.length < 20 && (
+          <TouchableOpacity
+            style={[profileViewStyles.addCell, { width: CELL, height: CELL }]}
+            onPress={addPhoto}
+            disabled={uploading}
+            activeOpacity={0.7}
+          >
+            {uploading
+              ? <ActivityIndicator color={colors.primary} />
+              : <Ionicons name="add" size={28} color={colors.primary} />}
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {portfolioImages.length === 0 && !uploading && (
         <View style={profileViewStyles.emptyGrid}>
           <Ionicons name="camera-outline" size={40} color={colors.border} />
-          <Text style={profileViewStyles.emptyGridText}>Aucune œuvre publiée</Text>
-          <Text style={profileViewStyles.emptyGridSub}>Ajoutez des photos dans "Modifier le profil"</Text>
+          <Text style={profileViewStyles.emptyGridText}>Aucune photo</Text>
+          <Text style={profileViewStyles.emptyGridSub}>Appuyez sur + pour ajouter vos créations</Text>
         </View>
       )}
 
       <TouchableOpacity style={profileViewStyles.logoutBtn} onPress={() => supabase.auth.signOut()}>
         <Text style={profileViewStyles.logoutText}>Se déconnecter</Text>
       </TouchableOpacity>
+
+      {/* ── Modal aperçu plein écran ── */}
+      <Modal visible={!!preview} animationType="fade" transparent statusBarTranslucent>
+        <TouchableOpacity
+          style={profileViewStyles.previewOverlay}
+          activeOpacity={1}
+          onPress={() => setPreview(null)}
+        >
+          {preview && (
+            <Image source={{ uri: preview }} style={profileViewStyles.previewImg} resizeMode="contain" />
+          )}
+          <TouchableOpacity
+            style={profileViewStyles.previewClose}
+            onPress={() => setPreview(null)}
+          >
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={profileViewStyles.previewDelete}
+            onPress={() => { setPreview(null); if (preview) removePhoto(preview); }}
+          >
+            <Ionicons name="trash-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -903,10 +991,15 @@ const profileViewStyles = StyleSheet.create({
   btnEditText:  { ...typography.label, color: colors.text.primary, fontWeight: '600' },
   btnShare:     { width: 38, height: 38, borderRadius: radius.lg, backgroundColor: colors.muted, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
 
-  grid:         { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.xl, gap: spacing.xs },
-  emptyGrid:    { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl },
-  emptyGridText:{ ...typography.h3, color: colors.text.primary, marginTop: spacing.md },
-  emptyGridSub:   { ...typography.body, color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs },
+  grid:          { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
+  addCell:       { backgroundColor: colors.muted, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed' },
+  emptyGrid:     { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl },
+  emptyGridText: { ...typography.h3, color: colors.text.primary, marginTop: spacing.md },
+  emptyGridSub:  { ...typography.body, color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs },
+  previewOverlay:{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center' },
+  previewImg:    { width: '100%', height: '80%' },
+  previewClose:  { position: 'absolute', top: 56, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
+  previewDelete: { position: 'absolute', bottom: 48, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(220,38,38,0.7)', alignItems: 'center', justifyContent: 'center' },
 
   badgesRow:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
   siretBadge:     { backgroundColor: colors.primary + '15', borderColor: colors.primary + '50' },

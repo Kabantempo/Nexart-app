@@ -21,6 +21,7 @@ import { Toast } from '../../components/Toast';
 import { GoogleLoginButton } from '../../components/GoogleLoginButton';
 import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
+import { FloatingInput } from '../../components/ui/FloatingInput';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Login'> };
 
@@ -54,7 +55,7 @@ export default function LoginScreen({ navigation }: Props) {
     if (error) {
       setToast({ visible: true, message: error.message, type: 'error' });
     } else {
-      setToast({ visible: true, message: 'Connexion réussie! ✨', type: 'success' });
+      setToast({ visible: true, message: 'Connexion réussie !', type: 'success' });
     }
   };
 
@@ -73,7 +74,7 @@ export default function LoginScreen({ navigation }: Props) {
         >
           {/* Back */}
           <TouchableOpacity style={s.back} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-            <Text style={s.backArrow}>←</Text>
+            <Ionicons name="chevron-back" size={20} color={colors.text.secondary} />
             <Text style={s.backText}>Accueil</Text>
           </TouchableOpacity>
 
@@ -96,49 +97,30 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Form */}
           <View style={s.form}>
-            {/* Email */}
-            <View style={s.fieldWrap}>
-              <Text style={s.fieldLabel}>Adresse email</Text>
-              <TextInput
-                style={[s.input, focusedField === 'email' && s.inputFocused, !!emailError && s.inputError]}
-                placeholder="votre@email.fr"
-                placeholderTextColor={colors.text.secondary + '60'}
-                value={email}
-                onChangeText={(v) => { setEmail(v); validateEmail(v); }}
-                onFocus={() => setFocused('email')}
-                onBlur={() => setFocused(null)}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoComplete="email"
-                textContentType="emailAddress"
-                returnKeyType="next"
-              />
-              {!!emailError && <Text style={s.errorText}>{emailError}</Text>}
-            </View>
+            <FloatingInput
+              label="Adresse email"
+              value={email}
+              onChangeText={(v) => { setEmail(v); validateEmail(v); }}
+              error={emailError}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+            />
 
-            {/* Password */}
-            <View style={s.fieldWrap}>
-              <Text style={s.fieldLabel}>Mot de passe</Text>
-              <View style={[s.pwdRow, focusedField === 'password' && s.pwdRowFocused]}>
-                <TextInput
-                  style={[s.input, s.pwdInput, focusedField === 'password' && s.inputFocused]}
-                  placeholder="••••••••"
-                  placeholderTextColor={colors.text.secondary + '60'}
-                  value={password}
-                  onChangeText={setPassword}
-                  onFocus={() => setFocused('password')}
-                  onBlur={() => setFocused(null)}
-                  secureTextEntry={!showPwd}
-                  autoComplete="password"
-                  textContentType="password"
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                />
-                <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPwd(v => !v)} activeOpacity={0.7}>
-                  <Ionicons name={showPwd ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.secondary} />
-                </TouchableOpacity>
-              </View>
-            </View>
+            <FloatingInput
+              label="Mot de passe"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPwd}
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              rightIcon={showPwd ? 'eye-off-outline' : 'eye-outline'}
+              onRightIconPress={() => setShowPwd(v => !v)}
+            />
 
             {/* Submit */}
             <AnimatedTouchableOpacity
@@ -201,7 +183,6 @@ const s = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: spacing.xl,
   },
-  backArrow: { fontSize: 18, color: colors.text.secondary },
   backText:  { ...typography.label, color: colors.text.secondary },
 
   // Brand

@@ -101,7 +101,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
   return (
     <View style={s.card}>
       {item.status === 'accepted' && (
-        <View style={s.acceptedBanner}><Text style={s.acceptedBannerText}>🎉 Candidature acceptée</Text></View>
+        <View style={s.acceptedBanner}><Text style={s.acceptedBannerText}>Candidature acceptée</Text></View>
       )}
       <View style={s.cardHeader}>
         {event?.start_date && (
@@ -112,7 +112,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
         )}
         <View style={{ flex: 1 }}>
           <Text style={s.eventTitle} numberOfLines={2}>{event?.title ?? '—'}</Text>
-          {event?.city && <Text style={s.eventMeta}>📍 {event.city}{event.start_date ? `  ·  ${formatDateRange(event.start_date, event.end_date ?? event.start_date)}` : ''}</Text>}
+          {event?.city && <Text style={s.eventMeta}>{event.city}{event.start_date ? `  ·  ${formatDateRange(event.start_date, event.end_date ?? event.start_date)}` : ''}</Text>}
           <Text style={s.appliedDate}>Candidaté le {new Date(item.created_at).toLocaleDateString('fr-FR')}</Text>
         </View>
         <View style={[s.statusBadge, { backgroundColor: cfg.bg }]}>
@@ -128,7 +128,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
       {item.status === 'refused' && item.refusal_reason && (
         <View style={s.refusalBox}>
           <View style={s.refusalHeader}>
-            <Text style={s.refusalIcon}>✕</Text>
+            <Ionicons name="close" size={11} color={colors.error} />
             <Text style={s.refusalLabel}>Motif du refus</Text>
           </View>
           <Text style={s.refusalText}>{item.refusal_reason}</Text>
@@ -137,7 +137,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
       {item.status === 'accepted' && (
         <View style={s.actionRow}>
           <TouchableOpacity style={s.btnMsg} onPress={openChat}>
-            <Text style={s.btnMsgText}>💬 Message</Text>
+            <Text style={s.btnMsgText}>Message</Text>
           </TouchableOpacity>
           {needsPayment && !isPending && (
             <TouchableOpacity style={[s.btnPay, paying && { opacity: 0.6 }]} onPress={handlePay} disabled={paying}>
@@ -159,11 +159,11 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
           )}
           {isPast && hasReviewed === false && (
             <TouchableOpacity style={s.btnReview} onPress={openReview}>
-              <Text style={s.btnReviewText}>★ Évaluer</Text>
+              <Text style={s.btnReviewText}>Évaluer</Text>
             </TouchableOpacity>
           )}
           {isPast && hasReviewed === true && (
-            <View style={s.reviewedBadge}><Text style={s.reviewedText}>✓ Évalué</Text></View>
+            <View style={s.reviewedBadge}><Text style={s.reviewedText}>Évalué</Text></View>
           )}
         </View>
       )}

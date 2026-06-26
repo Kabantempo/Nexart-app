@@ -10,6 +10,7 @@ import { Toast } from '../../components/Toast';
 import { GoogleLoginButton } from '../../components/GoogleLoginButton';
 import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
 import { useGoogleAuth } from '../../hooks/useGoogleAuth';
+import { FloatingInput } from '../../components/ui/FloatingInput';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Register'> };
 
@@ -64,7 +65,7 @@ export default function RegisterScreen({ navigation }: Props) {
     if (error) {
       setToast({ visible: true, message: error.message, type: 'error' });
     } else {
-      setToast({ visible: true, message: 'Compte créé avec succès! 🎉', type: 'success' });
+      setToast({ visible: true, message: 'Compte créé avec succès !', type: 'success' });
     }
   };
 
@@ -73,7 +74,8 @@ export default function RegisterScreen({ navigation }: Props) {
     <Toast visible={toast.visible} message={toast.message} type={toast.type} duration={3000} />
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>← Retour</Text>
+        <Ionicons name="chevron-back" size={16} color={colors.text.secondary} />
+        <Text style={styles.backText}>Retour</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>Créer un compte</Text>
@@ -81,80 +83,60 @@ export default function RegisterScreen({ navigation }: Props) {
       <Text style={styles.sectionLabel}>Je suis…</Text>
       <View style={styles.roleRow}>
         <TouchableOpacity style={[styles.roleCard, role === 'creator' && styles.roleCardActive]} onPress={() => setRole('creator')}>
-          <Text style={styles.roleIcon}>🎨</Text>
+          <Ionicons name="brush-outline" size={28} color={role === 'creator' ? colors.primary : colors.text.secondary} style={styles.roleIcon} />
           <Text style={[styles.roleTitle, role === 'creator' && styles.roleTextActive]}>Créateur</Text>
           <Text style={styles.roleDesc}>J'expose mes créations</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.roleCard, role === 'organizer' && styles.roleCardActiveAlt]} onPress={() => setRole('organizer')}>
-          <Text style={styles.roleIcon}>🗓️</Text>
+          <Ionicons name="calendar-outline" size={28} color={role === 'organizer' ? colors.secondary : colors.text.secondary} style={styles.roleIcon} />
           <Text style={[styles.roleTitle, role === 'organizer' && styles.roleTextActiveAlt]}>Organisateur</Text>
           <Text style={styles.roleDesc}>J'organise des marchés</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.roleCard, role === 'visitor' && styles.roleCardActiveVisitor]} onPress={() => setRole('visitor')}>
-          <Text style={styles.roleIcon}>👀</Text>
+          <Ionicons name="eye-outline" size={28} color={role === 'visitor' ? '#8B7CF6' : colors.text.secondary} style={styles.roleIcon} />
           <Text style={[styles.roleTitle, role === 'visitor' && styles.roleTextActiveVisitor]}>Visiteur</Text>
           <Text style={styles.roleDesc}>J'explore les marchés</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Nom */}
-      <View style={styles.fieldWrap}>
-        <TextInput
-          style={[styles.input, focused === 'name' && styles.inputFocused]}
-          placeholder="Nom complet"
-          placeholderTextColor={colors.text.secondary + '80'}
-          value={fullName}
-          onChangeText={setFullName}
-          onFocus={() => setFocused('name')}
-          onBlur={() => setFocused(null)}
-        />
-      </View>
+      <FloatingInput
+        label="Nom complet"
+        value={fullName}
+        onChangeText={setFullName}
+        autoCapitalize="words"
+        textContentType="name"
+      />
 
-      {/* Email */}
-      <View style={styles.fieldWrap}>
-        <TextInput
-          style={[styles.input, focused === 'email' && styles.inputFocused, !!emailError && styles.inputError]}
-          placeholder="Email"
-          placeholderTextColor={colors.text.secondary + '80'}
-          value={email}
-          onChangeText={(v) => { setEmail(v); validateEmail(v); }}
-          onFocus={() => setFocused('email')}
-          onBlur={() => setFocused(null)}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        {!!emailError && <Text style={styles.fieldError}>{emailError}</Text>}
-      </View>
+      <FloatingInput
+        label="Email"
+        value={email}
+        onChangeText={(v) => { setEmail(v); validateEmail(v); }}
+        error={emailError}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        textContentType="emailAddress"
+      />
 
-      {/* Mot de passe */}
-      <View style={styles.fieldWrap}>
-        <View style={styles.pwdRow}>
-          <TextInput
-            style={[styles.input, styles.pwdInput, focused === 'pwd' && styles.inputFocused, !!passwordError && styles.inputError]}
-            placeholder="Mot de passe (min. 6 caractères)"
-            placeholderTextColor={colors.text.secondary + '80'}
-            value={password}
-            onChangeText={(v) => { setPassword(v); validatePassword(v); }}
-            onFocus={() => setFocused('pwd')}
-            onBlur={() => setFocused(null)}
-            secureTextEntry={!showPwd}
-          />
-          <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPwd(v => !v)} activeOpacity={0.7}>
-            <Ionicons name={showPwd ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.text.secondary} />
-          </TouchableOpacity>
-        </View>
-        {password.length > 0 && (
-          <View style={styles.strengthRow}>
-            <View style={styles.strengthBars}>
-              {[1, 2, 3].map(i => (
-                <View key={i} style={[styles.strengthBar, { backgroundColor: i <= pwdStrength ? pwdStrengthColor : colors.border }]} />
-              ))}
-            </View>
-            <Text style={[styles.strengthLabel, { color: pwdStrengthColor }]}>{pwdStrengthLabel}</Text>
+      <FloatingInput
+        label="Mot de passe (min. 6 caractères)"
+        value={password}
+        onChangeText={(v) => { setPassword(v); validatePassword(v); }}
+        error={passwordError}
+        secureTextEntry={!showPwd}
+        textContentType="newPassword"
+        rightIcon={showPwd ? 'eye-off-outline' : 'eye-outline'}
+        onRightIconPress={() => setShowPwd(v => !v)}
+      />
+      {password.length > 0 && (
+        <View style={[styles.strengthRow, { marginTop: -spacing.sm, marginBottom: spacing.sm }]}>
+          <View style={styles.strengthBars}>
+            {[1, 2, 3].map(i => (
+              <View key={i} style={[styles.strengthBar, { backgroundColor: i <= pwdStrength ? pwdStrengthColor : colors.border }]} />
+            ))}
           </View>
-        )}
-        {!!passwordError && <Text style={styles.fieldError}>{passwordError}</Text>}
-      </View>
+          <Text style={[styles.strengthLabel, { color: pwdStrengthColor }]}>{pwdStrengthLabel}</Text>
+        </View>
+      )}
 
       <AnimatedTouchableOpacity
         style={[styles.btn, !role && styles.btnDisabled]}
@@ -196,7 +178,7 @@ export default function RegisterScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
-  back: { marginBottom: spacing.xl },
+  back: { marginBottom: spacing.xl, flexDirection: 'row', alignItems: 'center', gap: 4 },
   backText: { color: colors.text.secondary },
   title: { ...typography.h2, color: colors.text.primary, marginBottom: spacing.xl },
   sectionLabel: { ...typography.label, color: colors.text.secondary, marginBottom: spacing.sm, textTransform: 'uppercase', letterSpacing: 1 },
@@ -215,7 +197,7 @@ const styles = StyleSheet.create({
   roleCardActiveAlt: { borderColor: colors.secondary },
   roleCardActiveVisitor: { borderColor: '#8B7CF6' },
   roleTextActiveVisitor: { color: '#8B7CF6' },
-  roleIcon: { fontSize: 28, marginBottom: spacing.xs },
+  roleIcon: { marginBottom: spacing.xs },
   roleTitle: { ...typography.h3, color: colors.text.primary, marginBottom: 2 },
   roleTextActive: { color: colors.primary },
   roleTextActiveAlt: { color: colors.secondary },

@@ -36,7 +36,7 @@ function EventRow({
         <View style={{ flex: 1 }}>
           <Text style={styles.cardTitle} numberOfLines={2}>{event.title}</Text>
           <Text style={styles.cardMeta}>
-            📍 {event.city ?? '—'} · {formatDate(event.start_date)} → {formatDate(event.end_date)}
+            {event.city ?? '—'} · {formatDate(event.start_date)} → {formatDate(event.end_date)}
           </Text>
           <Text style={styles.cardStands}>{event.stand_count} stands</Text>
         </View>

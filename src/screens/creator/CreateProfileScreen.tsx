@@ -194,7 +194,7 @@ export default function CreateProfileScreen({ navigation }: Props) {
 
         <View style={s.footer}>
           <TouchableOpacity style={[s.btn, s.btnSecondary]} onPress={() => setStep(1)}>
-            <Text style={s.btnSecondaryText}>← Retour</Text>
+            <Text style={s.btnSecondaryText}>Retour</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.btn, { opacity: disciplines.length > 0 ? 1 : 0.5, flex: 1.5 }]}
@@ -263,7 +263,7 @@ export default function CreateProfileScreen({ navigation }: Props) {
 
         <View style={s.footer}>
           <TouchableOpacity style={[s.btn, s.btnSecondary]} onPress={() => setStep(2)}>
-            <Text style={s.btnSecondaryText}>← Retour</Text>
+            <Text style={s.btnSecondaryText}>Retour</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.btn, { opacity: region && city.trim().length > 0 ? 1 : 0.5, flex: 1.5 }]}
@@ -351,7 +351,7 @@ export default function CreateProfileScreen({ navigation }: Props) {
           {loading ? (
             <ActivityIndicator color={colors.text.inverse} />
           ) : (
-            <Text style={s.btnText}>Terminer 🎉</Text>
+            <Text style={s.btnText}>Terminer</Text>
           )}
         </TouchableOpacity>
       </View>

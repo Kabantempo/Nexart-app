@@ -14,14 +14,14 @@ export default function AboutScreen({ navigation }: Props) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backText}>← Retour</Text>
+        <Text style={styles.backText}>Retour</Text>
       </TouchableOpacity>
 
       <View style={styles.content}>
         <Text style={styles.title}>À propos de Nexart</Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🎨 Notre mission</Text>
+          <Text style={styles.sectionTitle}>Notre mission</Text>
           <Text style={styles.text}>
             Nexart est la plateforme de mise en relation entre créateurs, artisans et organisateurs de marchés artisanaux en France.
           </Text>
@@ -31,7 +31,7 @@ export default function AboutScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌟 Valeurs</Text>
+          <Text style={styles.sectionTitle}>Valeurs</Text>
           <View style={styles.valueItem}>
             <Text style={styles.valueTitle}>Authenticité</Text>
             <Text style={styles.valueDesc}>Chaque création sur Nexart est vérifiée et faite main.</Text>
@@ -47,7 +47,7 @@ export default function AboutScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📊 Les chiffres</Text>
+          <Text style={styles.sectionTitle}>Les chiffres</Text>
           <View style={styles.statRow}>
             <View style={styles.stat}>
               <Text style={styles.statNumber}>1000+</Text>
@@ -65,7 +65,7 @@ export default function AboutScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔗 En savoir plus</Text>
+          <Text style={styles.sectionTitle}>En savoir plus</Text>
           <TouchableOpacity
             style={styles.link}
             onPress={() => navigation.navigate('Contact')}

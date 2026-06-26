@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { UserRole } from '../types';
 import { colors, spacing, typography, radius } from '../constants/theme';
 
-const STEPS: Record<UserRole, Array<{ icon: string; title: string; body: string }>> = {
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const STEPS: Record<UserRole, Array<{ icon: IoniconName; title: string; body: string }>> = {
   creator: [
-    { icon: '🎨', title: 'Bienvenue sur Nexart !', body: 'La plateforme qui connecte créateurs et marchés artisanaux en France.' },
-    { icon: '📋', title: 'Complétez votre profil', body: 'Ajoutez vos disciplines, votre ville et vos photos de portfolio — les organisateurs vous trouveront plus facilement.' },
-    { icon: '🔍', title: 'Trouvez vos marchés', body: 'Parcourez les marchés disponibles dans l\'onglet Marchés, filtrez par discipline, ville ou date.' },
-    { icon: '🎉', title: 'Candidatez en 1 clic', body: 'Envoyez votre candidature directement depuis la fiche du marché. L\'organisateur vous répondra par message.' },
+    { icon: 'brush-outline', title: 'Bienvenue sur Nexart !', body: 'La plateforme qui connecte créateurs et marchés artisanaux en France.' },
+    { icon: 'clipboard-outline', title: 'Complétez votre profil', body: 'Ajoutez vos disciplines, votre ville et vos photos de portfolio — les organisateurs vous trouveront plus facilement.' },
+    { icon: 'search-outline', title: 'Trouvez vos marchés', body: 'Parcourez les marchés disponibles dans l\'onglet Marchés, filtrez par discipline, ville ou date.' },
+    { icon: 'checkmark-circle-outline', title: 'Candidatez en 1 clic', body: 'Envoyez votre candidature directement depuis la fiche du marché. L\'organisateur vous répondra par message.' },
   ],
   organizer: [
-    { icon: '🗓️', title: 'Bienvenue sur Nexart !', body: 'La plateforme pour trouver les meilleurs artisans pour vos marchés.' },
-    { icon: '✏️', title: 'Créez votre premier marché', body: 'Utilisez l\'onglet "Créer" pour publier votre marché avec dates, stands et disciplines recherchées.' },
-    { icon: '📩', title: 'Recevez des candidatures', body: 'Les artisans candidatent directement. Acceptez ou refusez depuis "Mes marchés".' },
-    { icon: '💬', title: 'Échangez par message', body: 'Contactez les artisans acceptés via la messagerie intégrée pour organiser les détails.' },
+    { icon: 'calendar-outline', title: 'Bienvenue sur Nexart !', body: 'La plateforme pour trouver les meilleurs artisans pour vos marchés.' },
+    { icon: 'create-outline', title: 'Créez votre premier marché', body: 'Utilisez l\'onglet "Créer" pour publier votre marché avec dates, stands et disciplines recherchées.' },
+    { icon: 'mail-outline', title: 'Recevez des candidatures', body: 'Les artisans candidatent directement. Acceptez ou refusez depuis "Mes marchés".' },
+    { icon: 'chatbubbles-outline', title: 'Échangez par message', body: 'Contactez les artisans acceptés via la messagerie intégrée pour organiser les détails.' },
   ],
   visitor: [
-    { icon: '✨', title: 'Bienvenue sur Nexart !', body: 'Découvrez les marchés artisanaux et les créateurs indépendants près de chez vous.' },
-    { icon: '🔍', title: 'Explorez les marchés', body: 'Recherchez par ville, discipline ou date. Sauvegardez vos favoris.' },
-    { icon: '👩‍🎨', title: 'Découvrez les créateurs', body: 'Parcourez les portfolios, voyez leurs prochains marchés, et contactez-les directement.' },
-    { icon: '❤️', title: 'Sauvegardez vos favoris', body: 'Gardez une trace des marchés et créateurs qui vous inspirent.' },
+    { icon: 'star-outline', title: 'Bienvenue sur Nexart !', body: 'Découvrez les marchés artisanaux et les créateurs indépendants près de chez vous.' },
+    { icon: 'search-outline', title: 'Explorez les marchés', body: 'Recherchez par ville, discipline ou date. Sauvegardez vos favoris.' },
+    { icon: 'person-outline', title: 'Découvrez les créateurs', body: 'Parcourez les portfolios, voyez leurs prochains marchés, et contactez-les directement.' },
+    { icon: 'heart-outline', title: 'Sauvegardez vos favoris', body: 'Gardez une trace des marchés et créateurs qui vous inspirent.' },
   ],
 };
 
@@ -64,7 +67,7 @@ export default function OnboardingModal({ role, visible, onDismiss }: { role: Us
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <View style={s.overlay}>
         <View style={s.panel}>
-          <Text style={s.icon}>{current.icon}</Text>
+          <Ionicons name={current.icon} size={52} color={colors.primary} style={s.icon} />
           <Text style={s.title}>{current.title}</Text>
           <Text style={s.body}>{current.body}</Text>
 
@@ -99,7 +102,7 @@ export default function OnboardingModal({ role, visible, onDismiss }: { role: Us
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   panel:   { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.xl, width: '100%', maxWidth: 400, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
-  icon:    { fontSize: 52, marginBottom: spacing.lg },
+  icon:    { marginBottom: spacing.lg },
   title:   { ...typography.h2, color: colors.text.primary, textAlign: 'center', marginBottom: spacing.md },
   body:    { ...typography.body, color: colors.text.secondary, textAlign: 'center', lineHeight: 24, marginBottom: spacing.xl },
   dots:    { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xl },

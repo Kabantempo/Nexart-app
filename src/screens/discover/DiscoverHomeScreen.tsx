@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
-  TouchableOpacity, ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
+import { SkeletonHorizontalList } from '../../components/Skeleton';
 import { useNavigation } from '@react-navigation/native';
 import { useEvents } from '../../hooks/useEvents';
 import { usePublicCreators } from '../../hooks/usePublicCreators';
@@ -147,10 +148,7 @@ export default function DiscoverHomeScreen() {
 
       {/* Événements — swipe horizontal */}
       {evLoading ? (
-        <View style={s.loadingRow}>
-          <ActivityIndicator color={colors.primary} />
-          <Text style={s.loadingText}>Chargement des marchés…</Text>
-        </View>
+        <SkeletonHorizontalList variant="event" count={3} />
       ) : (
         <HorizontalCardList
           title="Prochains marchés"
@@ -169,10 +167,7 @@ export default function DiscoverHomeScreen() {
 
       {/* Créateurs — swipe horizontal */}
       {crLoading ? (
-        <View style={s.loadingRow}>
-          <ActivityIndicator color={colors.primary} />
-          <Text style={s.loadingText}>Chargement des créateurs…</Text>
-        </View>
+        <SkeletonHorizontalList variant="creator" count={4} />
       ) : (
         <HorizontalCardList
           title="Créateurs à découvrir"
@@ -232,6 +227,4 @@ const s = StyleSheet.create({
   chipText:     { ...typography.caption, color: colors.text.secondary },
   chipTextActive: { color: colors.text.inverse, fontWeight: '700' },
 
-  loadingRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.xl, paddingVertical: spacing.lg },
-  loadingText: { ...typography.body, color: colors.text.secondary },
 });

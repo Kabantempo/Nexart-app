@@ -41,7 +41,7 @@ export default function ContactScreen({ navigation }: Props) {
     if (error) {
       setToast({ visible: true, message: error.message, type: 'error' })
     } else {
-      setToast({ visible: true, message: 'Message envoyé avec succès! ✨', type: 'success' })
+      setToast({ visible: true, message: 'Message envoyé avec succès !', type: 'success' })
       setName('')
       setEmail('')
       setSubject('')
@@ -60,7 +60,7 @@ export default function ContactScreen({ navigation }: Props) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backText}>← Retour</Text>
+          <Text style={styles.backText}>Retour</Text>
         </TouchableOpacity>
 
         <View style={styles.content}>
@@ -134,7 +134,7 @@ export default function ContactScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.info}>
-            <Text style={styles.infoTitle}>📧 Autres façons de nous joindre</Text>
+            <Text style={styles.infoTitle}>Autres façons de nous joindre</Text>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Email</Text>
               <Text style={styles.infoValue}>contact@nexart.fr</Text>

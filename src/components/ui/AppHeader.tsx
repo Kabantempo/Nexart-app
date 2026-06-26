@@ -34,6 +34,7 @@ export function AppHeader({
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>
       {/* Logo gauche */}
       <View style={s.logo}>
+        <Image source={require('../../assets/nexart-icon.png')} style={s.logoImg} />
         <Text style={s.logoText}>Nexart</Text>
       </View>
 
@@ -78,8 +79,14 @@ const s = StyleSheet.create({
     borderColor: colors.border,
   },
   logo: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  logoImg: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
   },
   logoText: {
     fontSize: 20,

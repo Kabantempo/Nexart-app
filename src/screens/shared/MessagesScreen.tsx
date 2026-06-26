@@ -202,7 +202,7 @@ export default function MessagesScreen({ navigation }: Props) {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={s.empty}>
-              <View style={s.emptyIcon}><Text style={s.emptyIconText}>✦</Text></View>
+              <View style={s.emptyIcon}><Ionicons name="chatbubbles-outline" size={28} color={colors.text.secondary} /></View>
               <Text style={s.emptyTitle}>Aucune conversation</Text>
               <Text style={s.emptySub}>Les conversations s'ouvrent après qu'une candidature est acceptée</Text>
             </View>
@@ -217,7 +217,7 @@ export default function MessagesScreen({ navigation }: Props) {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={s.empty}>
-              <View style={s.emptyIcon}><Text style={s.emptyIconText}>✉</Text></View>
+              <View style={s.emptyIcon}><Ionicons name="mail-outline" size={28} color={colors.text.secondary} /></View>
               <Text style={s.emptyTitle}>Aucune demande</Text>
               <Text style={s.emptySub}>Les visiteurs peuvent vous contacter depuis votre profil public</Text>
             </View>

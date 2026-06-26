@@ -1,4 +1,4 @@
-{
+﻿{
   "expo": {
     "name": "nexart",
     "slug": "nexart",
@@ -59,14 +59,23 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-"extra": {
+    "extra": {
       "eas": {
         "projectId": "69b28ef6-b967-4914-ac62-6215b62e8fe6"
       }
     },
     "owner": "kaban13",
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-secure-store",
+      "expo-status-bar",
+      "expo-web-browser"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/69b28ef6-b967-4914-ac62-6215b62e8fe6"
+    }
   }
 }

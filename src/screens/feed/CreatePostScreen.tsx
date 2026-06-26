@@ -135,7 +135,7 @@ export default function CreatePostScreen() {
           <View key={i} style={s.imgWrap}>
             <Image source={{ uri }} style={s.img} />
             <TouchableOpacity style={s.imgRemove} onPress={() => setImages(prev => prev.filter((_, j) => j !== i))}>
-              <Text style={s.imgRemoveText}>✕</Text>
+              <Ionicons name="close" size={14} color="#fff" />
             </TouchableOpacity>
           </View>
         ))}

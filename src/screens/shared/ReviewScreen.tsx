@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
   ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -69,7 +70,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
       <View style={[s.container, { paddingTop: insets.top }]}>
         <View style={s.successWrap}>
           <View style={s.successIconCircle}>
-            <Text style={s.successIcon}>★</Text>
+            <Ionicons name="star" size={28} color={colors.secondary} />
           </View>
           <Text style={s.successTitle}>Avis envoyé !</Text>
           <Text style={s.successSub}>Merci pour votre évaluation de {reviewedName}.</Text>
@@ -85,7 +86,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
     <View style={[s.container, { paddingTop: insets.top }]}>
       <View style={s.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
-          <Text style={s.backArrow}>←</Text>
+          <Ionicons name="chevron-back" size={22} color={colors.text.secondary} />
         </TouchableOpacity>
         <Text style={s.headerTitle}>
           {reviewerRole === 'creator' ? 'Évaluer l\'organisateur' : 'Évaluer le créateur'}
@@ -105,7 +106,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
         <View style={s.starsRow}>
           {[1, 2, 3, 4, 5].map(n => (
             <TouchableOpacity key={n} onPress={() => setRating(n)} style={s.starBtn} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}>
-              <Text style={[s.star, n <= rating && s.starActive]}>★</Text>
+              <Ionicons name={n <= rating ? 'star' : 'star-outline'} size={36} color={n <= rating ? '#F59E0B' : colors.border} />
             </TouchableOpacity>
           ))}
         </View>

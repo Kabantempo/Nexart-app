@@ -1,19 +1,69 @@
 import React from 'react'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../constants/theme'
-import AdminPanel from '../screens/admin/AdminPanel'
+import { TabIcon } from '../components/ui/TabIcon'
 
-const Stack = createStackNavigator()
+import AdminPanel           from '../screens/admin/AdminPanel'
+import OrganizerEventStack  from './OrganizerEventStack'
+import CreateEventScreen    from '../screens/organizer/CreateEventScreen'
+import ApplicationsStack    from './ApplicationsStack'
+import MessageStack         from './MessageStack'
+import ProfileScreen        from '../screens/shared/ProfileScreen'
+
+const Tab = createBottomTabNavigator()
+type IoniconName = React.ComponentProps<typeof Ionicons>['name']
+
+const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; component: React.ComponentType<any> }[] = [
+  { name: 'Panneau',        icon: 'shield-outline',       iconActive: 'shield',         component: AdminPanel },
+  { name: 'Marchés',        icon: 'storefront-outline',   iconActive: 'storefront',     component: OrganizerEventStack },
+  { name: 'Créer',          icon: 'add-circle-outline',   iconActive: 'add-circle',     component: CreateEventScreen },
+  { name: 'Candidatures',   icon: 'document-text-outline',iconActive: 'document-text',  component: ApplicationsStack },
+  { name: 'Messages',       icon: 'chatbubble-outline',   iconActive: 'chatbubble',     component: MessageStack },
+  { name: 'Profil',         icon: 'person-outline',       iconActive: 'person',         component: ProfileScreen },
+]
 
 export default function AdminNavigator() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        cardStyle: { backgroundColor: colors.background },
+    <Tab.Navigator
+      sceneContainerStyle={{ paddingBottom: 80 }}
+      screenOptions={({ route }) => {
+        const tab = TABS.find(t => t.name === route.name)
+        return {
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => (
+            <TabIcon
+              name={focused ? tab?.iconActive ?? tab?.icon ?? 'shield' : tab?.icon ?? 'shield-outline'}
+              focused={focused}
+              color={color}
+              size={size}
+            />
+          ),
+          tabBarStyle: {
+            position: 'absolute',
+            backgroundColor: colors.surface,
+            borderTopWidth: 0,
+            borderRadius: 28,
+            marginHorizontal: 16,
+            marginBottom: 16,
+            height: 64,
+            paddingBottom: 8,
+            paddingTop: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.12,
+            shadowRadius: 20,
+            elevation: 16,
+          },
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.text.secondary,
+          tabBarShowLabel: false,
+        }
       }}
     >
-      <Stack.Screen name="AdminPanel" component={AdminPanel} />
-    </Stack.Navigator>
+      {TABS.map(tab => (
+        <Tab.Screen key={tab.name} name={tab.name} component={tab.component} />
+      ))}
+    </Tab.Navigator>
   )
 }

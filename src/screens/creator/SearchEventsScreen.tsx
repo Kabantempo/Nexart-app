@@ -42,13 +42,13 @@ const DATE_OPTIONS: { label: string; short: string; value: DatePreset }[] = [
   { label: 'Prochainement',    short: 'Bientôt',      value: 'soon' },
 ];
 
-const EVENT_TYPES: { label: string; icon: string; value: EventType | 'all' }[] = [
-  { label: 'Tous',       icon: '✦', value: 'all' },
-  { label: 'Pop-up',     icon: '⚡', value: 'popup' },
-  { label: 'Salon',      icon: '🏛', value: 'salon' },
-  { label: 'Foire',      icon: '🎪', value: 'fair' },
-  { label: 'Permanent',  icon: '🏠', value: 'permanent' },
-  { label: 'Saisonnier', icon: '🌿', value: 'seasonal' },
+const EVENT_TYPES: { label: string; icon: React.ComponentProps<typeof Ionicons>['name']; value: EventType | 'all' }[] = [
+  { label: 'Tous',       icon: 'apps-outline',      value: 'all' },
+  { label: 'Pop-up',     icon: 'flash-outline',     value: 'popup' },
+  { label: 'Salon',      icon: 'business-outline',  value: 'salon' },
+  { label: 'Foire',      icon: 'ribbon-outline',    value: 'fair' },
+  { label: 'Permanent',  icon: 'home-outline',      value: 'permanent' },
+  { label: 'Saisonnier', icon: 'leaf-outline',      value: 'seasonal' },
 ];
 
 const TYPE_CONFIG: Record<string, { color: string; gradient: [string, string] }> = {
@@ -286,7 +286,7 @@ function FiltersSheet({
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.xxl }}>
 
             {/* ── Date ── */}
-            <Text style={fs.sectionTitle}>📅  Date</Text>
+            <Text style={fs.sectionTitle}>Date</Text>
             <View style={fs.pillRow}>
               {DATE_OPTIONS.map(o => (
                 <TouchableOpacity
@@ -300,7 +300,7 @@ function FiltersSheet({
             </View>
 
             {/* ── Budget ── */}
-            <Text style={fs.sectionTitle}>💰  Budget stand</Text>
+            <Text style={fs.sectionTitle}>Budget stand</Text>
             <View style={fs.pillRow}>
               {BUDGET_OPTIONS.map(o => (
                 <TouchableOpacity
@@ -314,7 +314,7 @@ function FiltersSheet({
             </View>
 
             {/* ── Région ── */}
-            <Text style={fs.sectionTitle}>📍  Région</Text>
+            <Text style={fs.sectionTitle}>Région</Text>
             <View style={fs.pillRow}>
               <TouchableOpacity
                 style={[fs.pill, local.region === null && fs.pillActive]}
@@ -334,7 +334,7 @@ function FiltersSheet({
             </View>
 
             {/* ── Disciplines ── */}
-            <Text style={fs.sectionTitle}>🎨  Disciplines</Text>
+            <Text style={fs.sectionTitle}>Disciplines</Text>
             <View style={fs.pillRow}>
               {DISCIPLINE_TAGS.map(t => {
                 const active = local.disciplines.includes(t);
@@ -523,7 +523,7 @@ export default function SearchEventsScreen({ navigation }: Props) {
             style={[s.typeChip, eventType === t.value && s.typeChipActive]}
             onPress={() => setEventType(t.value)}
           >
-            <Text style={s.typeChipIcon}>{t.icon}</Text>
+            <Ionicons name={t.icon} size={13} color={eventType === t.value ? '#fff' : colors.text.secondary} />
             <Text style={[s.typeChipText, eventType === t.value && s.typeChipTextActive]}>{t.label}</Text>
           </TouchableOpacity>
         ))}
