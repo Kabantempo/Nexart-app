@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Platform,
-  ActivityIndicator, ScrollView,
+  ActivityIndicator, ScrollView, TextInput,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useGeoCreators } from '../../hooks/useGeoCreators';
 import { DISCIPLINE_TAGS } from '../../types';
@@ -77,6 +78,7 @@ export default function CreatorMapScreen() {
   const nav = useNavigation<any>();
   const [radiusKm, setRadius]     = useState(30);
   const [discipline, setDisc]     = useState('');
+  const [search, setSearch]       = useState('');
   const [selected, setSelected]   = useState<any>(null);
   const [showDiscs, setShowDiscs] = useState(false);
 
@@ -84,11 +86,12 @@ export default function CreatorMapScreen() {
   const centerLat = 48.85;
   const centerLng = 2.35;
 
-  const { creators, loading } = useGeoCreators({ centerLat, centerLng, radiusKm, discipline: discipline || undefined });
+  const { creators: geoCreators, loading } = useGeoCreators({ centerLat, centerLng, radiusKm, discipline: discipline || undefined });
 
-  const disciplineGroups = discipline
-    ? creators.filter(c => c.disciplines.includes(discipline))
-    : creators;
+  const q = search.trim().toLowerCase();
+  const creators = q
+    ? geoCreators.filter(c => c.full_name.toLowerCase().includes(q) || (c.city ?? '').toLowerCase().includes(q))
+    : geoCreators;
 
   const MapContent = Platform.OS === 'web' ? WebCreatorMap : NativeCreatorMap;
 
@@ -100,6 +103,23 @@ export default function CreatorMapScreen() {
           <Text style={s.back}>←</Text>
         </TouchableOpacity>
         <Text style={s.title}>Créateurs disponibles</Text>
+      </View>
+
+      <View style={s.searchBar}>
+        <Ionicons name="search-outline" size={16} color={colors.text.secondary} />
+        <TextInput
+          style={s.searchInput}
+          placeholder="Nom, ville…"
+          placeholderTextColor={colors.text.secondary + '80'}
+          value={search}
+          onChangeText={setSearch}
+          autoCapitalize="none"
+        />
+        {search.length > 0 && (
+          <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close-circle" size={16} color={colors.text.secondary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={s.controlRow}>
@@ -172,6 +192,13 @@ const s = StyleSheet.create({
   topBar:    { flexDirection: 'row', alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl, paddingBottom: spacing.sm, gap: spacing.md, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.border },
   back:      { ...typography.h2, color: colors.text.secondary },
   title:     { ...typography.h3, color: colors.text.primary, flex: 1 },
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    backgroundColor: colors.surface, borderRadius: radius.md,
+    marginHorizontal: spacing.xl, marginTop: spacing.sm, paddingHorizontal: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  searchInput: { flex: 1, ...typography.body, color: colors.text.primary, paddingVertical: 10 },
   controlRow:{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.border },
   radiusRow: { paddingHorizontal: spacing.md, gap: spacing.xs, paddingVertical: spacing.sm },
   chip:      { paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.full, borderWidth: 1, borderColor: colors.border },

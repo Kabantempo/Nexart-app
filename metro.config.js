@@ -3,19 +3,25 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
-// Exclude web folder and other non-mobile files
+// Alias react-native → react-native-web for web platform
+const rnwPath = require.resolve('react-native-web');
+const rnwDir = path.dirname(rnwPath);
+
 config.resolver = {
   ...config.resolver,
   blockList: [
-    /web\/.*/,
+    /^web\/.*/,
     /web\/node_modules\/.*/,
-    /.git\/.*/,
+    /\.git\/.*/,
   ],
+  platforms: ['ios', 'android', 'web', 'native'],
+  extraNodeModules: {
+    'react-native': path.resolve(__dirname, 'node_modules/react-native-web'),
+  },
 };
 
-// Only watch src directory (no Expo Router app/ folder in this project)
 config.watchFolders = [
-  path.join(__dirname, 'src'),
+  __dirname,
   path.join(__dirname, 'node_modules'),
 ];
 
