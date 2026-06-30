@@ -13,6 +13,9 @@ export default function RegisterScreen({ navigation }: Props) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
@@ -26,6 +29,10 @@ export default function RegisterScreen({ navigation }: Props) {
     }
     if (password.length < 6) {
       Alert.alert('Erreur', 'Le mot de passe doit faire au moins 6 caractères');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
       return;
     }
     setLoading(true);
@@ -82,19 +89,41 @@ export default function RegisterScreen({ navigation }: Props) {
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Mot de passe (min. 6 caractères)"
-        placeholderTextColor={colors.text.secondary}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={styles.pwdRow}>
+        <TextInput
+          style={[styles.input, styles.pwdInput]}
+          placeholder="Mot de passe (min. 6 caractères)"
+          placeholderTextColor={colors.text.secondary}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPwd}
+        />
+        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPwd(v => !v)}>
+          <Text style={styles.eyeText}>{showPwd ? 'Cacher' : 'Voir'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.pwdRow}>
+        <TextInput
+          style={[styles.input, styles.pwdInput]}
+          placeholder="Confirmer le mot de passe"
+          placeholderTextColor={colors.text.secondary}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!showConfirmPwd}
+        />
+        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowConfirmPwd(v => !v)}>
+          <Text style={styles.eyeText}>{showConfirmPwd ? 'Cacher' : 'Voir'}</Text>
+        </TouchableOpacity>
+      </View>
+      {confirmPassword.length > 0 && password !== confirmPassword && (
+        <Text style={styles.pwdMismatch}>Les mots de passe ne correspondent pas</Text>
+      )}
 
       <TouchableOpacity
-        style={[styles.btn, !role && styles.btnDisabled]}
+        style={[styles.btn, (!role || (confirmPassword !== '' && password !== confirmPassword)) && styles.btnDisabled]}
         onPress={handleRegister}
-        disabled={loading || !role}
+        disabled={loading || !role || (confirmPassword !== '' && password !== confirmPassword)}
       >
         <Text style={styles.btnText}>{loading ? 'Création…' : 'Créer mon compte'}</Text>
       </TouchableOpacity>
@@ -155,6 +184,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  pwdRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  pwdInput: { flex: 1 },
+  eyeBtn: { paddingHorizontal: spacing.sm, marginBottom: spacing.md },
+  eyeText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
+  pwdMismatch: { ...typography.caption, color: colors.error, marginTop: -spacing.sm, marginBottom: spacing.md },
   btn: {
     backgroundColor: colors.primary,
     padding: spacing.md,

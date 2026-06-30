@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
@@ -41,14 +42,7 @@ export default function WelcomeScreen({ navigation }: Props) {
 
         {/* Brand header */}
         <View style={s.header}>
-          <View style={s.logoMark}>
-            <View style={s.logoGrid}>
-              <View style={s.logoDot} />
-              <View style={s.logoDot} />
-              <View style={s.logoDot} />
-              <View style={s.logoDot} />
-            </View>
-          </View>
+          <Image source={require('../../../assets/logo-mark.png')} style={s.logoMark} />
           <Text style={s.brandName}>Nexart</Text>
         </View>
 
@@ -143,22 +137,6 @@ const s = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoGrid: {
-    width: 18,
-    height: 18,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 3,
-  },
-  logoDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.9)',
   },
   brandName: {
     fontSize: 20,
