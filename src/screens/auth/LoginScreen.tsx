@@ -10,6 +10,8 @@ import {
   Platform,
   ScrollView,
   StatusBar,
+  Linking,
+  Image,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
@@ -24,6 +26,15 @@ export default function LoginScreen({ navigation }: Props) {
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [showPwd, setShowPwd]   = useState(false);
+
+  const handleGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { skipBrowserRedirect: true, redirectTo: 'nexart://auth/callback' },
+    });
+    if (error) { Alert.alert('Erreur', error.message); return; }
+    if (data?.url) Linking.openURL(data.url);
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -56,14 +67,7 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Brand */}
           <View style={s.brand}>
-            <View style={s.logoMark}>
-              <View style={s.logoGrid}>
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-                <View style={s.logoDot} />
-              </View>
-            </View>
+            <Image source={require('../../../assets/logo-mark.png')} style={s.logoMark} />
             <Text style={s.brandName}>Nexart</Text>
           </View>
 
@@ -114,6 +118,9 @@ export default function LoginScreen({ navigation }: Props) {
                   <Text style={s.eyeText}>{showPwd ? 'Cacher' : 'Voir'}</Text>
                 </TouchableOpacity>
               </View>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} activeOpacity={0.7} style={s.forgotLink}>
+                <Text style={s.forgotLinkText}>Mot de passe oublié ?</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Submit */}
@@ -134,6 +141,16 @@ export default function LoginScreen({ navigation }: Props) {
               <Text style={s.dividerText}>ou</Text>
               <View style={s.dividerLine} />
             </View>
+
+            {/* Google OAuth */}
+            <TouchableOpacity
+              style={s.btnGoogle}
+              onPress={handleGoogle}
+              activeOpacity={0.85}
+            >
+              <Text style={s.googleIcon}>G</Text>
+              <Text style={s.btnGoogleText}>Continuer avec Google</Text>
+            </TouchableOpacity>
 
             {/* Register link */}
             <TouchableOpacity
@@ -188,22 +205,6 @@ const s = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoGrid: {
-    width: 18,
-    height: 18,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 3,
-  },
-  logoDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.9)',
   },
   brandName: {
     fontSize: 20,
@@ -253,6 +254,9 @@ const s = StyleSheet.create({
   eyeBtn:  { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
   eyeText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
 
+  forgotLink: { alignSelf: 'flex-end', marginTop: -spacing.xs },
+  forgotLinkText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
+
   btnPrimary: {
     backgroundColor: colors.primary,
     paddingVertical: 16,
@@ -282,6 +286,30 @@ const s = StyleSheet.create({
   },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
   dividerText: { ...typography.caption, color: colors.text.secondary },
+
+  btnGoogle: {
+    paddingVertical: 14,
+    borderRadius: radius.xl,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  googleIcon: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#4285F4',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  btnGoogleText: {
+    ...typography.label,
+    color: colors.text.primary,
+    fontSize: 15,
+    fontWeight: '600',
+  },
 
   btnSecondary: {
     paddingVertical: 16,

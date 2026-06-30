@@ -10,6 +10,10 @@ import CreatorNavigator   from './CreatorNavigator';
 import OrganizerNavigator from './OrganizerNavigator';
 import VisitorNavigator   from './VisitorNavigator';
 import DiscoverStack      from './DiscoverStack';
+import AboutScreen        from '../screens/info/AboutScreen';
+import ContactScreen      from '../screens/info/ContactScreen';
+import LegalScreen        from '../screens/info/LegalScreen';
+import AdminScreen        from '../screens/admin/AdminScreen';
 
 const Stack = createStackNavigator();
 
@@ -50,6 +54,26 @@ export default function RootNavigator() {
         ) : (
           <Stack.Screen name="Visitor"   component={VisitorNavigator} />
         )}
+        <Stack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{ headerShown: true, title: 'À propos', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Contact"
+          component={ContactScreen}
+          options={{ headerShown: true, title: 'Contact', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Legal"
+          component={LegalScreen}
+          options={{ headerShown: true, title: 'Mentions légales', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{ headerShown: true, title: 'Panel Admin', headerBackTitle: 'Retour' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

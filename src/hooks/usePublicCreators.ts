@@ -3,9 +3,20 @@ import { supabase } from '../lib/supabase';
 import { PublicCreatorProfile } from '../types';
 import { DEMO_MODE, DEMO_CREATORS } from '../lib/demoData';
 
-export function usePublicCreators(opts: { discipline?: string; city?: string; limit?: number } = {}) {
+export function usePublicCreators(opts: { discipline?: string; city?: string; search?: string; limit?: number } = {}) {
   const [creators, setCreators] = useState<PublicCreatorProfile[]>([]);
   const [loading, setLoading]   = useState(true);
+
+  const matchesSearch = useCallback((c: PublicCreatorProfile, q: string) => {
+    const needle = q.toLowerCase();
+    return (
+      c.full_name?.toLowerCase().includes(needle) ||
+      c.bio?.toLowerCase().includes(needle) ||
+      c.city?.toLowerCase().includes(needle) ||
+      c.region?.toLowerCase().includes(needle) ||
+      c.disciplines?.some(d => d.toLowerCase().includes(needle))
+    );
+  }, []);
 
   const fetch = useCallback(async () => {
     setLoading(true);
@@ -41,17 +52,19 @@ export function usePublicCreators(opts: { discipline?: string; city?: string; li
 
     if (opts.discipline) result = result.filter(c => c.disciplines.includes(opts.discipline!));
     if (opts.city)       result = result.filter(c => c.city?.toLowerCase().includes(opts.city!.toLowerCase()));
+    if (opts.search?.trim()) result = result.filter(c => matchesSearch(c, opts.search!.trim()));
 
     if (DEMO_MODE && result.length === 0) {
       let demo = DEMO_CREATORS as unknown as PublicCreatorProfile[];
       if (opts.discipline) demo = demo.filter(c => c.disciplines.includes(opts.discipline!));
       if (opts.city)       demo = demo.filter(c => c.city?.toLowerCase().includes(opts.city!.toLowerCase()));
+      if (opts.search?.trim()) demo = demo.filter(c => matchesSearch(c, opts.search!.trim()));
       setCreators(demo.slice(0, opts.limit ?? 40));
     } else {
       setCreators(result);
     }
     setLoading(false);
-  }, [opts.discipline, opts.city, opts.limit]);
+  }, [opts.discipline, opts.city, opts.search, opts.limit, matchesSearch]);
 
   useEffect(() => { fetch(); }, [fetch]);
 

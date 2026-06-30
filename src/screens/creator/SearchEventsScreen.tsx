@@ -425,7 +425,7 @@ export default function SearchEventsScreen({ navigation }: Props) {
       .order('start_date', { ascending: true })
       .limit(100);
 
-    if (search.trim())              q = q.or(`title.ilike.%${search.trim()}%,city.ilike.%${search.trim()}%`);
+    if (search.trim())              q = q.or(`title.ilike.%${search.trim()}%,city.ilike.%${search.trim()}%,region.ilike.%${search.trim()}%,description.ilike.%${search.trim()}%`);
     if (eventType !== 'all')        q = q.eq('event_type', eventType);
     if (filters.disciplines.length) q = q.overlaps('discipline_tags', filters.disciplines);
     if (filters.region)             q = q.eq('region', filters.region);

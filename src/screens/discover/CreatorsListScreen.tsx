@@ -43,7 +43,7 @@ export default function CreatorsListScreen({ navigation, route }: Props) {
   const [search, setSearch] = useState('');
   const [disc, setDisc]     = useState(route.params?.discipline ?? '');
 
-  const { creators, loading } = usePublicCreators({ discipline: disc || undefined, city: search || undefined });
+  const { creators, loading } = usePublicCreators({ discipline: disc || undefined, search: search || undefined });
 
   return (
     <View style={s.container}>

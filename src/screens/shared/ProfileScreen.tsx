@@ -4,6 +4,7 @@ import {
   ScrollView, Alert, ActivityIndicator, Image, Platform,
   FlatList, Dimensions, Linking, Modal, KeyboardAvoidingView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -746,6 +747,7 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
   const { profile }  = useAuth();
   const { average, count, isTrusted } = useProfileReviews(userId);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const W = Dimensions.get('window').width;
   const CELL = (W - spacing.xl * 2 - spacing.xs * 2) / 3;
 
@@ -871,6 +873,13 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
         </View>
       )}
 
+      {profile?.is_admin && (
+        <TouchableOpacity style={profileViewStyles.adminBtn} onPress={() => navigation.navigate('Admin')}>
+          <Ionicons name="shield-checkmark-outline" size={16} color={colors.primary} />
+          <Text style={profileViewStyles.adminBtnText}>Panel Admin</Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity style={profileViewStyles.logoutBtn} onPress={() => supabase.auth.signOut()}>
         <Text style={profileViewStyles.logoutText}>Se déconnecter</Text>
       </TouchableOpacity>
@@ -914,6 +923,8 @@ const profileViewStyles = StyleSheet.create({
   availRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
   availChip:      { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.muted, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3, borderWidth: 1, borderColor: colors.border },
   availChipText:  { ...typography.caption, color: colors.text.secondary, fontSize: 11 },
+  adminBtn:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: spacing.xl, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.primary, padding: spacing.md, borderRadius: radius.md },
+  adminBtnText:   { color: colors.primary, fontWeight: '600' },
   logoutBtn:      { marginHorizontal: spacing.xl, marginTop: spacing.xl, marginBottom: spacing.lg, borderWidth: 1, borderColor: colors.error, padding: spacing.md, borderRadius: radius.md, alignItems: 'center' },
   logoutText:     { color: colors.error, fontWeight: '600' },
 });
@@ -926,6 +937,7 @@ export default function ProfileScreen() {
   const [showEdit, setShowEdit]       = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
 
   const pickAvatar = async () => {
     if (Platform.OS !== 'web') {
@@ -1025,16 +1037,30 @@ export default function ProfileScreen() {
         <OrganizerProfileSection userId={profile.id} />
       ) : null}
 
+      {profile?.is_admin && (
+        <TouchableOpacity style={styles.btnAdmin} onPress={() => navigation.navigate('Admin')}>
+          <Text style={styles.btnAdminText}>Panel Admin</Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity style={styles.btnLogout} onPress={() => supabase.auth.signOut()}>
         <Text style={styles.btnLogoutText}>Se déconnecter</Text>
       </TouchableOpacity>
 
+      <View style={styles.infoLinks}>
+        <TouchableOpacity style={styles.infoLinkBtn} onPress={() => navigation.navigate('About')} activeOpacity={0.7}>
+          <Text style={styles.infoLinkText}>À propos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.infoLinkBtn} onPress={() => navigation.navigate('Contact')} activeOpacity={0.7}>
+          <Text style={styles.infoLinkText}>Contact</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.legalRow}>
-        <TouchableOpacity onPress={() => Linking.openURL('https://nexart.app/cgu.html')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Legal')}>
           <Text style={styles.legalLink}>CGU</Text>
         </TouchableOpacity>
         <Text style={styles.legalSep}>·</Text>
-        <TouchableOpacity onPress={() => Linking.openURL('https://nexart.app/privacy.html')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Legal')}>
           <Text style={styles.legalLink}>Confidentialité</Text>
         </TouchableOpacity>
       </View>
@@ -1117,12 +1143,20 @@ const styles = StyleSheet.create({
   avatarEditRow:  { alignItems: 'center', paddingVertical: spacing.xl },
   changePhotoText:{ ...typography.caption, color: colors.primary, fontWeight: '600', marginTop: spacing.xs },
 
+  btnAdmin: {
+    marginTop: spacing.xl, borderWidth: 1, borderColor: colors.primary,
+    padding: spacing.md, borderRadius: radius.md, alignItems: 'center',
+  },
+  btnAdminText: { color: colors.primary, fontWeight: '600' },
   btnLogout: {
-    marginTop: spacing.xxl, borderWidth: 1, borderColor: colors.error,
+    marginTop: spacing.lg, borderWidth: 1, borderColor: colors.error,
     padding: spacing.md, borderRadius: radius.md, alignItems: 'center',
   },
   btnLogoutText: { color: colors.error, fontWeight: '600' },
-  legalRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: spacing.lg, gap: spacing.sm },
+  infoLinks: { flexDirection: 'row', justifyContent: 'center', gap: spacing.md, marginTop: spacing.lg, marginBottom: spacing.sm },
+  infoLinkBtn: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  infoLinkText: { ...typography.caption, color: colors.text.secondary, fontWeight: '600' },
+  legalRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: spacing.xs, gap: spacing.sm },
   legalLink: { ...typography.caption, color: colors.text.secondary, textDecorationLine: 'underline' },
   legalSep:  { ...typography.caption, color: colors.text.secondary },
 });
