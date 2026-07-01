@@ -10,6 +10,7 @@ import RootNavigator from './src/navigation';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import OnboardingModal, { useOnboarding } from './src/components/OnboardingModal';
 import SplashScreen from './src/screens/SplashScreen';
+import { ToastProvider } from './src/components/ui/Toast';
 
 // Fix mouse wheel scroll on web
 // React Native Web sets touch-action:none which blocks wheel events
@@ -102,7 +103,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthContext.Provider value={{ session, user, profile, loading, refetchProfile, setProfile }}>
-        <AppInner profile={profile} />
+        <ToastProvider>
+          <AppInner profile={profile} />
+        </ToastProvider>
       </AuthContext.Provider>
     </SafeAreaProvider>
   );

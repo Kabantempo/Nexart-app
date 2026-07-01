@@ -145,7 +145,8 @@ export default function MessagesScreen({ navigation }: Props) {
   const { inquiries, reply: replyToInquiry } = useCreatorInquiries(
     profile?.role === 'creator' ? profile?.id : undefined,
   );
-  const [tab, setTab] = useState<'conv' | 'inquiries'>('conv');
+  const [tab, setTab]       = useState<'conv' | 'inquiries'>('conv');
+  const [search, setSearch] = useState('');
 
   const isCreator = profile?.role === 'creator';
   const unreadInq = inquiries.filter(i => !i.reply).length;
@@ -155,11 +156,36 @@ export default function MessagesScreen({ navigation }: Props) {
     if (err) Alert.alert('Erreur', err.message);
   };
 
+  const filteredConv = conversations.filter(c => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    const isC = c.creator_id === profile?.id;
+    const other = isC ? c.organizer : c.creator;
+    return (other?.full_name?.toLowerCase().includes(q) ?? false)
+      || (c.event?.title?.toLowerCase().includes(q) ?? false);
+  });
+
   if (loading) return <View style={s.centered}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
   return (
     <View style={[s.container, { paddingTop: insets.top + spacing.sm }]}>
       <Text style={s.title}>Messages</Text>
+      <View style={s.searchWrap}>
+        <Ionicons name="search-outline" size={16} color={colors.text.secondary} style={{ marginLeft: spacing.md }} />
+        <TextInput
+          style={s.searchInput}
+          placeholder="Rechercher une conversation…"
+          placeholderTextColor={colors.text.secondary}
+          value={search}
+          onChangeText={setSearch}
+          returnKeyType="search"
+        />
+        {search.length > 0 && (
+          <TouchableOpacity onPress={() => setSearch('')} style={{ paddingRight: spacing.md }}>
+            <Ionicons name="close-circle" size={16} color={colors.text.secondary} />
+          </TouchableOpacity>
+        )}
+      </View>
 
       {isCreator && (
         <View style={s.tabs}>
@@ -176,7 +202,7 @@ export default function MessagesScreen({ navigation }: Props) {
 
       {tab === 'conv' ? (
         <FlatList
-          data={conversations}
+          data={filteredConv}
           keyExtractor={c => c.id}
           renderItem={({ item }) => (
             <ConversationRow
@@ -231,7 +257,9 @@ export default function MessagesScreen({ navigation }: Props) {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  title:     { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.md, fontWeight: '700' },
+  title:     { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.sm, fontWeight: '700' },
+  searchWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border, marginHorizontal: spacing.xl, marginBottom: spacing.md },
+  searchInput: { flex: 1, ...typography.body, color: colors.text.primary, paddingVertical: 10, paddingHorizontal: spacing.sm },
 
   tabs: { flexDirection: 'row', paddingHorizontal: spacing.xl, gap: spacing.sm, marginBottom: spacing.md },
   tab: { flex: 1, paddingVertical: 10, borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: colors.surface },

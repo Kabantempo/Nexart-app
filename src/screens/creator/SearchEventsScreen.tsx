@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import {
   View, Text, TextInput, StyleSheet, FlatList,
-  TouchableOpacity, ActivityIndicator, ScrollView,
+  TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl,
   Image, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -411,8 +412,9 @@ export default function SearchEventsScreen({ navigation }: Props) {
     disciplines: [], region: null, budget: 'all', date: 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [events,   setEvents]   = useState<Event[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [events,    setEvents]    = useState<Event[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const activeCount = [
     filters.disciplines.length > 0,
@@ -577,10 +579,20 @@ export default function SearchEventsScreen({ navigation }: Props) {
           data={events}
           keyExtractor={e => e.id}
           renderItem={({ item }) => (
-            <EventCard event={item} onPress={() => navigation.navigate('EventDetail', { eventId: item.id })} />
+            <EventCard event={item} onPress={() => {
+              Haptics.selectionAsync();
+              navigation.navigate('EventDetail', { eventId: item.id });
+            }} />
           )}
           contentContainerStyle={s.list}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={async () => { setRefreshing(true); await fetchEvents(); setRefreshing(false); }}
+              tintColor={colors.primary}
+            />
+          }
           ListEmptyComponent={
             <View style={s.empty}>
               <Ionicons name="search-outline" size={40} color={colors.border} />

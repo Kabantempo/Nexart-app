@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as Haptics from 'expo-haptics';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, ActivityIndicator, Alert,
@@ -75,6 +76,7 @@ function ApplySection({ eventId, userId }: { eventId: string; userId: string }) 
     }
     setExpanded(false);
     setApplied(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   if (statusLoading) return <ActivityIndicator color={colors.primary} style={{ margin: spacing.xl }} />;

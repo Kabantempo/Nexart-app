@@ -9,6 +9,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
 import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { useAuth } from '../../stores/auth';
 import { usePublicCreatorProfile } from '../../hooks/usePublicCreators';
@@ -205,7 +206,7 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
   const { posts } = usePosts({ creatorId, limit: 6 });
 
   const [showContact, setShowContact] = useState(false);
-  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   const settings: PageSettings = { ...DEFAULT_PAGE_SETTINGS, ...(creator?.page_settings ?? {}) };
 
@@ -239,14 +240,32 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Lightbox galerie plein écran */}
-      <Modal visible={!!lightboxImg} transparent animationType="fade" onRequestClose={() => setLightboxImg(null)}>
-        <TouchableOpacity style={lb.overlay} onPress={() => setLightboxImg(null)} activeOpacity={1}>
-          {lightboxImg && <Image source={{ uri: lightboxImg }} style={lb.img} resizeMode="contain" />}
-          <TouchableOpacity style={lb.closeBtn} onPress={() => setLightboxImg(null)}>
+      {/* Lightbox galerie plein écran avec swipe */}
+      <Modal visible={lightboxIdx !== null} transparent animationType="fade" onRequestClose={() => setLightboxIdx(null)}>
+        <View style={lb.overlay}>
+          <FlatList
+            data={creator?.portfolio_images ?? []}
+            keyExtractor={(_, i) => String(i)}
+            horizontal
+            pagingEnabled
+            initialScrollIndex={lightboxIdx ?? 0}
+            getItemLayout={(_, i) => ({ length: W, offset: W * i, index: i })}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={{ width: W }} activeOpacity={1} onPress={() => setLightboxIdx(null)}>
+                <Image source={{ uri: item }} style={lb.img} resizeMode="contain" />
+              </TouchableOpacity>
+            )}
+          />
+          <TouchableOpacity style={lb.closeBtn} onPress={() => setLightboxIdx(null)}>
             <Ionicons name="close" size={22} color="#fff" />
           </TouchableOpacity>
-        </TouchableOpacity>
+          {(creator?.portfolio_images?.length ?? 0) > 1 && (
+            <View style={lb.counter}>
+              <Text style={lb.counterText}>{(creator?.portfolio_images ?? []).length} photos · glissez</Text>
+            </View>
+          )}
+        </View>
       </Modal>
 
       <ScrollView
@@ -299,7 +318,10 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
               </Text>
             </TouchableOpacity>
             <Text style={[s.followersCount, { color: settings.bio_color + '66' }]}>{followers} abonnés</Text>
-            <TouchableOpacity onPress={profile ? toggle : () => Alert.alert('Compte requis')}>
+            <TouchableOpacity onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              profile ? toggle() : Alert.alert('Compte requis');
+            }}>
               <Text style={[s.favBtn, isFav && { color: colors.error }]}>{isFav ? '♥' : '♡'}</Text>
             </TouchableOpacity>
           </View>
@@ -338,7 +360,7 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
             <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Portfolio</Text>
             <View style={s.grid}>
               {creator.portfolio_images.map((url, i) => (
-                <TouchableOpacity key={i} onPress={() => setLightboxImg(url)} activeOpacity={0.85}>
+                <TouchableOpacity key={i} onPress={() => setLightboxIdx(i)} activeOpacity={0.85}>
                   <Image source={{ uri: url }} style={s.gridImg} />
                 </TouchableOpacity>
               ))}
@@ -432,9 +454,11 @@ const s = StyleSheet.create({
 });
 
 const lb = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
-  img:     { width: W, height: W * 1.3 },
-  closeBtn:{ position: 'absolute', top: 52, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+  overlay:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.97)', justifyContent: 'center' },
+  img:      { width: W, height: W * 1.4 },
+  closeBtn: { position: 'absolute', top: 52, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+  counter:  { position: 'absolute', bottom: 40, alignSelf: 'center' },
+  counterText: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
 });
 
 const c = StyleSheet.create({

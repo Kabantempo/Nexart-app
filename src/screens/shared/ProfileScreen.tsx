@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, Alert, ActivityIndicator, Image, Platform,
-  FlatList, Dimensions, Linking, Modal, KeyboardAvoidingView,
+  FlatList, Dimensions, Linking, Modal, KeyboardAvoidingView, Share,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -1173,7 +1174,13 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
           <Ionicons name="color-palette-outline" size={15} color={colors.primary} />
           <Text style={pv.btnCustomizeText}>Ma page</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={pv.btnIconOnly} activeOpacity={0.85}>
+        <TouchableOpacity style={pv.btnIconOnly} activeOpacity={0.85} onPress={() => {
+          Haptics.selectionAsync();
+          Share.share({
+            message: `Découvrez ${profile?.full_name ?? 'ce créateur'} sur Nexart — https://nexart.fr`,
+            title: profile?.full_name ?? 'Profil Nexart',
+          });
+        }}>
           <Ionicons name="share-outline" size={17} color={colors.text.secondary} />
         </TouchableOpacity>
       </View>
@@ -1238,9 +1245,33 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={pv.logoutBtn} onPress={() => supabase.auth.signOut()}>
+      <TouchableOpacity style={pv.logoutBtn} onPress={() => {
+        Alert.alert('Se déconnecter ?', 'Vous devrez vous reconnecter pour accéder à votre compte.', [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Déconnecter', style: 'destructive', onPress: () => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); supabase.auth.signOut(); } },
+        ]);
+      }}>
         <Ionicons name="log-out-outline" size={15} color={colors.error} />
         <Text style={pv.logoutText}>Se déconnecter</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={pv.deleteAccountBtn} onPress={() => {
+        Alert.alert(
+          'Supprimer mon compte',
+          'Cette action est irréversible. Toutes vos données (profil, portfolio, candidatures, messages) seront supprimées définitivement.',
+          [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Supprimer définitivement', style: 'destructive', onPress: async () => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              const { error } = await supabase.rpc('delete_user');
+              if (error) Alert.alert('Erreur', 'La suppression a échoué. Contactez support@nexart.fr');
+              else supabase.auth.signOut();
+            }},
+          ],
+        );
+      }}>
+        <Ionicons name="trash-outline" size={13} color={colors.text.secondary} />
+        <Text style={pv.deleteAccountText}>Supprimer mon compte</Text>
       </TouchableOpacity>
 
       {/* ── Modal aperçu plein écran ── */}
@@ -1568,6 +1599,8 @@ const pv = StyleSheet.create({
     borderRadius: radius.md,
   },
   logoutText: { ...typography.label, color: colors.error, fontWeight: '600' },
+  deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, justifyContent: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  deleteAccountText: { ...typography.caption, color: colors.text.secondary, textDecorationLine: 'underline' },
 
   /* Preview plein écran */
   previewOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
