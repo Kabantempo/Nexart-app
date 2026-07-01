@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions,
+  View, Text, StyleSheet, Modal, TouchableOpacity, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, radius } from '../../constants/theme';
@@ -36,6 +36,7 @@ interface Props {
 
 export function OnboardingModal({ visible, onDismiss }: Props) {
   const [step, setStep] = useState(0);
+  const lastScrollTime = useRef(0);
 
   const slide  = SLIDES[step];
   const isLast = step === SLIDES.length - 1;
@@ -45,7 +46,32 @@ export function OnboardingModal({ visible, onDismiss }: Props) {
     else setStep(s => s + 1);
   };
 
+  const handlePrev = () => setStep(s => Math.max(0, s - 1));
+
   const handleSkip = () => { onDismiss(); setStep(0); };
+
+  // Scroll molette / trackpad sur web
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !visible) return;
+    const onWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      if (now - lastScrollTime.current < 400) return; // debounce
+      lastScrollTime.current = now;
+      if (e.deltaY > 0 || e.deltaX > 0) handleNext();
+      else if (e.deltaY < 0 || e.deltaX < 0) handlePrev();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') handleNext();
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') handlePrev();
+      else if (e.key === 'Escape') handleSkip();
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [visible, step]);
 
   return (
     <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
