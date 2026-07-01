@@ -63,7 +63,8 @@ function ApplySection({ eventId, userId }: { eventId: string; userId: string }) 
   const { status, loading: statusLoading } = useApplicationStatus(eventId, userId);
   const { apply, loading: applying } = useApply(eventId, userId);
   const [expanded, setExpanded] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage]   = useState('');
+  const [applied, setApplied]   = useState(false);
 
   const handleApply = async () => {
     const { error } = await apply(message.trim() || undefined);
@@ -73,10 +74,24 @@ function ApplySection({ eventId, userId }: { eventId: string; userId: string }) 
       return;
     }
     setExpanded(false);
-    Alert.alert('Candidature envoyée !', "L'organisateur recevra votre demande et vous répondra par message.");
+    setApplied(true);
   };
 
   if (statusLoading) return <ActivityIndicator color={colors.primary} style={{ margin: spacing.xl }} />;
+
+  if (applied) {
+    return (
+      <View style={s.successBox}>
+        <View style={s.successIcon}>
+          <Text style={s.successIconText}>✓</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.successTitle}>Candidature envoyée !</Text>
+          <Text style={s.successSub}>L'organisateur vous répondra par message.</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (status !== 'none') {
     const cfg = STATUS_CONFIG[status];
@@ -299,6 +314,21 @@ const s = StyleSheet.create({
   },
   statusBox:     { borderRadius: radius.xl, padding: spacing.md, alignItems: 'center' },
   statusBoxText: { ...typography.label, fontWeight: '700' },
+
+  successBox: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    backgroundColor: colors.secondary + '12',
+    borderRadius: radius.xl, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.secondary + '40',
+  },
+  successIcon: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: colors.secondary,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  successIconText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  successTitle: { ...typography.label, color: colors.secondary, fontWeight: '700', marginBottom: 2 },
+  successSub:   { ...typography.caption, color: colors.text.secondary },
   applyBtn: {
     backgroundColor: colors.primary, borderRadius: radius.xl,
     paddingVertical: 16, alignItems: 'center',

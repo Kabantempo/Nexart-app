@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { useCreatorApplications } from '../../hooks/useApplications';
@@ -13,6 +14,24 @@ import { Event } from '../../types';
 import { SwipeCard, CardStat } from '../../components/ui/SwipeCard';
 import { HorizontalCardList } from '../../components/ui/HorizontalCardList';
 import { AppHeader } from '../../components/ui/AppHeader';
+import { SkeletonHorizontalList } from '../../components/Skeleton';
+import { OnboardingModal } from '../../components/ui/OnboardingModal';
+
+const ONBOARDING_KEY = 'nexart_onboarding_v1';
+
+async function isOnboardingShown(): Promise<boolean> {
+  try {
+    if (Platform.OS === 'web') return !!localStorage.getItem(ONBOARDING_KEY);
+    return !!(await SecureStore.getItemAsync(ONBOARDING_KEY));
+  } catch { return false; }
+}
+
+async function markOnboardingShown(): Promise<void> {
+  try {
+    if (Platform.OS === 'web') localStorage.setItem(ONBOARDING_KEY, '1');
+    else await SecureStore.setItemAsync(ONBOARDING_KEY, '1');
+  } catch {}
+}
 
 const TYPE_COLORS: Record<string, string> = {
   permanent: '#3B82F6', seasonal: '#F59E0B',
@@ -125,6 +144,18 @@ export default function CreatorHomeScreen() {
   const { events, loading: evLoading } = useEvents({ limit: 5 });
   const { applications, loading: appLoading } = useCreatorApplications(profile?.id);
   const { events: recommended, loading: recLoading } = useEventRecommendations(creatorProfile, 3);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    isOnboardingShown().then(shown => {
+      if (!shown) setShowOnboarding(true);
+    });
+  }, []);
+
+  const handleDismissOnboarding = () => {
+    setShowOnboarding(false);
+    markOnboardingShown();
+  };
 
   const pendingCount  = applications.filter(a => a.status === 'pending').length;
   const acceptedCount = applications.filter(a => a.status === 'accepted').length;
@@ -133,6 +164,7 @@ export default function CreatorHomeScreen() {
   return (
     <View style={s.container}>
       <AppHeader showFavorites={false} />
+      <OnboardingModal visible={showOnboarding} onDismiss={handleDismissOnboarding} />
     <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
       {/* Greeting */}
@@ -186,7 +218,7 @@ export default function CreatorHomeScreen() {
 
       {/* Prochains marchés — swipe cards */}
       {evLoading ? (
-        <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
+        <SkeletonHorizontalList variant="event" count={3} />
       ) : (
         <HorizontalCardList
           title="Prochains marchés"
@@ -206,7 +238,16 @@ export default function CreatorHomeScreen() {
       {/* Candidatures */}
       <SectionTitle>Mes candidatures</SectionTitle>
       {appLoading ? (
-        <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
+        Array.from({ length: 3 }).map((_, i) => (
+          <View key={i} style={[s.appItem, { opacity: 1 - i * 0.25 }]}>
+            <View style={[s.appDot, { backgroundColor: colors.border }]} />
+            <View style={{ flex: 1, gap: 6 }}>
+              <View style={{ height: 13, width: '65%', backgroundColor: colors.surface, borderRadius: 4 }} />
+              <View style={{ height: 11, width: '40%', backgroundColor: colors.surface, borderRadius: 4 }} />
+            </View>
+            <View style={{ height: 24, width: 72, backgroundColor: colors.surface, borderRadius: 12 }} />
+          </View>
+        ))
       ) : applications.length === 0 ? (
         <EmptyState message="Candidatez à vos premiers marchés !" />
       ) : (

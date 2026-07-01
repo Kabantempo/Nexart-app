@@ -1283,7 +1283,7 @@ const pv = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  adminBtnText: { color: colors.primary, fontWeight: '600', ...typography.label },
+  adminBtnText: { ...typography.label, color: colors.primary, fontWeight: '600' },
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1296,7 +1296,7 @@ const pv = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  logoutText: { color: colors.error, fontWeight: '600', ...typography.label },
+  logoutText: { ...typography.label, color: colors.error, fontWeight: '600' },
 
   /* Preview plein écran */
   previewOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
