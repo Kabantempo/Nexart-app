@@ -15,6 +15,28 @@ export interface Profile {
   created_at: string;
 }
 
+export type PageFont = 'default' | 'serif' | 'mono';
+
+export interface PageSettings {
+  bio_font: PageFont;
+  bg_color: string;
+  accent_color: string;
+  bio_color: string;
+  tagline: string | null;
+  music_url: string | null;
+  music_label: string | null;
+}
+
+export const DEFAULT_PAGE_SETTINGS: PageSettings = {
+  bio_font: 'default',
+  bg_color: '#0D0D0D',
+  accent_color: '#6366F1',
+  bio_color: '#F5F3EF',
+  tagline: null,
+  music_url: null,
+  music_label: null,
+};
+
 export interface CreatorProfile {
   id: string;
   user_id: string;
@@ -35,6 +57,7 @@ export interface CreatorProfile {
     weekends: boolean;
     custom: Array<{ from: string; to: string }>;
   };
+  page_settings?: PageSettings | null;
 }
 
 export interface OrganizerProfile {
@@ -179,4 +202,5 @@ export interface PublicCreatorProfile {
   website: string | null;
   siret_verified: boolean;
   insurance_verified: boolean;
+  page_settings?: PageSettings | null;
 }

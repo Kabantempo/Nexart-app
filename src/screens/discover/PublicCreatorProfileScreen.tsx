@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Image, Alert, TextInput, ActivityIndicator, FlatList, Dimensions,
+  Image, Alert, TextInput, ActivityIndicator, FlatList,
+  Dimensions, Animated,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { useAuth } from '../../stores/auth';
 import { usePublicCreatorProfile } from '../../hooks/usePublicCreators';
@@ -15,6 +18,7 @@ import { useVisitorInquiry } from '../../hooks/useVisitorInquiry';
 import { useFollow, useFollowCounts } from '../../hooks/useFollow';
 import { usePosts } from '../../hooks/usePosts';
 import PostCard from '../../components/PostCard';
+import { PageSettings, DEFAULT_PAGE_SETTINGS } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 type Props = {
@@ -29,6 +33,95 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 }
 
+// ─── Music player (floating) ──────────────────────────────────────────────────
+
+function MusicPlayer({ settings }: { settings: PageSettings }) {
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    return () => { soundRef.current?.unloadAsync().catch(() => {}); };
+  }, []);
+
+  useEffect(() => {
+    if (playing) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.12, duration: 700, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+        ]),
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
+    }
+  }, [playing]);
+
+  const toggle = async () => {
+    if (loading) return;
+    if (playing) {
+      await soundRef.current?.pauseAsync();
+      setPlaying(false);
+      return;
+    }
+    if (soundRef.current) {
+      await soundRef.current.playAsync();
+      setPlaying(true);
+      return;
+    }
+    setLoading(true);
+    try {
+      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: settings.music_url! },
+        { shouldPlay: true, volume: 0.7 },
+      );
+      soundRef.current = sound;
+      setPlaying(true);
+      sound.setOnPlaybackStatusUpdate(status => {
+        if ('didJustFinish' in status && status.didJustFinish) setPlaying(false);
+      });
+    } catch {
+      Alert.alert('Audio indisponible', 'Le fichier audio n\'est pas accessible.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!settings.music_url) return null;
+
+  return (
+    <Animated.View style={[mp.container, { borderColor: settings.accent_color + '60', transform: [{ scale: pulseAnim }] }]}>
+      <TouchableOpacity style={[mp.btn, { backgroundColor: settings.accent_color }]} onPress={toggle} activeOpacity={0.85}>
+        {loading
+          ? <ActivityIndicator size="small" color="#fff" />
+          : <Ionicons name={playing ? 'pause' : 'play'} size={16} color="#fff" />}
+      </TouchableOpacity>
+      {settings.music_label && (
+        <Text style={[mp.label, { color: settings.accent_color }]} numberOfLines={1}>{settings.music_label}</Text>
+      )}
+    </Animated.View>
+  );
+}
+
+const mp = StyleSheet.create({
+  container: {
+    position: 'absolute', bottom: 90, right: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.surface + 'EE',
+    borderRadius: radius.full, borderWidth: 1,
+    paddingRight: 10, paddingLeft: 4, paddingVertical: 4,
+    shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 10, elevation: 8,
+    maxWidth: 220,
+  },
+  btn:   { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  label: { ...typography.caption, fontSize: 11, fontWeight: '600', flexShrink: 1 },
+});
+
+// ─── Contact section ──────────────────────────────────────────────────────────
+
 function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId: string }) {
   const { inquiry, loading, saving, send, edit } = useVisitorInquiry(visitorId, creatorId);
   const [text, setText] = useState('');
@@ -36,7 +129,6 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
 
   if (loading) return <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.md }} />;
 
-  // Creator has replied → show full exchange
   if (inquiry?.reply) {
     return (
       <View style={c.box}>
@@ -49,7 +141,6 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
     );
   }
 
-  // Message sent, no reply yet
   if (inquiry && !editing) {
     return (
       <View style={c.box}>
@@ -62,7 +153,6 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
     );
   }
 
-  // Edit mode
   if (editing) {
     const handleEdit = async () => {
       const { error } = await edit(text.trim());
@@ -74,13 +164,14 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
         <Text style={c.label}>Modifier votre message</Text>
         <TextInput style={c.input} value={text} onChangeText={setText} multiline maxLength={500} placeholder="Votre message…" placeholderTextColor={colors.text.secondary} />
         <Text style={c.chars}>{text.length}/500</Text>
-        <View style={c.row}><TouchableOpacity style={c.cancelBtn} onPress={() => setEditing(false)}><Text style={c.cancelText}>Annuler</Text></TouchableOpacity>
-          <TouchableOpacity style={[c.sendBtn, saving && { opacity: 0.6 }]} onPress={handleEdit} disabled={saving}><Text style={c.sendText}>{saving ? 'Envoi…' : 'Modifier'}</Text></TouchableOpacity></View>
+        <View style={c.row}>
+          <TouchableOpacity style={c.cancelBtn} onPress={() => setEditing(false)}><Text style={c.cancelText}>Annuler</Text></TouchableOpacity>
+          <TouchableOpacity style={[c.sendBtn, saving && { opacity: 0.6 }]} onPress={handleEdit} disabled={saving}><Text style={c.sendText}>{saving ? 'Envoi…' : 'Modifier'}</Text></TouchableOpacity>
+        </View>
       </View>
     );
   }
 
-  // No message yet → form
   const handleSend = async () => {
     if (!text.trim()) return;
     const { error } = await send(text.trim());
@@ -101,9 +192,12 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
   );
 }
 
+// ─── Main screen ──────────────────────────────────────────────────────────────
+
 export default function PublicCreatorProfileScreen({ navigation, route }: Props) {
   const { creatorId } = route.params;
   const { profile } = useAuth();
+  const insets = useSafeAreaInsets();
   const { creator, upcomingEvents, loading } = usePublicCreatorProfile(creatorId);
   const { average, count, isTrusted } = useProfileReviews(creatorId);
   const { isFav, toggle } = useFavoriteCreator(profile?.id, creatorId);
@@ -111,6 +205,12 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
   const { posts } = usePosts({ creatorId, limit: 6 });
 
   const [showContact, setShowContact] = useState(false);
+
+  const settings: PageSettings = { ...DEFAULT_PAGE_SETTINGS, ...(creator?.page_settings ?? {}) };
+
+  const bioFont = settings.bio_font === 'serif' ? 'serif'
+    : settings.bio_font === 'mono' ? 'monospace'
+    : undefined;
 
   const handleContact = () => {
     if (!profile) {
@@ -133,159 +233,180 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
   }
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={s.content}>
-      <TouchableOpacity style={s.back} onPress={() => navigation.goBack()}>
-        <Text style={s.backText}>← Retour</Text>
-      </TouchableOpacity>
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={[s.container, { backgroundColor: settings.bg_color }]}
+        contentContainerStyle={[s.content, { paddingBottom: insets.bottom + 100 }]}
+      >
+        <TouchableOpacity style={s.back} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={18} color={settings.bio_color} />
+          <Text style={[s.backText, { color: settings.bio_color + 'AA' }]}>Retour</Text>
+        </TouchableOpacity>
 
-      {/* Header */}
-      <View style={s.header}>
-        <View style={s.avatarWrap}>
-          {creator.avatar_url
-            ? <Image source={{ uri: creator.avatar_url }} style={s.avatarImg} />
-            : <View style={s.avatar}><Text style={s.avatarText}>{creator.full_name[0]?.toUpperCase()}</Text></View>
-          }
-        </View>
-        <View style={{ flex: 1 }}>
-          <View style={s.nameRow}>
-            <Text style={s.name}>{creator.full_name}</Text>
-            {isTrusted && <View style={s.trustBadge}><Text style={s.trustText}>✓ Confiance</Text></View>}
+        {/* Header */}
+        <View style={s.header}>
+          <View style={s.avatarWrap}>
+            {creator.avatar_url
+              ? <Image source={{ uri: creator.avatar_url }} style={s.avatarImg} />
+              : <View style={[s.avatar, { backgroundColor: settings.accent_color + '25' }]}>
+                  <Text style={[s.avatarText, { color: settings.accent_color }]}>{creator.full_name[0]?.toUpperCase()}</Text>
+                </View>
+            }
           </View>
-          {creator.city && <Text style={s.city}>📍 {creator.city}{creator.region ? `, ${creator.region}` : ''}</Text>}
-          {average !== null && <Text style={s.rating}>{'★'.repeat(Math.round(average))} {average}/5 · {count} avis</Text>}
-          <View style={s.badges}>
-            {creator.siret_verified    && <View style={s.badge}><Text style={s.badgeText}>SIRET ✓</Text></View>}
-            {creator.insurance_verified && <View style={s.badge}><Text style={s.badgeText}>Assuré ✓</Text></View>}
+          <View style={{ flex: 1 }}>
+            <View style={s.nameRow}>
+              <Text style={[s.name, { color: settings.bio_color }]}>{creator.full_name}</Text>
+              {isTrusted && (
+                <View style={[s.trustBadge, { backgroundColor: settings.accent_color + '20', borderColor: settings.accent_color + '50' }]}>
+                  <Text style={[s.trustText, { color: settings.accent_color }]}>✓ Confiance</Text>
+                </View>
+              )}
+            </View>
+            {creator.city && <Text style={[s.city, { color: settings.bio_color + '88' }]}>📍 {creator.city}{creator.region ? `, ${creator.region}` : ''}</Text>}
+            {average !== null && <Text style={[s.rating, { color: settings.accent_color }]}>{'★'.repeat(Math.round(average))} {average}/5 · {count} avis</Text>}
+            <View style={s.badges}>
+              {creator.siret_verified    && <View style={[s.badge, { backgroundColor: colors.secondary + '15' }]}><Text style={[s.badgeText, { color: colors.secondary }]}>SIRET ✓</Text></View>}
+              {creator.insurance_verified && <View style={[s.badge, { backgroundColor: colors.secondary + '15' }]}><Text style={[s.badgeText, { color: colors.secondary }]}>Assuré ✓</Text></View>}
+            </View>
           </View>
-        </View>
-        <View style={{ gap: 6, alignItems: 'flex-end' }}>
-          <TouchableOpacity
-            style={[s.followBtn, isFollowing && s.followBtnActive]}
-            onPress={() => profile ? toggleFollow() : Alert.alert('Compte requis', 'Créez un compte pour suivre des créateurs.')}
-          >
-            <Text style={[s.followBtnText, isFollowing && s.followBtnTextActive]}>
-              {isFollowing ? '✓ Suivi' : '+ Suivre'}
-            </Text>
-          </TouchableOpacity>
-          <Text style={s.followersCount}>{followers} abonnés</Text>
-          <TouchableOpacity onPress={profile ? toggle : () => Alert.alert('Compte requis')}>
-            <Text style={[s.favBtn, isFav && s.favBtnActive]}>{isFav ? '♥' : '♡'}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Bio */}
-      {creator.bio && <Text style={s.bio}>{creator.bio}</Text>}
-
-      {/* Disciplines */}
-      <View style={s.tagRow}>
-        {creator.disciplines.map(d => (
-          <View key={d} style={s.tag}><Text style={s.tagText}>{d}</Text></View>
-        ))}
-      </View>
-
-      {/* Links */}
-      {(creator.instagram || creator.website) && (
-        <View style={s.links}>
-          {creator.instagram && <Text style={s.link}>@{creator.instagram}</Text>}
-          {creator.website   && <Text style={s.link}>{creator.website}</Text>}
-        </View>
-      )}
-
-      {/* Portfolio */}
-      {creator.portfolio_images.length > 0 && (
-        <>
-          <Text style={s.section}>Portfolio</Text>
-          <View style={s.grid}>
-            {creator.portfolio_images.map((url, i) => (
-              <Image key={i} source={{ uri: url }} style={s.gridImg} />
-            ))}
-          </View>
-        </>
-      )}
-
-      {/* Upcoming events */}
-      {upcomingEvents.length > 0 && (
-        <>
-          <Text style={s.section}>Prochains marchés</Text>
-          {upcomingEvents.map((e: any) => (
-            <TouchableOpacity key={e.id} style={s.eventRow} onPress={() => navigation.navigate('PublicEventDetail', { eventId: e.id })}>
-              <Text style={s.eventDate}>{formatDate(e.start_date)}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={s.eventTitle} numberOfLines={1}>{e.title}</Text>
-                <Text style={s.eventCity}>{e.city}</Text>
-              </View>
-              <Text style={s.eventArrow}>→</Text>
+          <View style={{ gap: 6, alignItems: 'flex-end' }}>
+            <TouchableOpacity
+              style={[s.followBtn, { borderColor: settings.accent_color }, isFollowing && { backgroundColor: settings.accent_color }]}
+              onPress={() => profile ? toggleFollow() : Alert.alert('Compte requis', 'Créez un compte pour suivre des créateurs.')}
+            >
+              <Text style={[s.followBtnText, { color: isFollowing ? '#fff' : settings.accent_color }]}>
+                {isFollowing ? '✓ Suivi' : '+ Suivre'}
+              </Text>
             </TouchableOpacity>
+            <Text style={[s.followersCount, { color: settings.bio_color + '66' }]}>{followers} abonnés</Text>
+            <TouchableOpacity onPress={profile ? toggle : () => Alert.alert('Compte requis')}>
+              <Text style={[s.favBtn, isFav && { color: colors.error }]}>{isFav ? '♥' : '♡'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Tagline */}
+        {settings.tagline && (
+          <Text style={[s.tagline, { color: settings.accent_color, fontFamily: bioFont }]}>{settings.tagline}</Text>
+        )}
+
+        {/* Bio */}
+        {creator.bio && (
+          <Text style={[s.bio, { color: settings.bio_color + 'CC', fontFamily: bioFont }]}>{creator.bio}</Text>
+        )}
+
+        {/* Disciplines */}
+        <View style={s.tagRow}>
+          {creator.disciplines.map(d => (
+            <View key={d} style={[s.tag, { backgroundColor: settings.accent_color + '20', borderColor: settings.accent_color + '40', borderWidth: 1 }]}>
+              <Text style={[s.tagText, { color: settings.accent_color }]}>{d}</Text>
+            </View>
           ))}
-        </>
-      )}
+        </View>
 
-      {/* Posts récents */}
-      {posts.length > 0 && (
-        <>
-          <Text style={s.section}>Posts récents</Text>
-          {posts.slice(0, 3).map(post => <PostCard key={post.id} post={post} showCreator={false} />)}
-        </>
-      )}
+        {/* Links */}
+        {(creator.instagram || creator.website) && (
+          <View style={s.links}>
+            {creator.instagram && <Text style={[s.link, { color: settings.accent_color }]}>@{creator.instagram}</Text>}
+            {creator.website   && <Text style={[s.link, { color: settings.accent_color }]}>{creator.website}</Text>}
+          </View>
+        )}
 
-      {/* Contact */}
-      <Text style={s.section}>Contacter</Text>
-      {!showContact
-        ? <TouchableOpacity style={s.contactBtn} onPress={handleContact}>
-            <Text style={s.contactBtnText}>✉ Envoyer un message</Text>
-          </TouchableOpacity>
-        : <ContactSection visitorId={profile!.id} creatorId={creatorId} />
-      }
+        {/* Portfolio */}
+        {creator.portfolio_images.length > 0 && (
+          <>
+            <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Portfolio</Text>
+            <View style={s.grid}>
+              {creator.portfolio_images.map((url, i) => (
+                <Image key={i} source={{ uri: url }} style={s.gridImg} />
+              ))}
+            </View>
+          </>
+        )}
 
-      <View style={{ height: spacing.xxl }} />
-    </ScrollView>
+        {/* Upcoming events */}
+        {upcomingEvents.length > 0 && (
+          <>
+            <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Prochains marchés</Text>
+            {upcomingEvents.map((e: any) => (
+              <TouchableOpacity key={e.id} style={[s.eventRow, { backgroundColor: settings.accent_color + '10', borderColor: settings.accent_color + '25' }]} onPress={() => navigation.navigate('PublicEventDetail', { eventId: e.id })}>
+                <Text style={[s.eventDate, { color: settings.accent_color }]}>{formatDate(e.start_date)}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[s.eventTitle, { color: settings.bio_color }]} numberOfLines={1}>{e.title}</Text>
+                  <Text style={[s.eventCity, { color: settings.bio_color + '77' }]}>{e.city}</Text>
+                </View>
+                <Text style={{ color: settings.bio_color + '77' }}>→</Text>
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
+
+        {/* Posts récents */}
+        {posts.length > 0 && (
+          <>
+            <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Posts récents</Text>
+            {posts.slice(0, 3).map(post => <PostCard key={post.id} post={post} showCreator={false} />)}
+          </>
+        )}
+
+        {/* Contact */}
+        <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Contacter</Text>
+        {!showContact
+          ? <TouchableOpacity style={[s.contactBtn, { backgroundColor: settings.accent_color }]} onPress={handleContact}>
+              <Text style={s.contactBtnText}>✉ Envoyer un message</Text>
+            </TouchableOpacity>
+          : <ContactSection visitorId={profile!.id} creatorId={creatorId} />
+        }
+      </ScrollView>
+
+      {/* Floating music player */}
+      {settings.music_url && <MusicPlayer settings={settings} />}
+    </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1 },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  back:      { marginBottom: spacing.lg },
-  backText:  { color: colors.text.secondary },
+  back:      { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.lg },
+  backText:  { ...typography.caption },
   header:    { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg, alignItems: 'flex-start' },
   avatarWrap:{ position: 'relative' },
-  avatar:    { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.primary + '25', alignItems: 'center', justifyContent: 'center' },
+  avatar:    { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   avatarImg: { width: 72, height: 72, borderRadius: 36 },
-  avatarText:{ ...typography.h1, color: colors.primary },
+  avatarText:{ ...typography.h1 },
   nameRow:   { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
-  name:      { ...typography.h3, color: colors.text.primary, fontWeight: '700' },
-  trustBadge:{ backgroundColor: colors.secondary + '20', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 2, borderWidth: 1, borderColor: colors.secondary + '50' },
-  trustText: { ...typography.caption, color: colors.secondary, fontWeight: '700', fontSize: 10 },
-  city:      { ...typography.caption, color: colors.text.secondary, marginTop: 2 },
-  rating:    { ...typography.caption, color: colors.primary, marginTop: 2 },
+  name:      { ...typography.h3, fontWeight: '700' },
+  trustBadge:{ borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 2, borderWidth: 1 },
+  trustText: { ...typography.caption, fontWeight: '700', fontSize: 10 },
+  city:      { ...typography.caption, marginTop: 2 },
+  rating:    { ...typography.caption, marginTop: 2 },
   badges:    { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xs },
-  badge:     { backgroundColor: colors.secondary + '15', borderRadius: radius.sm, paddingHorizontal: spacing.xs, paddingVertical: 2 },
-  badgeText: { ...typography.caption, color: colors.secondary, fontSize: 10, fontWeight: '600' },
-  followBtn: { borderWidth: 1, borderColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 6 },
-  followBtnActive: { backgroundColor: colors.primary },
-  followBtnText: { ...typography.caption, color: colors.primary, fontWeight: '700' },
-  followBtnTextActive: { color: colors.text.inverse },
-  followersCount: { ...typography.caption, color: colors.text.secondary },
-  favBtn:    { fontSize: 24, color: colors.border },
-  favBtnActive: { color: colors.error },
-  bio:       { ...typography.body, color: colors.text.secondary, lineHeight: 22, marginBottom: spacing.md },
+  badge:     { borderRadius: radius.sm, paddingHorizontal: spacing.xs, paddingVertical: 2 },
+  badgeText: { ...typography.caption, fontSize: 10, fontWeight: '600' },
+  followBtn: { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: 6 },
+  followBtnText: { ...typography.caption, fontWeight: '700' },
+  followersCount: { ...typography.caption },
+  favBtn:    { fontSize: 24, color: '#555' },
+  tagline:   { ...typography.label, fontStyle: 'italic', marginBottom: spacing.sm, textAlign: 'center' },
+  bio:       { ...typography.body, lineHeight: 22, marginBottom: spacing.md },
   tagRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: spacing.md },
-  tag:       { backgroundColor: colors.primary + '15', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 4 },
-  tagText:   { ...typography.caption, color: colors.primary, fontWeight: '600' },
+  tag:       { borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 4 },
+  tagText:   { ...typography.caption, fontWeight: '600' },
   links:     { flexDirection: 'row', gap: spacing.lg, marginBottom: spacing.xl },
-  link:      { ...typography.caption, color: colors.primary },
-  section:   { ...typography.label, color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: 1, marginBottom: spacing.md, marginTop: spacing.xl, borderBottomWidth: 1, borderColor: colors.border, paddingBottom: spacing.xs },
+  link:      { ...typography.caption },
+  section:   { ...typography.label, textTransform: 'uppercase', letterSpacing: 1, marginBottom: spacing.md, marginTop: spacing.xl, borderBottomWidth: 1, paddingBottom: spacing.xs },
   grid:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: spacing.sm },
   gridImg:   { width: IMG, height: IMG, borderRadius: radius.sm, backgroundColor: colors.surface },
-  eventRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
-  eventDate: { ...typography.label, color: colors.primary, width: 50 },
-  eventTitle:{ ...typography.label, color: colors.text.primary },
-  eventCity: { ...typography.caption, color: colors.text.secondary },
-  eventArrow:{ color: colors.text.secondary },
-  contactBtn:{ backgroundColor: colors.primary, borderRadius: radius.md, padding: spacing.md, alignItems: 'center' },
-  contactBtnText: { ...typography.label, color: colors.text.inverse, fontWeight: '700', fontSize: 15 },
+  eventRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1 },
+  eventDate: { ...typography.label, width: 50 },
+  eventTitle:{ ...typography.label },
+  eventCity: { ...typography.caption },
+  contactBtn:{ borderRadius: radius.md, padding: spacing.md, alignItems: 'center' },
+  contactBtnText: { ...typography.label, color: '#fff', fontWeight: '700', fontSize: 15 },
 });
 
 const c = StyleSheet.create({

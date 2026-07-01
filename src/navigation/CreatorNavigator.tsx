@@ -8,7 +8,7 @@ import FeedStack           from './FeedStack';
 import MarketStack         from './MarketStack';
 import ApplicationsStack   from './ApplicationsStack';
 import MessageStack        from './MessageStack';
-import ProfileScreen       from '../screens/shared/ProfileScreen';
+import ProfileStack        from './ProfileStack';
 import DiscoverStack       from './DiscoverStack';
 
 const Tab = createBottomTabNavigator();
@@ -24,7 +24,7 @@ const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; hidden?:
   { name: 'Découvrir',    icon: 'compass-outline',       iconActive: 'compass', hidden: true },
 ];
 
-const SCREENS = [FeedStack, MarketStack, ApplicationsStack, MessageStack, ProfileScreen, DiscoverStack];
+const SCREENS = [FeedStack, MarketStack, ApplicationsStack, MessageStack, ProfileStack, DiscoverStack];
 
 export default function CreatorNavigator() {
   return (

@@ -1114,6 +1114,10 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
           <Ionicons name="create-outline" size={15} color={colors.text.primary} />
           <Text style={pv.btnEditText}>Modifier le profil</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={pv.btnCustomize} onPress={() => navigation.navigate('PageCustomization')} activeOpacity={0.85}>
+          <Ionicons name="color-palette-outline" size={15} color={colors.primary} />
+          <Text style={pv.btnCustomizeText}>Ma page</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={pv.btnIconOnly} activeOpacity={0.85}>
           <Ionicons name="share-outline" size={17} color={colors.text.secondary} />
         </TouchableOpacity>
@@ -1376,6 +1380,13 @@ const pv = StyleSheet.create({
     borderColor: colors.border,
   },
   btnEditText: { ...typography.label, color: colors.text.primary, fontWeight: '600' },
+  btnCustomize: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
+    height: 42, borderRadius: radius.md, paddingHorizontal: spacing.md,
+    backgroundColor: colors.primary + '12',
+    borderWidth: 1, borderColor: colors.primary + '40',
+  },
+  btnCustomizeText: { ...typography.label, color: colors.primary, fontWeight: '600' },
   btnIconOnly: {
     width: 42,
     height: 42,

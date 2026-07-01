@@ -83,7 +83,7 @@ export function usePublicCreatorProfile(creatorId: string | undefined) {
         id, full_name, avatar_url, bio,
         creator_profile:creator_profiles(
           disciplines, city, region, portfolio_images,
-          instagram, website, siret_verified, insurance_verified
+          instagram, website, siret_verified, insurance_verified, page_settings
         )
       `).eq('id', creatorId).single(),
 
@@ -104,6 +104,7 @@ export function usePublicCreatorProfile(creatorId: string | undefined) {
           portfolio_images: profile?.portfolio_images ?? [], instagram: profile?.instagram ?? null,
           website: profile?.website ?? null, siret_verified: profile?.siret_verified ?? false,
           insurance_verified: profile?.insurance_verified ?? false,
+          page_settings: profile?.page_settings ?? null,
         });
       }
       setUpcoming((apps ?? []).map((a: any) => a.event).filter(Boolean));
