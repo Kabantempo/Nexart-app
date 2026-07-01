@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, Platform,
 } from 'react-native';
@@ -36,42 +36,51 @@ interface Props {
 
 export function OnboardingModal({ visible, onDismiss }: Props) {
   const [step, setStep] = useState(0);
+  const stepRef        = useRef(step);
   const lastScrollTime = useRef(0);
+  stepRef.current = step;
 
   const slide  = SLIDES[step];
   const isLast = step === SLIDES.length - 1;
 
-  const handleNext = () => {
-    if (isLast) { onDismiss(); setStep(0); }
+  const handleNext = useCallback(() => {
+    if (stepRef.current >= SLIDES.length - 1) { onDismiss(); setStep(0); }
     else setStep(s => s + 1);
-  };
+  }, [onDismiss]);
 
-  const handlePrev = () => setStep(s => Math.max(0, s - 1));
+  const handlePrev = useCallback(() => {
+    setStep(s => Math.max(0, s - 1));
+  }, []);
 
-  const handleSkip = () => { onDismiss(); setStep(0); };
+  const handleSkip = useCallback(() => { onDismiss(); setStep(0); }, [onDismiss]);
 
-  // Scroll molette / trackpad sur web
+  // Molette + flèches clavier — attachés sur document pour passer à travers la Modal
   useEffect(() => {
     if (Platform.OS !== 'web' || !visible) return;
+
     const onWheel = (e: WheelEvent) => {
       const now = Date.now();
-      if (now - lastScrollTime.current < 400) return; // debounce
+      if (now - lastScrollTime.current < 350) return;
       lastScrollTime.current = now;
-      if (e.deltaY > 0 || e.deltaX > 0) handleNext();
-      else if (e.deltaY < 0 || e.deltaX < 0) handlePrev();
+      if (e.deltaY > 10 || e.deltaX > 10) handleNext();
+      else if (e.deltaY < -10 || e.deltaX < -10) handlePrev();
     };
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') handleNext();
       else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') handlePrev();
       else if (e.key === 'Escape') handleSkip();
+      else if (e.key === 'Enter' || e.key === ' ') handleNext();
     };
-    window.addEventListener('wheel', onWheel, { passive: true });
-    window.addEventListener('keydown', onKey);
+
+    // document capture pour passer au dessus de la Modal RN Web
+    document.addEventListener('wheel', onWheel, { passive: true, capture: true });
+    document.addEventListener('keydown', onKey, { capture: true });
     return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('wheel', onWheel, { capture: true } as any);
+      document.removeEventListener('keydown', onKey, { capture: true } as any);
     };
-  }, [visible, step]);
+  }, [visible, handleNext, handlePrev, handleSkip]);
 
   return (
     <Modal visible={visible} animationType="fade" transparent statusBarTranslucent>
@@ -89,23 +98,48 @@ export function OnboardingModal({ visible, onDismiss }: Props) {
           {/* Dots progression */}
           <View style={s.dotsRow}>
             {SLIDES.map((_, i) => (
-              <View key={i} style={[s.dot, i === step && { ...s.dotActive, backgroundColor: slide.color }]} />
+              <TouchableOpacity key={i} onPress={() => setStep(i)}>
+                <View style={[s.dot, i === step && { ...s.dotActive, backgroundColor: slide.color }]} />
+              </TouchableOpacity>
             ))}
           </View>
 
-          {/* CTA */}
-          <TouchableOpacity
-            style={[s.btn, { backgroundColor: slide.color }]}
-            onPress={handleNext}
-            activeOpacity={0.85}
-          >
-            <Text style={s.btnText}>{slide.action}</Text>
-          </TouchableOpacity>
+          {/* Navigation flèches (web) */}
+          {Platform.OS === 'web' && (
+            <View style={s.arrowRow}>
+              <TouchableOpacity style={[s.arrowBtn, step === 0 && { opacity: 0.3 }]} onPress={handlePrev} disabled={step === 0}>
+                <Ionicons name="chevron-back" size={18} color={colors.text.secondary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.btn, { backgroundColor: slide.color, flex: 1 }]}
+                onPress={handleNext}
+                activeOpacity={0.85}
+              >
+                <Text style={s.btnText}>{slide.action}</Text>
+              </TouchableOpacity>
+              <View style={{ width: 40 }} />
+            </View>
+          )}
+
+          {/* CTA mobile */}
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              style={[s.btn, { backgroundColor: slide.color }]}
+              onPress={handleNext}
+              activeOpacity={0.85}
+            >
+              <Text style={s.btnText}>{slide.action}</Text>
+            </TouchableOpacity>
+          )}
 
           {!isLast && (
             <TouchableOpacity onPress={handleSkip} style={s.skipBtn}>
               <Text style={s.skipText}>Passer</Text>
             </TouchableOpacity>
+          )}
+
+          {Platform.OS === 'web' && (
+            <Text style={s.hint}>Molette ou flèches ← → pour naviguer</Text>
           )}
         </View>
       </View>
@@ -168,6 +202,22 @@ const s = StyleSheet.create({
     width: 20,
     borderRadius: 3,
   },
+  arrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    width: '100%',
+    marginBottom: spacing.sm,
+  },
+  arrowBtn: {
+    width: 40,
+    height: 48,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   btn: {
     width: '100%',
     paddingVertical: 14,
@@ -188,5 +238,11 @@ const s = StyleSheet.create({
   skipText: {
     ...typography.caption,
     color: colors.text.secondary,
+  },
+  hint: {
+    ...typography.caption,
+    color: colors.text.secondary + '66',
+    marginTop: spacing.xs,
+    fontSize: 11,
   },
 });
