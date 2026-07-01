@@ -80,7 +80,7 @@ export function usePublicCreatorProfile(creatorId: string | undefined) {
     if (!creatorId) return;
     Promise.all([
       supabase.from('profiles').select(`
-        id, full_name, avatar_url, bio,
+        id, full_name, avatar_url, bio, created_at,
         creator_profile:creator_profiles(
           disciplines, city, region, portfolio_images,
           instagram, website, siret_verified, insurance_verified, page_settings
@@ -105,6 +105,7 @@ export function usePublicCreatorProfile(creatorId: string | undefined) {
           website: profile?.website ?? null, siret_verified: profile?.siret_verified ?? false,
           insurance_verified: profile?.insurance_verified ?? false,
           page_settings: profile?.page_settings ?? null,
+          created_at: (p as any).created_at ?? null,
         });
       }
       setUpcoming((apps ?? []).map((a: any) => a.event).filter(Boolean));

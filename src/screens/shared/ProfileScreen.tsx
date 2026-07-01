@@ -936,6 +936,25 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
 
   const portfolioImages = creatorProfile?.portfolio_images ?? [];
 
+  // Barre de progression (#3)
+  const progressSteps = [
+    { done: !!profile?.bio?.trim(), label: 'Bio' },
+    { done: (creatorProfile?.disciplines?.length ?? 0) > 0, label: 'Disciplines' },
+    { done: !!creatorProfile?.city, label: 'Localisation' },
+    { done: portfolioImages.length >= 3, label: '3+ photos' },
+    { done: !!(creatorProfile?.instagram || creatorProfile?.website || creatorProfile?.etsy), label: 'Liens' },
+    { done: !!(creatorProfile?.availability?.weekends || (creatorProfile?.availability?.custom?.length ?? 0) > 0), label: 'Disponibilités' },
+  ];
+  const progressPct = Math.round((progressSteps.filter(p => p.done).length / progressSteps.length) * 100);
+  const showProgress = progressPct < 100;
+
+  // Mode "Disponible maintenant" (#9)
+  const isAvailableNow = (creatorProfile?.availability as any)?.available_now === true;
+  const toggleAvailableNow = () => {
+    const current = creatorProfile?.availability ?? { weekends: false, custom: [] };
+    upsert({ availability: { ...current, available_now: !isAvailableNow } });
+  };
+
   const addPhoto = async () => {
     if (portfolioImages.length >= 20) { Alert.alert('Maximum atteint', '20 photos max.'); return; }
     if (Platform.OS !== 'web') {
@@ -1021,6 +1040,42 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
           </View>
         ) : null}
       </View>
+
+      {/* ── Barre de progression profil (#3) ── */}
+      {showProgress && (
+        <View style={pv.progressWrap}>
+          <View style={pv.progressHeader}>
+            <Text style={pv.progressLabel}>Profil complété à {progressPct}%</Text>
+            <Text style={pv.progressHint}>
+              {progressSteps.find(p => !p.done)?.label} manquant
+            </Text>
+          </View>
+          <View style={pv.progressBar}>
+            <View style={[pv.progressFill, { width: `${progressPct}%` as any }]} />
+          </View>
+          <View style={pv.progressSteps}>
+            {progressSteps.map(p => (
+              <View key={p.label} style={pv.progressStep}>
+                <Ionicons name={p.done ? 'checkmark-circle' : 'ellipse-outline'} size={13} color={p.done ? colors.secondary : colors.border} />
+                <Text style={[pv.progressStepText, p.done && pv.progressStepDone]}>{p.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* ── Mode dispo maintenant (#9) ── */}
+      <TouchableOpacity
+        style={[pv.dispoNow, isAvailableNow && pv.dispoNowActive]}
+        onPress={toggleAvailableNow}
+        activeOpacity={0.8}
+      >
+        <View style={[pv.dispoNowDot, { backgroundColor: isAvailableNow ? colors.secondary : colors.border }]} />
+        <Text style={[pv.dispoNowText, isAvailableNow && { color: colors.secondary }]}>
+          {isAvailableNow ? 'Disponible maintenant' : 'Marquer comme disponible'}
+        </Text>
+        <Ionicons name={isAvailableNow ? 'toggle' : 'toggle-outline'} size={22} color={isAvailableNow ? colors.secondary : colors.text.secondary} />
+      </TouchableOpacity>
 
       {/* ── Métriques — 3 tuiles horizontales ── */}
       <View style={pv.metricsRow}>
@@ -1387,6 +1442,34 @@ const pv = StyleSheet.create({
     borderWidth: 1, borderColor: colors.primary + '40',
   },
   btnCustomizeText: { ...typography.label, color: colors.primary, fontWeight: '600' },
+
+  /* Barre de progression */
+  progressWrap: {
+    marginHorizontal: spacing.xl, marginBottom: spacing.md,
+    backgroundColor: colors.surface, borderRadius: radius.lg,
+    padding: spacing.md, borderWidth: 1, borderColor: colors.border,
+  },
+  progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
+  progressLabel:  { ...typography.label, color: colors.text.primary, fontWeight: '700' },
+  progressHint:   { ...typography.caption, color: colors.text.secondary },
+  progressBar:    { height: 6, borderRadius: 3, backgroundColor: colors.border, marginBottom: spacing.sm, overflow: 'hidden' },
+  progressFill:   { height: 6, borderRadius: 3, backgroundColor: colors.secondary },
+  progressSteps:  { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  progressStep:   { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  progressStepText: { ...typography.caption, color: colors.text.secondary, fontSize: 10 },
+  progressStepDone: { color: colors.secondary },
+
+  /* Dispo maintenant */
+  dispoNow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    marginHorizontal: spacing.xl, marginBottom: spacing.md,
+    padding: spacing.md, borderRadius: radius.md,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  },
+  dispoNowActive: { borderColor: colors.secondary + '50', backgroundColor: colors.secondary + '08' },
+  dispoNowDot:    { width: 8, height: 8, borderRadius: 4 },
+  dispoNowText:   { ...typography.label, color: colors.text.secondary, flex: 1 },
+
   btnIconOnly: {
     width: 42,
     height: 42,

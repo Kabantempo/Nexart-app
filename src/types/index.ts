@@ -56,6 +56,7 @@ export interface CreatorProfile {
   availability: {
     weekends: boolean;
     custom: Array<{ from: string; to: string }>;
+    available_now?: boolean;
   };
   page_settings?: PageSettings | null;
 }
@@ -203,4 +204,5 @@ export interface PublicCreatorProfile {
   siret_verified: boolean;
   insurance_verified: boolean;
   page_settings?: PageSettings | null;
+  created_at?: string | null;
 }

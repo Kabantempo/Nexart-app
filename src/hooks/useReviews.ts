@@ -28,6 +28,29 @@ export function useProfileReviews(userId: string | undefined) {
   return { reviews, loading, average, count: reviews.length, isTrusted, refetch: fetch };
 }
 
+export function useEventReviews(eventId: string | undefined) {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!eventId) { setLoading(false); return; }
+    supabase
+      .from('reviews')
+      .select('*')
+      .eq('event_id', eventId)
+      .eq('reviewer_role', 'creator')
+      .order('created_at', { ascending: false })
+      .limit(10)
+      .then(({ data }) => { setReviews((data as Review[]) ?? []); setLoading(false); });
+  }, [eventId]);
+
+  const average = reviews.length
+    ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
+    : null;
+
+  return { reviews, average, count: reviews.length, loading };
+}
+
 export function useHasReviewed(eventId: string, reviewerId: string | undefined) {
   const [hasReviewed, setHasReviewed] = useState<boolean | null>(null);
 

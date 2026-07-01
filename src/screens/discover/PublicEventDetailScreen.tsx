@@ -7,6 +7,7 @@ import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { useAuth } from '../../stores/auth';
 import { useEvent } from '../../hooks/useEvent';
 import { useFavoriteEvent } from '../../hooks/useFavorites';
+import { useEventReviews } from '../../hooks/useReviews';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
@@ -29,6 +30,7 @@ export default function PublicEventDetailScreen({ navigation, route }: Props) {
   const { profile }  = useAuth();
   const { event, loading } = useEvent(eventId);
   const { isFav, toggle } = useFavoriteEvent(profile?.id, eventId);
+  const { reviews, average, count } = useEventReviews(eventId);
 
   const handleFav = () => {
     if (!profile) {
@@ -97,6 +99,29 @@ export default function PublicEventDetailScreen({ navigation, route }: Props) {
         <Text style={s.field}>{orgName}</Text>
       </View>
 
+      {/* Avis artisans */}
+      {reviews.length > 0 && (
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>
+            Avis des artisans · {average}/5 ({count})
+          </Text>
+          {reviews.slice(0, 5).map(r => (
+            <View key={r.id} style={s.reviewCard}>
+              <View style={s.reviewHeader}>
+                <Text style={s.reviewStars}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</Text>
+                <Text style={s.reviewDate}>{new Date(r.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}</Text>
+              </View>
+              {r.tags.length > 0 && (
+                <View style={s.tagRow}>
+                  {r.tags.map(t => <View key={t} style={s.tag}><Text style={s.tagText}>{t}</Text></View>)}
+                </View>
+              )}
+              {r.comment && <Text style={s.reviewComment}>{r.comment}</Text>}
+            </View>
+          ))}
+        </View>
+      )}
+
       <View style={s.infoBanner}>
         <Text style={s.infoBannerText}>
           Vous êtes artisan et souhaitez participer ? Créez un compte créateur pour candidater.
@@ -127,6 +152,11 @@ const s = StyleSheet.create({
   tagRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   tag:       { borderWidth: 1, borderColor: colors.primary + '60', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   tagText:   { ...typography.caption, color: colors.primary },
+  reviewCard:    { backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
+  reviewHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  reviewStars:   { color: '#F59E0B', fontSize: 13, letterSpacing: 2 },
+  reviewDate:    { ...typography.caption, color: colors.text.secondary },
+  reviewComment: { ...typography.caption, color: colors.text.primary, lineHeight: 18, marginTop: 4 },
   infoBanner:{ backgroundColor: colors.secondary + '15', borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.secondary + '40', marginTop: spacing.xl },
   infoBannerText: { ...typography.body, color: colors.text.primary, marginBottom: spacing.md },
   infoBtn:   { alignSelf: 'flex-start', backgroundColor: colors.secondary, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },

@@ -74,6 +74,15 @@ export default function ConversationScreen({ navigation, route }: Props) {
     await sendMessage(content, otherPartyId);
   };
 
+  const QUICK_REPLIES = [
+    'Bonjour, merci pour votre message !',
+    'Je reviens vers vous rapidement.',
+    'Votre profil est très intéressant !',
+    'Pouvez-vous me donner plus de détails ?',
+    'Je vous confirme votre place.',
+    'Merci, à bientôt sur le marché !',
+  ];
+
   const withDayHeaders: Array<Message | { type: 'day'; label: string; id: string }> = [];
   let lastDay = '';
   for (const msg of messages) {
@@ -138,6 +147,24 @@ export default function ConversationScreen({ navigation, route }: Props) {
             </View>
           }
         />
+      )}
+
+      {/* Réponses rapides */}
+      {messages.length === 0 && (
+        <View>
+          <FlatList
+            horizontal
+            data={QUICK_REPLIES}
+            keyExtractor={i => i}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={s.quickList}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={s.quickChip} onPress={() => setText(item)} activeOpacity={0.7}>
+                <Text style={s.quickChipText} numberOfLines={1}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       )}
 
       {/* Input */}
@@ -233,4 +260,12 @@ const s = StyleSheet.create({
   },
   sendBtnDisabled: { backgroundColor: colors.border, shadowOpacity: 0 },
   sendIcon:        { ...typography.h3, color: colors.text.inverse, lineHeight: 24 },
+
+  quickList:    { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, gap: spacing.xs },
+  quickChip: {
+    borderRadius: radius.full, borderWidth: 1, borderColor: colors.primary + '40',
+    backgroundColor: colors.primary + '10', paddingHorizontal: spacing.md, paddingVertical: 7,
+    maxWidth: 220,
+  },
+  quickChipText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
 });

@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Image, Alert, TextInput, ActivityIndicator, FlatList,
-  Dimensions, Animated,
+  Dimensions, Animated, Modal,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -205,8 +205,13 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
   const { posts } = usePosts({ creatorId, limit: 6 });
 
   const [showContact, setShowContact] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   const settings: PageSettings = { ...DEFAULT_PAGE_SETTINGS, ...(creator?.page_settings ?? {}) };
+
+  const isNew = creator?.created_at
+    ? (Date.now() - new Date(creator.created_at).getTime()) < 30 * 24 * 60 * 60 * 1000
+    : false;
 
   const bioFont = settings.bio_font === 'serif' ? 'serif'
     : settings.bio_font === 'mono' ? 'monospace'
@@ -234,6 +239,16 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Lightbox galerie plein écran */}
+      <Modal visible={!!lightboxImg} transparent animationType="fade" onRequestClose={() => setLightboxImg(null)}>
+        <TouchableOpacity style={lb.overlay} onPress={() => setLightboxImg(null)} activeOpacity={1}>
+          {lightboxImg && <Image source={{ uri: lightboxImg }} style={lb.img} resizeMode="contain" />}
+          <TouchableOpacity style={lb.closeBtn} onPress={() => setLightboxImg(null)}>
+            <Ionicons name="close" size={22} color="#fff" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       <ScrollView
         style={[s.container, { backgroundColor: settings.bg_color }]}
         contentContainerStyle={[s.content, { paddingBottom: insets.bottom + 100 }]}
@@ -259,6 +274,11 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
               {isTrusted && (
                 <View style={[s.trustBadge, { backgroundColor: settings.accent_color + '20', borderColor: settings.accent_color + '50' }]}>
                   <Text style={[s.trustText, { color: settings.accent_color }]}>✓ Confiance</Text>
+                </View>
+              )}
+              {isNew && (
+                <View style={[s.trustBadge, { backgroundColor: '#F59E0B20', borderColor: '#F59E0B50' }]}>
+                  <Text style={[s.trustText, { color: '#F59E0B' }]}>✦ Nouveau</Text>
                 </View>
               )}
             </View>
@@ -318,7 +338,9 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
             <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Portfolio</Text>
             <View style={s.grid}>
               {creator.portfolio_images.map((url, i) => (
-                <Image key={i} source={{ uri: url }} style={s.gridImg} />
+                <TouchableOpacity key={i} onPress={() => setLightboxImg(url)} activeOpacity={0.85}>
+                  <Image source={{ uri: url }} style={s.gridImg} />
+                </TouchableOpacity>
               ))}
             </View>
           </>
@@ -407,6 +429,12 @@ const s = StyleSheet.create({
   eventCity: { ...typography.caption },
   contactBtn:{ borderRadius: radius.md, padding: spacing.md, alignItems: 'center' },
   contactBtnText: { ...typography.label, color: '#fff', fontWeight: '700', fontSize: 15 },
+});
+
+const lb = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
+  img:     { width: W, height: W * 1.3 },
+  closeBtn:{ position: 'absolute', top: 52, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
 });
 
 const c = StyleSheet.create({
