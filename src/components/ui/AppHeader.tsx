@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  View, TouchableOpacity, StyleSheet, Image,
+  View, TouchableOpacity, StyleSheet, Image, Text,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
-import { colors, spacing, radius } from '../../constants/theme';
+import { colors, spacing, radius, typography } from '../../constants/theme';
 
 interface AppHeaderProps {
   showFavorites?: boolean;
@@ -19,20 +19,27 @@ export function AppHeader({
   showCreate    = false,
   onCreatePress,
 }: AppHeaderProps) {
-  const insets       = useSafeAreaInsets();
-  const nav          = useNavigation<any>();
-  const { profile }  = useAuth();
+  const insets              = useSafeAreaInsets();
+  const nav                 = useNavigation<any>();
+  const { profile, session } = useAuth();
+  const isAuth              = !!session || !!profile;
 
-  const goToFavorites = () => nav.navigate('Favoris');
-  const goToProfile   = () => nav.navigate('Profil');
+  const goToFavorites = () => { if (isAuth) nav.navigate('Favoris'); };
+  const goToProfile   = () => {
+    if (!isAuth) { nav.navigate('Auth'); return; }
+    nav.navigate('Profil');
+  };
 
   return (
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>
-      {/* Espace gauche (équilibre visuel) */}
-      <View style={s.side} />
+      {/* Logo gauche */}
+      <View style={s.logo}>
+        <Image source={require('../../assets/nexart-icon.png')} style={s.logoImg} />
+        <Text style={s.logoText}>Nexart</Text>
+      </View>
 
       {/* Actions droite */}
-      <View style={[s.side, s.actions]}>
+      <View style={s.actions}>
         {showCreate && (
           <TouchableOpacity style={s.iconCircle} onPress={onCreatePress} activeOpacity={0.8}>
             <Ionicons name="add" size={20} color={colors.primary} />
@@ -64,14 +71,29 @@ const s = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.md,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderColor: colors.border,
   },
-  side:    { flex: 1 },
+  logo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  logoImg: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.primary,
+    ...typography.h3,
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',

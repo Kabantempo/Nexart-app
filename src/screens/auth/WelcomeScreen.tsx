@@ -7,6 +7,7 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useAuth } from '../../stores/auth';
@@ -69,7 +70,7 @@ export default function WelcomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('Login')}
             activeOpacity={0.85}
           >
-            <Text style={s.btnPrimaryIcon}>✉</Text>
+            <Ionicons name="mail-outline" size={18} color={colors.text.inverse} />
             <Text style={s.btnPrimaryText}>Se connecter par email</Text>
           </TouchableOpacity>
 

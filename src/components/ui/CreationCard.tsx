@@ -18,11 +18,11 @@ const POST_TYPE_COLORS: Record<string, string> = {
 };
 
 const POST_TYPE_LABELS: Record<string, string> = {
-  guest_appearance: '🎪 Guest',
-  call_for_collab:  '🤝 Collab',
-  tip:              '💡 Conseil',
-  experience:       '✨ Expérience',
-  general:          '🎨 Création',
+  guest_appearance: 'Guest',
+  call_for_collab:  'Collab',
+  tip:              'Conseil',
+  experience:       'Expérience',
+  general:          'Création',
 };
 
 export function CreationCard({ post }: { post: Post }) {
@@ -37,7 +37,7 @@ export function CreationCard({ post }: { post: Post }) {
   const creator    = post.creator as any;
   const cover      = post.images?.[0] ?? null;
   const typeColor  = POST_TYPE_COLORS[post.post_type] ?? colors.text.secondary;
-  const typeLabel  = POST_TYPE_LABELS[post.post_type] ?? '🎨 Création';
+  const typeLabel  = POST_TYPE_LABELS[post.post_type] ?? 'Création';
 
   const shortText = post.content
     .split('\n')[0]
@@ -105,7 +105,10 @@ export function CreationCard({ post }: { post: Post }) {
 
           {/* Sous-titre = localisation ou event_ref */}
           {locationStr ? (
-            <Text style={s.subtitle} numberOfLines={1}>📍 {locationStr}</Text>
+            <View style={s.locationRow}>
+              <Ionicons name="location-outline" size={11} color={colors.text.secondary} />
+              <Text style={s.subtitle} numberOfLines={1}>{locationStr}</Text>
+            </View>
           ) : null}
 
           {/* Extrait du texte (remplace la zone prix de MarketCard) */}
@@ -127,10 +130,10 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 12,
+    elevation: 6,
   },
 
   imageWrap:        { width: '100%', position: 'relative' },
@@ -174,6 +177,7 @@ const s = StyleSheet.create({
   },
 
   title:    { ...typography.label, color: colors.text.primary, fontWeight: '700', flex: 1, lineHeight: 18 },
-  subtitle: { ...typography.caption, color: colors.text.secondary, marginBottom: 4 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 4 },
+  subtitle: { ...typography.caption, color: colors.text.secondary },
   caption:  { ...typography.caption, color: colors.text.secondary, lineHeight: 15, fontSize: 11 },
 });

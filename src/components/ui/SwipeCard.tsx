@@ -1,9 +1,10 @@
 import React from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Image, useWindowDimensions, ScrollView,
+  Image, useWindowDimensions, ScrollView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 export interface CardStat {
@@ -35,10 +36,15 @@ export function SwipeCard({
   const cover     = validImgs[0] ?? null;
   const thumbs    = validImgs.slice(1, 3);
 
+  const handlePress = () => {
+    if (Platform.OS === 'ios') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  };
+
   return (
     <TouchableOpacity
       style={[s.card, { width: cardWidth, borderColor: accentColor + '25' }]}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.92}
     >
       {/* ── Cover image ── */}

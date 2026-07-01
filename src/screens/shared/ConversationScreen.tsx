@@ -90,7 +90,7 @@ export default function ConversationScreen({ navigation, route }: Props) {
       {/* Header */}
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={s.backText}>←</Text>
+          <Ionicons name="chevron-back" size={22} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={s.headerAvatar}>
           <Text style={s.headerAvatarText}>{otherPartyName[0]?.toUpperCase() ?? '?'}</Text>
@@ -131,7 +131,7 @@ export default function ConversationScreen({ navigation, route }: Props) {
           ListEmptyComponent={
             <View style={s.emptyChat}>
               <View style={s.emptyChatIcon}>
-                <Text style={s.emptyChatIconText}>✦</Text>
+                <Ionicons name="chatbubble-ellipses-outline" size={28} color={colors.text.secondary} />
               </View>
               <Text style={s.emptyChatText}>Démarrez la conversation</Text>
               <Text style={s.emptyChatSub}>Partagez les détails de votre stand, posez vos questions…</Text>

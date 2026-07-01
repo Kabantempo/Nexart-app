@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/theme';
+import { TabIcon } from '../components/ui/TabIcon';
 
 import FeedStack             from './FeedStack';
 import DiscoverStack         from './DiscoverStack';
@@ -27,28 +28,38 @@ const VISIBLE_TABS = TABS.slice(0, 4);
 export default function VisitorNavigator() {
   return (
     <Tab.Navigator
+      sceneContainerStyle={{ paddingBottom: 80 }}
       screenOptions={({ route }) => {
         const tab = TABS.find(t => t.name === route.name);
         return {
           headerShown: false,
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons
+            <TabIcon
               name={focused ? tab?.iconActive ?? tab?.icon ?? 'home' : tab?.icon ?? 'home-outline'}
-              size={size}
+              focused={focused}
               color={color}
+              size={size}
             />
           ),
           tabBarStyle: {
+            position: 'absolute',
             backgroundColor: colors.surface,
-            borderTopColor: colors.border,
-            borderTopWidth: 1,
-            height: 72,
-            paddingBottom: 14,
-            paddingTop: 6,
+            borderTopWidth: 0,
+            borderRadius: 28,
+            marginHorizontal: 16,
+            marginBottom: 16,
+            height: 64,
+            paddingBottom: 8,
+            paddingTop: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.12,
+            shadowRadius: 20,
+            elevation: 16,
           },
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.text.secondary,
-          tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+          tabBarShowLabel: false,
           // Cache l'onglet Favoris de la barre
           tabBarButton: route.name === 'Favoris' ? () => null : undefined,
           tabBarItemStyle: route.name === 'Favoris' ? { display: 'none' } : undefined,

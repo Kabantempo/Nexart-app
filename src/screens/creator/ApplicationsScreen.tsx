@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Modal, Linking } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { useCreatorApplications } from '../../hooks/useApplications';
 import { getOrCreateConversation } from '../../hooks/useConversations';
-import { submitReview, useHasReviewed } from '../../hooks/useReviews';
+import { useHasReviewed } from '../../hooks/useReviews';
 import { supabase } from '../../lib/supabase';
-import { ApplicationStatus, CREATOR_REVIEW_TAGS } from '../../types';
+import { ApplicationStatus } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 async function createCheckoutSession(applicationId: string, eventTitle: string, standPrice: number): Promise<{ url: string | null; error: string | null }> {
@@ -53,58 +53,12 @@ function formatDateRange(start: string, end: string) {
   return start === end ? s : `${s} → ${e}`;
 }
 
-function ReviewModal({ visible, onClose, onSubmit }: { visible: boolean; onClose: () => void; onSubmit: (r: number, c: string, t: string[]) => Promise<void> }) {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
-  const toggle = (t: string) => setTags(p => p.includes(t) ? p.filter(x => x !== t) : [...p, t]);
-  const handle = async () => {
-    if (!rating) { Alert.alert('Note requise'); return; }
-    setSaving(true); await onSubmit(rating, comment, tags); setSaving(false);
-    setRating(0); setComment(''); setTags([]);
-  };
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={m.overlay}>
-        <View style={m.panel}>
-          <Text style={m.title}>Évaluer l'organisateur</Text>
-          <Text style={m.label}>Note</Text>
-          <View style={m.stars}>
-            {[1,2,3,4,5].map(n => (
-              <TouchableOpacity key={n} onPress={() => setRating(n)}>
-                <Text style={[m.star, n <= rating && m.starActive]}>★</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={m.label}>Tags</Text>
-          <View style={m.tagWrap}>
-            {CREATOR_REVIEW_TAGS.map(t => (
-              <TouchableOpacity key={t} style={[m.tag, tags.includes(t) && m.tagActive]} onPress={() => toggle(t)}>
-                <Text style={[m.tagText, tags.includes(t) && m.tagTextActive]}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <TextInput style={m.input} value={comment} onChangeText={setComment} placeholder="Votre avis… (100 max)" placeholderTextColor={colors.text.secondary} maxLength={100} />
-          <View style={m.actions}>
-            <TouchableOpacity style={m.btnCancel} onPress={onClose}><Text style={m.btnCancelText}>Annuler</Text></TouchableOpacity>
-            <TouchableOpacity style={[m.btnSubmit, saving && { opacity: 0.6 }]} onPress={handle} disabled={saving}>
-              <Text style={m.btnSubmitText}>{saving ? 'Envoi…' : 'Envoyer'}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 function ApplicationCard({ item, userId }: { item: any; userId: string }) {
   const cfg = STATUS_CONFIG[item.status as ApplicationStatus];
   const nav = useNavigation<any>();
   const event = item.event;
   const isPast = event?.end_date && new Date(event.end_date) < new Date();
   const hasReviewed = useHasReviewed(event?.id ?? '', userId);
-  const [showReview, setShowReview] = useState(false);
   const [paying, setPaying] = useState(false);
 
   const organizerId = event?.organizer_id ?? '';
@@ -135,20 +89,19 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
     });
   };
 
-  const handleReview = async (rating: number, comment: string, tags: string[]) => {
-    if (!organizerId) { Alert.alert('Erreur', 'Organisateur introuvable.'); return; }
-    const { error } = await submitReview({
-      eventId: event.id, reviewerId: userId, reviewedId: organizerId,
-      reviewerRole: 'creator', rating, comment, tags,
+  const openReview = () => {
+    nav.navigate('Review', {
+      eventId: event.id,
+      reviewedId: organizerId,
+      reviewedName: 'L\'organisateur',
+      reviewerRole: 'creator',
     });
-    if (error) Alert.alert('Erreur', error);
-    else { setShowReview(false); Alert.alert('Avis envoyé !'); }
   };
 
   return (
     <View style={s.card}>
       {item.status === 'accepted' && (
-        <View style={s.acceptedBanner}><Text style={s.acceptedBannerText}>🎉 Candidature acceptée</Text></View>
+        <View style={s.acceptedBanner}><Text style={s.acceptedBannerText}>Candidature acceptée</Text></View>
       )}
       <View style={s.cardHeader}>
         {event?.start_date && (
@@ -159,7 +112,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
         )}
         <View style={{ flex: 1 }}>
           <Text style={s.eventTitle} numberOfLines={2}>{event?.title ?? '—'}</Text>
-          {event?.city && <Text style={s.eventMeta}>📍 {event.city}{event.start_date ? `  ·  ${formatDateRange(event.start_date, event.end_date ?? event.start_date)}` : ''}</Text>}
+          {event?.city && <Text style={s.eventMeta}>{event.city}{event.start_date ? `  ·  ${formatDateRange(event.start_date, event.end_date ?? event.start_date)}` : ''}</Text>}
           <Text style={s.appliedDate}>Candidaté le {new Date(item.created_at).toLocaleDateString('fr-FR')}</Text>
         </View>
         <View style={[s.statusBadge, { backgroundColor: cfg.bg }]}>
@@ -175,7 +128,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
       {item.status === 'refused' && item.refusal_reason && (
         <View style={s.refusalBox}>
           <View style={s.refusalHeader}>
-            <Text style={s.refusalIcon}>✕</Text>
+            <Ionicons name="close" size={11} color={colors.error} />
             <Text style={s.refusalLabel}>Motif du refus</Text>
           </View>
           <Text style={s.refusalText}>{item.refusal_reason}</Text>
@@ -184,7 +137,7 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
       {item.status === 'accepted' && (
         <View style={s.actionRow}>
           <TouchableOpacity style={s.btnMsg} onPress={openChat}>
-            <Text style={s.btnMsgText}>💬 Message</Text>
+            <Text style={s.btnMsgText}>Message</Text>
           </TouchableOpacity>
           {needsPayment && !isPending && (
             <TouchableOpacity style={[s.btnPay, paying && { opacity: 0.6 }]} onPress={handlePay} disabled={paying}>
@@ -205,16 +158,15 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
             </View>
           )}
           {isPast && hasReviewed === false && (
-            <TouchableOpacity style={s.btnReview} onPress={() => setShowReview(true)}>
-              <Text style={s.btnReviewText}>★ Évaluer</Text>
+            <TouchableOpacity style={s.btnReview} onPress={openReview}>
+              <Text style={s.btnReviewText}>Évaluer</Text>
             </TouchableOpacity>
           )}
           {isPast && hasReviewed === true && (
-            <View style={s.reviewedBadge}><Text style={s.reviewedText}>✓ Évalué</Text></View>
+            <View style={s.reviewedBadge}><Text style={s.reviewedText}>Évalué</Text></View>
           )}
         </View>
       )}
-      <ReviewModal visible={showReview} onClose={() => setShowReview(false)} onSubmit={handleReview} />
     </View>
   );
 }
@@ -325,25 +277,4 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl },
   emptyTitle: { ...typography.h3, color: colors.text.primary, marginBottom: spacing.xs, textAlign: 'center' },
   emptySubtitle: { ...typography.body, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 },
-});
-
-const m = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  panel: { backgroundColor: colors.surface, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.xl },
-  title: { ...typography.h3, color: colors.text.primary, marginBottom: spacing.lg },
-  label: { ...typography.label, color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: 0.6, fontSize: 11, marginBottom: spacing.sm, marginTop: spacing.md },
-  stars: { flexDirection: 'row', gap: spacing.sm },
-  star: { fontSize: 32, color: colors.border },
-  starActive: { color: colors.primary },
-  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  tag: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 5 },
-  tagActive: { backgroundColor: colors.secondary, borderColor: colors.secondary },
-  tagText: { ...typography.caption, color: colors.text.secondary },
-  tagTextActive: { color: colors.text.inverse, fontWeight: '600' },
-  input: { backgroundColor: colors.background, color: colors.text.primary, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border, marginTop: spacing.sm },
-  actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xl },
-  btnCancel: { flex: 1, padding: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
-  btnCancelText: { ...typography.label, color: colors.text.secondary },
-  btnSubmit: { flex: 2, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center' },
-  btnSubmitText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 });

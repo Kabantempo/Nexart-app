@@ -100,7 +100,7 @@ export default function CreatorMapScreen() {
       {/* Controls */}
       <View style={s.topBar}>
         <TouchableOpacity onPress={() => nav.goBack()}>
-          <Text style={s.back}>←</Text>
+          <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={s.title}>Créateurs disponibles</Text>
       </View>
@@ -168,12 +168,12 @@ export default function CreatorMapScreen() {
       {/* Creator preview */}
       {selected && (
         <View style={s.preview}>
-          <TouchableOpacity style={s.closeBtn} onPress={() => setSelected(null)}><Text style={s.closeBtnText}>✕</Text></TouchableOpacity>
+          <TouchableOpacity style={s.closeBtn} onPress={() => setSelected(null)}><Ionicons name="close" size={18} color={colors.text.primary} /></TouchableOpacity>
           <View style={s.previewHeader}>
             <View style={s.avatar}><Text style={s.avatarText}>{selected.full_name[0]?.toUpperCase()}</Text></View>
             <View style={{ flex: 1 }}>
               <Text style={s.creatorName}>{selected.full_name}</Text>
-              <Text style={s.creatorDist}>📍 {selected.city ?? '—'}  ·  {selected.distanceKm} km</Text>
+              <Text style={s.creatorDist}>{selected.city ?? '—'}  ·  {selected.distanceKm} km</Text>
               <Text style={s.creatorDisc}>{selected.disciplines.slice(0, 3).join(' · ')}</Text>
             </View>
           </View>

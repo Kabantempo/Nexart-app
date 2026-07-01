@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { Session, User } from '@supabase/supabase-js';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +9,36 @@ import { Profile } from './src/types';
 import RootNavigator from './src/navigation';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import OnboardingModal, { useOnboarding } from './src/components/OnboardingModal';
+import SplashScreen from './src/screens/SplashScreen';
+
+// Fix mouse wheel scroll on web
+// React Native Web sets touch-action:none which blocks wheel events
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    html, body, #root { height: 100%; overflow: hidden; }
+    div[style*="overflow: scroll"], div[style*="overflow: auto"] {
+      touch-action: pan-y !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Forward wheel events to the nearest scrollable parent when RN blocks them
+  document.addEventListener('wheel', (e) => {
+    let el = e.target as HTMLElement | null;
+    while (el && el !== document.body) {
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+        el.scrollTop += e.deltaY;
+        e.preventDefault();
+        return;
+      }
+      el = el.parentElement;
+    }
+  }, { passive: false });
+}
 
 function AppInner({ profile }: { profile: Profile | null }) {
   usePushNotifications(profile?.id);
@@ -29,6 +60,7 @@ export default function App() {
   const [user, setUser]       = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
@@ -58,6 +90,14 @@ export default function App() {
 
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
+
+  if (showSplash) {
+    return (
+      <SafeAreaProvider>
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>

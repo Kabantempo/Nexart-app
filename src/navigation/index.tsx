@@ -1,11 +1,13 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
 import { colors } from '../constants/theme';
-import linking from './linking';
+import { pageTransitionOptions } from '../lib/navigationConfig';
+import { unauthLinking, visitorLinking, creatorLinking, defaultLinking } from './linking';
 
 import AuthNavigator      from './AuthNavigator';
+import AdminNavigator     from './AdminNavigator';
 import CreatorNavigator   from './CreatorNavigator';
 import OrganizerNavigator from './OrganizerNavigator';
 import VisitorNavigator   from './VisitorNavigator';
@@ -22,8 +24,15 @@ export default function RootNavigator() {
 
   if (loading) return null;
 
-  // Accès autorisé si session réelle OU profil injecté (mode test)
   const isAuthenticated = !!session || !!profile;
+
+  const linking: LinkingOptions<ReactNavigation.RootParamList> = !isAuthenticated
+    ? unauthLinking
+    : profile?.role === 'visitor'
+      ? visitorLinking
+      : profile?.role === 'creator'
+        ? creatorLinking
+        : defaultLinking;
 
   return (
     <NavigationContainer
@@ -41,12 +50,14 @@ export default function RootNavigator() {
         },
       }}
     >
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, ...pageTransitionOptions }}>
         {!isAuthenticated ? (
           <>
             <Stack.Screen name="Auth"     component={AuthNavigator} />
             <Stack.Screen name="Discover" component={DiscoverStack} />
           </>
+        ) : profile?.is_admin ? (
+          <Stack.Screen name="Admin"     component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (
           <Stack.Screen name="Creator"   component={CreatorNavigator} />
         ) : profile?.role === 'organizer' ? (

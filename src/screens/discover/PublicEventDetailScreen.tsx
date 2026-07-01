@@ -7,6 +7,7 @@ import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { useAuth } from '../../stores/auth';
 import { useEvent } from '../../hooks/useEvent';
 import { useFavoriteEvent } from '../../hooks/useFavorites';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 type Props = {
@@ -47,19 +48,24 @@ export default function PublicEventDetailScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <View style={s.topRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}><Text style={s.back}>← Retour</Text></TouchableOpacity>
-        <TouchableOpacity onPress={handleFav}><Text style={[s.fav, isFav && s.favActive]}>{isFav ? '♥' : '♡'}</Text></TouchableOpacity>
+        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={16} color={colors.text.secondary} />
+          <Text style={s.back}>Retour</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleFav}>
+          <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#ef4444' : colors.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       <View style={s.typeBadge}><Text style={s.typeBadgeText}>{TYPE_LABEL[event.event_type] ?? event.event_type}</Text></View>
       <Text style={s.title}>{event.title}</Text>
-      <Text style={s.location}>📍 {[event.location, event.city, event.region].filter(Boolean).join(', ')}</Text>
+      <Text style={s.location}>{[event.location, event.city, event.region].filter(Boolean).join(', ')}</Text>
 
       <View style={s.section}>
         <Text style={s.sectionTitle}>Dates</Text>
         <Text style={s.field}>{fmt(event.start_date)}</Text>
         {event.start_date !== event.end_date && <Text style={s.field}>→ {fmt(event.end_date)}</Text>}
-        {event.start_time && <Text style={s.field}>🕐 {event.start_time}{event.end_time ? ` – ${event.end_time}` : ''}</Text>}
+        {event.start_time && <Text style={s.field}>{event.start_time}{event.end_time ? ` – ${event.end_time}` : ''}</Text>}
       </View>
 
       <View style={s.section}>
@@ -108,9 +114,8 @@ const s = StyleSheet.create({
   content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   topRow:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl },
+  backBtn:   { flexDirection: 'row', alignItems: 'center', gap: 4 },
   back:      { color: colors.text.secondary },
-  fav:       { fontSize: 28, color: colors.border },
-  favActive: { color: colors.error },
   typeBadge: { alignSelf: 'flex-start', backgroundColor: colors.primary + '20', borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: 3, marginBottom: spacing.sm },
   typeBadgeText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
   title:     { ...typography.h1, color: colors.text.primary, marginBottom: spacing.sm },

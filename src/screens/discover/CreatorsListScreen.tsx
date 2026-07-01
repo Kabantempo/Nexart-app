@@ -7,6 +7,8 @@ import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { usePublicCreators } from '../../hooks/usePublicCreators';
 import { PublicCreatorProfile, DISCIPLINE_TAGS } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
+import { SkeletonGroup } from '../../components/Skeleton';
+import { EmptyState } from '../../components/EmptyState';
 
 type Props = {
   navigation: StackNavigationProp<DiscoverStackParams, 'CreatorsList'>;
@@ -66,6 +68,12 @@ export default function CreatorsListScreen({ navigation, route }: Props) {
 
       {loading ? (
         <View style={s.centered}><ActivityIndicator color={colors.primary} size="large" /></View>
+      ) : loading ? (
+        <View style={s.list}>
+          {[1, 2, 3].map((idx) => (
+            <SkeletonGroup key={idx} />
+          ))}
+        </View>
       ) : (
         <FlatList
           data={creators}
@@ -74,7 +82,15 @@ export default function CreatorsListScreen({ navigation, route }: Props) {
             <CreatorRow creator={item} onPress={() => navigation.navigate('PublicCreatorProfile', { creatorId: item.id })} />
           )}
           contentContainerStyle={s.list}
-          ListEmptyComponent={<Text style={s.empty}>Aucun créateur trouvé</Text>}
+          ListEmptyComponent={
+            <View style={s.emptyContainer}>
+              <EmptyState
+                icon="search"
+                title="Aucun créateur trouvé"
+                subtitle="Essayez une autre recherche ou discipline"
+              />
+            </View>
+          }
         />
       )}
     </View>
@@ -95,6 +111,7 @@ const s = StyleSheet.create({
   chipText: { ...typography.caption, color: colors.text.secondary },
   chipTextActive: { color: colors.text.inverse, fontWeight: '700' },
   list: { paddingHorizontal: spacing.xl, paddingBottom: spacing.xxl },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.xxl },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, marginBottom: spacing.sm, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
   cover: { width: 80, height: 80 },
   coverPlaceholder: { backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center' },

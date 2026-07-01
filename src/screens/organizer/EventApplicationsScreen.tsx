@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator, Alert, TextInput, Modal, Animated,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp, useNavigation } from '@react-navigation/native';
@@ -10,9 +11,9 @@ import { OrganizerEventStackParams } from '../../navigation/OrganizerEventStack'
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
 import { getOrCreateConversation } from '../../hooks/useConversations';
-import { submitReview, useHasReviewed } from '../../hooks/useReviews';
+import { useHasReviewed } from '../../hooks/useReviews';
 import { getPushTokenForUser, sendPushNotification } from '../../hooks/usePushNotifications';
-import { ApplicationStatus, ORGANIZER_REVIEW_TAGS } from '../../types';
+import { ApplicationStatus } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { DEMO_MODE, DEMO_ORGANIZER_APPLICATIONS } from '../../lib/demoData';
 
@@ -71,7 +72,7 @@ function RefusalModal({
           <View style={modal.panelHandle} />
 
           <View style={modal.refusalIconWrap}>
-            <Text style={modal.refusalIconText}>✕</Text>
+            <Ionicons name="close" size={22} color={colors.error} />
           </View>
           <Text style={modal.title}>Refuser la candidature</Text>
           <Text style={modal.refusalSubtitle}>de {creatorName}</Text>
@@ -129,7 +130,7 @@ function AcceptancePostModal({
     ? `le ${fmt(eventStart)}`
     : `du ${fmt(eventStart)} au ${fmt(eventEnd)}`;
   const cityStr = eventCity ? ` à ${eventCity}` : '';
-  const postPreview = `🎉 ${creatorName} sera présent·e au ${eventTitle}${cityStr} — ${dates} !\n\nVenez les découvrir sur place et soutenir leur travail artisanal. ✨`;
+  const postPreview = `${creatorName} sera présent·e au ${eventTitle}${cityStr} — ${dates} !\n\nVenez les découvrir sur place et soutenir leur travail artisanal.`;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -138,7 +139,7 @@ function AcceptancePostModal({
           <View style={modal.panelHandle} />
 
           <View style={modal.acceptIconWrap}>
-            <Text style={modal.acceptIconText}>🎉</Text>
+            <Ionicons name="checkmark-circle" size={32} color={colors.secondary} />
           </View>
           <Text style={modal.title}>Accepter la candidature ?</Text>
           <Text style={modal.acceptSubtitle}>
@@ -147,7 +148,7 @@ function AcceptancePostModal({
 
           <View style={modal.postPreviewBox}>
             <View style={modal.postPreviewHeader}>
-              <Text style={modal.postPreviewIcon}>📢</Text>
+              <Ionicons name="megaphone-outline" size={22} color={colors.primary} />
               <View>
                 <Text style={modal.postPreviewTitle}>Annonce dans le fil</Text>
                 <Text style={modal.postPreviewMeta}>Visible par les abonnés de {creatorName}</Text>
@@ -180,93 +181,11 @@ function AcceptancePostModal({
   );
 }
 
-// ─── Review modal ─────────────────────────────────────────────────────────────
-
-function ReviewModal({
-  visible,
-  creatorName,
-  onClose,
-  onSubmit,
-}: {
-  visible: boolean;
-  creatorName: string;
-  onClose: () => void;
-  onSubmit: (rating: number, comment: string, tags: string[]) => Promise<void>;
-}) {
-  const [rating, setRating]   = useState(0);
-  const [comment, setComment] = useState('');
-  const [tags, setTags]       = useState<string[]>([]);
-  const [saving, setSaving]   = useState(false);
-
-  const toggleTag = (t: string) =>
-    setTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
-
-  const handleSubmit = async () => {
-    if (rating === 0) { Alert.alert('Note requise', 'Donnez une note entre 1 et 5.'); return; }
-    setSaving(true);
-    await onSubmit(rating, comment, tags);
-    setSaving(false);
-    setRating(0); setComment(''); setTags([]);
-  };
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={modal.overlay}>
-        <View style={modal.panel}>
-          <Text style={modal.title}>Évaluer {creatorName}</Text>
-
-          <Text style={modal.label}>Note</Text>
-          <View style={modal.stars}>
-            {[1,2,3,4,5].map(n => (
-              <TouchableOpacity key={n} onPress={() => setRating(n)}>
-                <Text style={[modal.star, n <= rating && modal.starActive]}>★</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={modal.label}>Tags</Text>
-          <View style={modal.tagWrap}>
-            {ORGANIZER_REVIEW_TAGS.map(t => (
-              <TouchableOpacity
-                key={t}
-                style={[modal.tag, tags.includes(t) && modal.tagActive]}
-                onPress={() => toggleTag(t)}
-              >
-                <Text style={[modal.tagText, tags.includes(t) && modal.tagTextActive]}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <Text style={modal.label}>Commentaire <Text style={modal.hint}>(100 max, optionnel)</Text></Text>
-          <TextInput
-            style={modal.input}
-            value={comment}
-            onChangeText={setComment}
-            placeholder="Votre avis…"
-            placeholderTextColor={colors.text.secondary}
-            maxLength={100}
-          />
-          <Text style={modal.charCount}>{comment.length}/100</Text>
-
-          <View style={modal.actions}>
-            <TouchableOpacity style={modal.btnCancel} onPress={onClose}>
-              <Text style={modal.btnCancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[modal.btnSubmit, saving && { opacity: 0.6 }]} onPress={handleSubmit} disabled={saving}>
-              <Text style={modal.btnSubmitText}>{saving ? 'Envoi…' : 'Envoyer'}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Application card ─────────────────────────────────────────────────────────
 
 function ApplicationCard({
-  item, eventId, organizerId, eventTitle,
-  onDecide, onOpenConversation, onConfirmPayment,
+  item, eventId, organizerId,
+  onDecide, onOpenConversation, onConfirmPayment, onReview,
 }: {
   item: ApplicationItem;
   eventId: string;
@@ -275,29 +194,20 @@ function ApplicationCard({
   onDecide: (id: string, status: ApplicationStatus) => void;
   onOpenConversation: (creatorId: string, creatorName: string) => void;
   onConfirmPayment?: (applicationId: string) => void;
+  onReview: (creatorId: string, creatorName: string) => void;
 }) {
   const cfg = STATUS_CONFIG[item.status];
   const disciplines = item.creator?.creator_profile?.disciplines ?? [];
   const city = item.creator?.creator_profile?.city;
   const hasReviewed = useHasReviewed(eventId, organizerId);
-  const [showReview, setShowReview] = useState(false);
   const swipeRef = useRef<Swipeable>(null);
-
-  const handleReview = async (rating: number, comment: string, tags: string[]) => {
-    const { error } = await submitReview({
-      eventId, reviewerId: organizerId, reviewedId: item.creator.id,
-      reviewerRole: 'organizer', rating, comment, tags,
-    });
-    if (error) Alert.alert('Erreur', error);
-    else { setShowReview(false); Alert.alert('Avis envoyé', 'Merci pour votre évaluation.'); }
-  };
 
   // Swipe actions (only for pending cards)
   const renderLeftActions = (progress: Animated.AnimatedInterpolation<number>) => {
     const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1], extrapolate: 'clamp' });
     return (
       <Animated.View style={[styles.swipeAcceptWrap, { transform: [{ scale }] }]}>
-        <Text style={styles.swipeAcceptIcon}>✓</Text>
+        <Ionicons name="checkmark" size={22} color="#fff" />
         <Text style={styles.swipeAcceptLabel}>Accepter</Text>
       </Animated.View>
     );
@@ -307,7 +217,7 @@ function ApplicationCard({
     const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1], extrapolate: 'clamp' });
     return (
       <Animated.View style={[styles.swipeRefuseWrap, { transform: [{ scale }] }]}>
-        <Text style={styles.swipeRefuseIcon}>✕</Text>
+        <Ionicons name="close" size={22} color="#fff" />
         <Text style={styles.swipeRefuseLabel}>Refuser</Text>
       </Animated.View>
     );
@@ -317,7 +227,7 @@ function ApplicationCard({
     <View style={styles.card}>
       {item.status === 'pending' && (
         <View style={styles.swipeHint}>
-          <Text style={styles.swipeHintText}>← Refuser  ·  Accepter →</Text>
+          <Text style={styles.swipeHintText}>Refuser  ·  Accepter</Text>
         </View>
       )}
 
@@ -327,7 +237,7 @@ function ApplicationCard({
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.creatorName}>{item.creator?.full_name ?? '—'}</Text>
-          {city && <Text style={styles.creatorCity}>📍 {city}</Text>}
+          {city && <Text style={styles.creatorCity}>{city}</Text>}
         </View>
         <View style={[styles.statusBadge, { backgroundColor: cfg.bg }]}>
           <Text style={[styles.statusText, { color: cfg.color }]}>{cfg.label}</Text>
@@ -352,7 +262,7 @@ function ApplicationCard({
       {item.status === 'refused' && item.refusal_reason && (
         <View style={styles.refusalBox}>
           <View style={styles.refusalHeader}>
-            <Text style={styles.refusalHeaderIcon}>✕</Text>
+            <Ionicons name="close" size={10} color={colors.error} />
             <Text style={styles.refusalHeaderLabel}>Motif communiqué</Text>
           </View>
           <Text style={styles.refusalText}>{item.refusal_reason}</Text>
@@ -377,7 +287,7 @@ function ApplicationCard({
       {item.status === 'accepted' && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.btnMsg} onPress={() => onOpenConversation(item.creator.id, item.creator.full_name)}>
-            <Text style={styles.btnMsgText}>💬 Message</Text>
+            <Text style={styles.btnMsgText}>Message</Text>
           </TouchableOpacity>
           {onConfirmPayment && item.stripe_payment_id?.startsWith('pending_') && (
             <TouchableOpacity style={styles.btnConfirmPay} onPress={() => onConfirmPayment(item.id)}>
@@ -385,25 +295,19 @@ function ApplicationCard({
             </TouchableOpacity>
           )}
           {item.stripe_payment_id && !item.stripe_payment_id.startsWith('pending_') && (
-            <View style={styles.paidBadge}><Text style={styles.paidBadgeText}>💳 Payé</Text></View>
+            <View style={styles.paidBadge}><Text style={styles.paidBadgeText}>Payé</Text></View>
           )}
           {hasReviewed === false && (
-            <TouchableOpacity style={styles.btnReview} onPress={() => setShowReview(true)}>
-              <Text style={styles.btnReviewText}>★ Évaluer</Text>
+            <TouchableOpacity style={styles.btnReview} onPress={() => onReview(item.creator.id, item.creator.full_name)}>
+              <Text style={styles.btnReviewText}>Évaluer</Text>
             </TouchableOpacity>
           )}
           {hasReviewed === true && (
-            <View style={styles.reviewedBadge}><Text style={styles.reviewedText}>✓ Évalué</Text></View>
+            <View style={styles.reviewedBadge}><Text style={styles.reviewedText}>Évalué</Text></View>
           )}
         </View>
       )}
 
-      <ReviewModal
-        visible={showReview}
-        creatorName={item.creator?.full_name ?? ''}
-        onClose={() => setShowReview(false)}
-        onSubmit={handleReview}
-      />
     </View>
   );
 
@@ -528,7 +432,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
           ? `le ${fmt(ev?.start_date)}`
           : `du ${fmt(ev?.start_date)} au ${fmt(ev?.end_date)}`;
         const cityStr = ev?.city ? ` à ${ev.city}` : '';
-        const content = `🎉 ${app.creator.full_name} sera présent·e au ${eventTitle}${cityStr} — ${dates} !\n\nVenez les découvrir sur place et soutenir leur travail artisanal. ✨`;
+        const content = `${app.creator.full_name} sera présent·e au ${eventTitle}${cityStr} — ${dates} !\n\nVenez les découvrir sur place et soutenir leur travail artisanal.`;
         await supabase.from('posts').insert({
           creator_id: app.creator.id,
           content,
@@ -542,7 +446,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
 
       const token = await getPushTokenForUser(app.creator.id);
       if (token) sendPushNotification(
-        token, '🎉 Candidature acceptée !',
+        token, 'Candidature acceptée !',
         `Votre candidature pour "${eventTitle}" a été acceptée.`,
       );
       fetchApplications();
@@ -552,7 +456,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
       ));
       if (publishPost) {
         Alert.alert(
-          '📢 Annonce publiée !',
+          'Annonce publiée !',
           `Une annonce a été publiée dans le fil de ${app.creator.full_name}. Ses abonnés peuvent maintenant la voir.`,
         );
       }
@@ -585,6 +489,15 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     rootNav.navigate('Messages', {
       screen: 'Conversation',
       params: { conversationId: convId, eventTitle, otherPartyName: creatorName },
+    });
+  };
+
+  const handleOpenReview = (creatorId: string, creatorName: string) => {
+    navigation.navigate('Review', {
+      eventId,
+      reviewedId: creatorId,
+      reviewedName: creatorName,
+      reviewerRole: 'organizer',
     });
   };
 
@@ -654,6 +567,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
               onDecide={handleDecide}
               onOpenConversation={handleOpenConversation}
               onConfirmPayment={handleConfirmPayment}
+              onReview={handleOpenReview}
             />
           )}
           contentContainerStyle={styles.list}
@@ -825,16 +739,4 @@ const modal = StyleSheet.create({
   btnRefuse: { flex: 2, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.error, alignItems: 'center' },
   btnRefuseText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 
-  // ── Review modal ──
-  stars: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
-  star: { fontSize: 32, color: colors.border },
-  starActive: { color: colors.primary },
-  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  tag: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 5 },
-  tagActive: { backgroundColor: colors.secondary, borderColor: colors.secondary },
-  tagText: { ...typography.caption, color: colors.text.secondary },
-  tagTextActive: { color: colors.text.inverse, fontWeight: '600' },
-  input: { backgroundColor: colors.background, color: colors.text.primary, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  btnSubmit: { flex: 2, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center' },
-  btnSubmitText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 });

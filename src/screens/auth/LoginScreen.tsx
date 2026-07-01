@@ -5,50 +5,63 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StatusBar,
-  Linking,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
+import { Toast } from '../../components/Toast';
+import { GoogleLoginButton } from '../../components/GoogleLoginButton';
+import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
+import { FloatingInput } from '../../components/ui/FloatingInput';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Login'> };
 
 export default function LoginScreen({ navigation }: Props) {
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [showPwd, setShowPwd]   = useState(false);
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [showPwd, setShowPwd]     = useState(false);
+  const [focusedField, setFocused] = useState<'email' | 'password' | null>(null);
+  const [emailError, setEmailError] = useState('');
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
+  const { handleGoogleSignIn, loading: googleLoading } = useGoogleAuth();
 
-  const handleGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { skipBrowserRedirect: true, redirectTo: 'nexart://auth/callback' },
-    });
-    if (error) { Alert.alert('Erreur', error.message); return; }
-    if (data?.url) Linking.openURL(data.url);
+  const validateEmail = (val: string) => {
+    if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) setEmailError('Email invalide');
+    else setEmailError('');
   };
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Champs requis', 'Veuillez remplir email et mot de passe.');
+      setToast({ visible: true, message: 'Veuillez remplir email et mot de passe', type: 'error' });
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setLoading(false);
-    if (error) Alert.alert('Erreur de connexion', error.message);
+    if (error) {
+      setToast({ visible: true, message: error.message, type: 'error' });
+    } else {
+      setToast({ visible: true, message: 'Connexion réussie !', type: 'success' });
+    }
   };
 
   return (
     <EtherealBackground intensity={0.18}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} duration={3000} />
       <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -61,7 +74,7 @@ export default function LoginScreen({ navigation }: Props) {
         >
           {/* Back */}
           <TouchableOpacity style={s.back} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-            <Text style={s.backArrow}>←</Text>
+            <Ionicons name="chevron-back" size={20} color={colors.text.secondary} />
             <Text style={s.backText}>Accueil</Text>
           </TouchableOpacity>
 
@@ -81,59 +94,45 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Form */}
           <View style={s.form}>
-            {/* Email */}
-            <View style={s.fieldWrap}>
-              <Text style={s.fieldLabel}>Adresse email</Text>
-              <TextInput
-                style={s.input}
-                placeholder="votre@email.fr"
-                placeholderTextColor={colors.text.secondary + '60'}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoComplete="email"
-                textContentType="emailAddress"
-                returnKeyType="next"
-              />
-            </View>
+            <FloatingInput
+              label="Adresse email"
+              value={email}
+              onChangeText={(v) => { setEmail(v); validateEmail(v); }}
+              error={emailError}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+            />
 
-            {/* Password */}
-            <View style={s.fieldWrap}>
-              <Text style={s.fieldLabel}>Mot de passe</Text>
-              <View style={s.pwdRow}>
-                <TextInput
-                  style={[s.input, s.pwdInput]}
-                  placeholder="••••••••"
-                  placeholderTextColor={colors.text.secondary + '60'}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPwd}
-                  autoComplete="password"
-                  textContentType="password"
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                />
-                <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPwd(v => !v)} activeOpacity={0.7}>
-                  <Text style={s.eyeText}>{showPwd ? 'Cacher' : 'Voir'}</Text>
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} activeOpacity={0.7} style={s.forgotLink}>
-                <Text style={s.forgotLinkText}>Mot de passe oublié ?</Text>
-              </TouchableOpacity>
-            </View>
+            <FloatingInput
+              label="Mot de passe"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPwd}
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              rightIcon={showPwd ? 'eye-off-outline' : 'eye-outline'}
+              onRightIconPress={() => setShowPwd(v => !v)}
+            />
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} activeOpacity={0.7} style={s.forgotLink}>
+              <Text style={s.forgotLinkText}>Mot de passe oublié ?</Text>
+            </TouchableOpacity>
 
             {/* Submit */}
-            <TouchableOpacity
+            <AnimatedTouchableOpacity
               style={[s.btnPrimary, loading && s.btnLoading]}
               onPress={handleLogin}
               disabled={loading}
-              activeOpacity={0.85}
+              scaleFactor={0.96}
             >
               <Text style={s.btnPrimaryText}>
                 {loading ? 'Connexion…' : 'Se connecter'}
               </Text>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
 
             {/* Divider */}
             <View style={s.divider}>
@@ -142,24 +141,17 @@ export default function LoginScreen({ navigation }: Props) {
               <View style={s.dividerLine} />
             </View>
 
-            {/* Google OAuth */}
-            <TouchableOpacity
-              style={s.btnGoogle}
-              onPress={handleGoogle}
-              activeOpacity={0.85}
-            >
-              <Text style={s.googleIcon}>G</Text>
-              <Text style={s.btnGoogleText}>Continuer avec Google</Text>
-            </TouchableOpacity>
+            {/* Google Login */}
+            <GoogleLoginButton onPress={handleGoogleSignIn} loading={googleLoading} />
 
             {/* Register link */}
-            <TouchableOpacity
+            <AnimatedTouchableOpacity
               style={s.btnSecondary}
               onPress={() => navigation.navigate('Register')}
-              activeOpacity={0.85}
+              scaleFactor={0.97}
             >
               <Text style={s.btnSecondaryText}>Créer un compte</Text>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
           </View>
 
           {/* Terms */}
@@ -191,7 +183,6 @@ const s = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: spacing.xl,
   },
-  backArrow: { fontSize: 18, color: colors.text.secondary },
   backText:  { ...typography.label, color: colors.text.secondary },
 
   // Brand
@@ -244,15 +235,28 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
     borderRadius: radius.xl,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
     fontSize: 15,
   },
+  inputFocused: {
+    borderColor: colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginLeft: 4,
+    marginTop: 2,
+  },
 
   pwdRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  pwdRowFocused: {},
   pwdInput: { flex: 1, marginBottom: 0 },
   eyeBtn:  { paddingHorizontal: spacing.sm, paddingVertical: spacing.sm },
-  eyeText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
 
   forgotLink: { alignSelf: 'flex-end', marginTop: -spacing.xs },
   forgotLinkText: { ...typography.caption, color: colors.primary, fontWeight: '600' },

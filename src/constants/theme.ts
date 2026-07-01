@@ -3,9 +3,9 @@ export const colors = {
   surface:    '#ffffff',   // --card
   muted:      '#f3f4f6',   // --muted  (fond subtil)
 
-  primary:    '#6366f1',   // --primary  (indigo-500)
-  secondary:  '#4f46e5',   // --chart-2  (indigo-600, pour actions secondaires)
-  accent:     '#e0e7ff',   // --accent   (indigo très clair)
+  primary:    '#4f46e5',   // --primary  (indigo-600) — UNIFIED with site
+  secondary:  '#4340c9',   // --chart-2  (indigo-700, pour actions secondaires)
+  accent:     '#eef2ff',   // --accent   (indigo très clair) — UNIFIED with site
 
   text: {
     primary:   '#1e293b',  // --foreground

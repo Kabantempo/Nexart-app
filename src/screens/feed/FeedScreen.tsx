@@ -160,7 +160,7 @@ export default function FeedScreen() {
           {/* Salutation */}
           {firstName ? (
             <View style={s.greeting}>
-              <Text style={s.greetText}>Bonjour {firstName} 👋</Text>
+              <Text style={s.greetText}>Bonjour {firstName}</Text>
             </View>
           ) : null}
 
