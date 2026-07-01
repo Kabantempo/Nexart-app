@@ -26,7 +26,7 @@ const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; componen
 export default function OrganizerNavigator() {
   return (
     <Tab.Navigator
-      sceneContainerStyle={{ paddingBottom: 80 }}
+      
       screenOptions={({ route }) => {
         const tab = TABS.find(t => t.name === route.name);
         return {

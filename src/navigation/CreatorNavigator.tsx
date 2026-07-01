@@ -29,7 +29,7 @@ const SCREENS = [FeedStack, MarketStack, ApplicationsStack, MessageStack, Profil
 export default function CreatorNavigator() {
   return (
     <Tab.Navigator
-      sceneContainerStyle={{ paddingBottom: 80 }}
+      
       screenOptions={({ route }) => {
         const tab = TABS.find(t => t.name === route.name);
         return {

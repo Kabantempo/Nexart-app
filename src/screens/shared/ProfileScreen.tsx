@@ -740,7 +740,10 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
   );
 }
 
-// ─── Creator profile view (mode lecture, style Instagram) ────────────────────
+// ─── Creator profile view (design artisan — pas Instagram) ───────────────────
+
+const PV_CARD_W = 160;
+const PV_CARD_H = 200;
 
 function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => void }) {
   const { creatorProfile, loading, upsert } = useCreatorProfile(userId);
@@ -749,8 +752,6 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const W = Dimensions.get('window').width;
-  const GRID_GAP = 2;
-  const CELL = (W - GRID_GAP * 2) / 3;
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview]     = useState<string | null>(null);
 
@@ -794,180 +795,236 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
       { text: 'Supprimer', style: 'destructive', onPress: () => upsert({ portfolio_images: portfolioImages.filter(u => u !== url) }) },
     ]);
 
+  const hasLinks = !!(creatorProfile?.website || creatorProfile?.instagram || creatorProfile?.etsy);
+
   return (
     <ScrollView
-      style={profileViewStyles.container}
-      contentContainerStyle={{ paddingBottom: spacing.xxl }}
+      style={pv.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + spacing.xxl }}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Header profil ── */}
-      <View style={[profileViewStyles.header, { paddingTop: insets.top + spacing.md }]}>
-        {/* Avatar */}
-        <View style={profileViewStyles.avatarWrap}>
+      {/* ── Carte identité artisan ── */}
+      <View style={[pv.identityCard, { paddingTop: insets.top + spacing.xl }]}>
+        {/* Avatar carré, pas circulaire */}
+        <View style={pv.avatarWrap}>
           {profile?.avatar_url ? (
-            <Image source={{ uri: profile.avatar_url }} style={profileViewStyles.avatar} />
+            <Image source={{ uri: profile.avatar_url }} style={pv.avatar} />
           ) : (
-            <View style={profileViewStyles.avatarFallback}>
-              <Ionicons name="person" size={32} color={colors.primary} />
+            <View style={pv.avatarFallback}>
+              <Text style={pv.avatarInitial}>{profile?.full_name?.[0]?.toUpperCase() ?? '?'}</Text>
             </View>
           )}
         </View>
 
-        {/* Stats */}
-        <View style={profileViewStyles.statsRow}>
-          <View style={profileViewStyles.stat}>
-            <Text style={profileViewStyles.statNum}>{portfolioImages.length}</Text>
-            <Text style={profileViewStyles.statLabel}>œuvres</Text>
+        <Text style={pv.name}>{profile?.full_name}</Text>
+
+        {/* Disciplines — chips horizontaux centrés */}
+        {creatorProfile?.disciplines?.length ? (
+          <View style={pv.disciplineRow}>
+            {creatorProfile.disciplines.slice(0, 4).map(d => (
+              <View key={d} style={pv.disciplineChip}>
+                <Text style={pv.disciplineChipText}>{d}</Text>
+              </View>
+            ))}
+            {creatorProfile.disciplines.length > 4 && (
+              <View style={[pv.disciplineChip, { backgroundColor: 'transparent' }]}>
+                <Text style={pv.disciplineChipText}>+{creatorProfile.disciplines.length - 4}</Text>
+              </View>
+            )}
           </View>
-          <View style={profileViewStyles.stat}>
-            <Text style={profileViewStyles.statNum}>{count}</Text>
-            <Text style={profileViewStyles.statLabel}>avis</Text>
+        ) : null}
+
+        {/* Localisation */}
+        {creatorProfile?.city ? (
+          <View style={pv.locationRow}>
+            <Ionicons name="location-outline" size={12} color={colors.text.secondary} />
+            <Text style={pv.locationText}>
+              {creatorProfile.city}{creatorProfile.region ? ` · ${creatorProfile.region}` : ''}
+            </Text>
           </View>
-          <View style={profileViewStyles.stat}>
-            <Text style={profileViewStyles.statNum}>{average != null ? `${average}/5` : '—'}</Text>
-            <Text style={profileViewStyles.statLabel}>note</Text>
-          </View>
+        ) : null}
+      </View>
+
+      {/* ── Métriques — 3 tuiles horizontales ── */}
+      <View style={pv.metricsRow}>
+        <View style={pv.metricTile}>
+          <Text style={pv.metricVal}>{portfolioImages.length}</Text>
+          <Text style={pv.metricLabel}>créations</Text>
+        </View>
+        <View style={[pv.metricTile, pv.metricTileMid]}>
+          <Text style={pv.metricVal}>{average != null ? average.toFixed(1) : '—'}</Text>
+          <Text style={pv.metricLabel}>note moy.</Text>
+        </View>
+        <View style={pv.metricTile}>
+          <Text style={pv.metricVal}>{count}</Text>
+          <Text style={pv.metricLabel}>avis</Text>
         </View>
       </View>
 
-      {/* ── Bio ── */}
-      <View style={profileViewStyles.bio}>
-        <Text style={profileViewStyles.name}>{profile?.full_name}</Text>
-        {creatorProfile?.disciplines?.length ? (
-          <Text style={profileViewStyles.disciplines}>{creatorProfile.disciplines.join(' · ')}</Text>
-        ) : null}
+      {/* ── Bio + badges ── */}
+      <View style={pv.section}>
         {profile?.bio ? (
-          <Text style={profileViewStyles.bioText}>{profile.bio}</Text>
+          <Text style={pv.bioText}>{profile.bio}</Text>
         ) : null}
-        {creatorProfile?.city ? (
-          <View style={profileViewStyles.locationRow}>
-            <Ionicons name="location-outline" size={13} color={colors.text.secondary} />
-            <Text style={profileViewStyles.location}>{creatorProfile.city}{creatorProfile.region ? `, ${creatorProfile.region}` : ''}</Text>
-          </View>
-        ) : null}
+
+        {/* Badges confiance */}
         {(isTrusted || creatorProfile?.siret_verified || creatorProfile?.insurance_verified) && (
-          <View style={profileViewStyles.badgesRow}>
+          <View style={pv.badgeRow}>
             {isTrusted && (
-              <View style={profileViewStyles.trustBadge}>
-                <Ionicons name="checkmark-circle" size={13} color={colors.success} />
-                <Text style={profileViewStyles.trustText}>Créateur de confiance</Text>
+              <View style={[pv.badge, pv.badgeGreen]}>
+                <Ionicons name="checkmark-circle" size={12} color={colors.success} />
+                <Text style={[pv.badgeText, { color: colors.success }]}>Confiance</Text>
               </View>
             )}
             {creatorProfile?.siret_verified && (
-              <View style={[profileViewStyles.trustBadge, profileViewStyles.siretBadge]}>
-                <Ionicons name="business-outline" size={13} color={colors.primary} />
-                <Text style={[profileViewStyles.trustText, { color: colors.primary }]}>SIRET vérifié</Text>
+              <View style={[pv.badge, pv.badgePrimary]}>
+                <Ionicons name="business-outline" size={12} color={colors.primary} />
+                <Text style={[pv.badgeText, { color: colors.primary }]}>SIRET</Text>
               </View>
             )}
             {creatorProfile?.insurance_verified && (
-              <View style={[profileViewStyles.trustBadge, profileViewStyles.insuranceBadge]}>
-                <Ionicons name="shield-checkmark-outline" size={13} color={colors.secondary} />
-                <Text style={[profileViewStyles.trustText, { color: colors.secondary }]}>Assurance RC</Text>
+              <View style={[pv.badge, pv.badgeSecondary]}>
+                <Ionicons name="shield-checkmark-outline" size={12} color={colors.secondary} />
+                <Text style={[pv.badgeText, { color: colors.secondary }]}>RC Pro</Text>
               </View>
             )}
           </View>
         )}
+
+        {/* Disponibilités */}
         {(creatorProfile?.availability?.weekends || (creatorProfile?.availability?.custom?.length ?? 0) > 0) && (
-          <View style={profileViewStyles.availRow}>
-            {creatorProfile?.availability?.weekends && (
-              <View style={profileViewStyles.availChip}>
-                <Ionicons name="sunny-outline" size={11} color={colors.text.secondary} />
-                <Text style={profileViewStyles.availChipText}>Weekends</Text>
-              </View>
+          <View style={pv.availRow}>
+            <Ionicons name="calendar-outline" size={13} color={colors.text.secondary} />
+            <Text style={pv.availText}>
+              {[
+                creatorProfile?.availability?.weekends ? 'weekends' : null,
+                (creatorProfile?.availability?.custom?.length ?? 0) > 0
+                  ? `${creatorProfile!.availability.custom.length} période${creatorProfile!.availability.custom.length > 1 ? 's' : ''}`
+                  : null,
+              ].filter(Boolean).join(' · ')}
+            </Text>
+          </View>
+        )}
+
+        {/* Liens externes */}
+        {hasLinks && (
+          <View style={pv.linksRow}>
+            {creatorProfile?.instagram && (
+              <TouchableOpacity style={pv.linkChip} onPress={() => Linking.openURL(`https://instagram.com/${creatorProfile.instagram}`)}>
+                <Ionicons name="logo-instagram" size={13} color={colors.text.secondary} />
+                <Text style={pv.linkChipText}>@{creatorProfile.instagram}</Text>
+              </TouchableOpacity>
             )}
-            {(creatorProfile?.availability?.custom?.length ?? 0) > 0 && (
-              <View style={profileViewStyles.availChip}>
-                <Ionicons name="calendar-outline" size={11} color={colors.text.secondary} />
-                <Text style={profileViewStyles.availChipText}>
-                  {creatorProfile!.availability.custom.length} période{creatorProfile!.availability.custom.length > 1 ? 's' : ''}
-                </Text>
-              </View>
+            {creatorProfile?.website && (
+              <TouchableOpacity style={pv.linkChip} onPress={() => Linking.openURL(creatorProfile.website!)}>
+                <Ionicons name="globe-outline" size={13} color={colors.text.secondary} />
+                <Text style={pv.linkChipText}>Site web</Text>
+              </TouchableOpacity>
+            )}
+            {creatorProfile?.etsy && (
+              <TouchableOpacity style={pv.linkChip} onPress={() => Linking.openURL(`https://etsy.com/shop/${creatorProfile.etsy}`)}>
+                <Ionicons name="storefront-outline" size={13} color={colors.text.secondary} />
+                <Text style={pv.linkChipText}>Etsy</Text>
+              </TouchableOpacity>
             )}
           </View>
         )}
       </View>
 
-      {/* ── Boutons ── */}
-      <View style={profileViewStyles.actions}>
-        <TouchableOpacity style={profileViewStyles.btnEdit} onPress={onEdit} activeOpacity={0.85}>
-          <Text style={profileViewStyles.btnEditText}>Modifier le profil</Text>
+      {/* ── Actions ── */}
+      <View style={pv.actions}>
+        <TouchableOpacity style={pv.btnEdit} onPress={onEdit} activeOpacity={0.85}>
+          <Ionicons name="create-outline" size={15} color={colors.text.primary} />
+          <Text style={pv.btnEditText}>Modifier le profil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={profileViewStyles.btnShare} activeOpacity={0.85}>
-          <Ionicons name="share-outline" size={16} color={colors.text.primary} />
+        <TouchableOpacity style={pv.btnIconOnly} activeOpacity={0.85}>
+          <Ionicons name="share-outline" size={17} color={colors.text.secondary} />
         </TouchableOpacity>
       </View>
 
-      {/* ── Séparateur grid ── */}
-      <View style={{ height: 1, backgroundColor: colors.border, marginBottom: GRID_GAP }} />
-
-      {/* ── Grille portfolio ── */}
-      <View style={profileViewStyles.grid}>
-        {portfolioImages.map((uri, i) => (
-          <TouchableOpacity
-            key={`${uri}-${i}`}
-            onPress={() => setPreview(uri)}
-            onLongPress={() => removePhoto(uri)}
-            activeOpacity={0.85}
-          >
-            <Image source={{ uri }} style={{ width: CELL, height: CELL }} resizeMode="cover" />
-          </TouchableOpacity>
-        ))}
-
-        {/* Cellule "+" */}
-        {portfolioImages.length < 20 && (
-          <TouchableOpacity
-            style={[profileViewStyles.addCell, { width: CELL, height: CELL }]}
-            onPress={addPhoto}
-            disabled={uploading}
-            activeOpacity={0.7}
-          >
-            {uploading
-              ? <ActivityIndicator color={colors.primary} />
-              : <Ionicons name="add" size={28} color={colors.primary} />}
-          </TouchableOpacity>
-        )}
+      {/* ── Séparateur section créations ── */}
+      <View style={pv.sectionHeader}>
+        <View style={pv.sectionLine} />
+        <Text style={pv.sectionTitle}>Créations</Text>
+        <View style={pv.sectionLine} />
       </View>
 
-      {portfolioImages.length === 0 && !uploading && (
-        <View style={profileViewStyles.emptyGrid}>
-          <Ionicons name="camera-outline" size={40} color={colors.border} />
-          <Text style={profileViewStyles.emptyGridText}>Aucune photo</Text>
-          <Text style={profileViewStyles.emptyGridSub}>Appuyez sur + pour ajouter vos créations</Text>
-        </View>
+      {/* ── Portfolio scroll horizontal — pas une grille Instagram ── */}
+      {portfolioImages.length === 0 && !uploading ? (
+        <TouchableOpacity style={pv.emptyPortfolio} onPress={addPhoto}>
+          <View style={pv.emptyPortfolioIcon}>
+            <Ionicons name="camera-outline" size={28} color={colors.primary} />
+          </View>
+          <Text style={pv.emptyPortfolioText}>Ajoutez vos premières créations</Text>
+          <Text style={pv.emptyPortfolioSub}>Jusqu'à 20 photos pour présenter votre travail</Text>
+        </TouchableOpacity>
+      ) : (
+        <FlatList
+          data={[...portfolioImages, 'ADD']}
+          keyExtractor={(item, i) => `${item}-${i}`}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.sm }}
+          renderItem={({ item }) => {
+            if (item === 'ADD') {
+              if (portfolioImages.length >= 20) return null;
+              return (
+                <TouchableOpacity
+                  style={[pv.portfolioCard, pv.portfolioCardAdd]}
+                  onPress={addPhoto}
+                  disabled={uploading}
+                  activeOpacity={0.7}
+                >
+                  {uploading
+                    ? <ActivityIndicator color={colors.primary} />
+                    : <Ionicons name="add" size={28} color={colors.primary} />}
+                </TouchableOpacity>
+              );
+            }
+            return (
+              <TouchableOpacity
+                onPress={() => setPreview(item)}
+                onLongPress={() => removePhoto(item)}
+                activeOpacity={0.9}
+              >
+                <Image source={{ uri: item }} style={pv.portfolioCard} resizeMode="cover" />
+              </TouchableOpacity>
+            );
+          }}
+        />
       )}
 
+      {/* ── Admin + déconnexion ── */}
       {profile?.is_admin && (
-        <TouchableOpacity style={profileViewStyles.adminBtn} onPress={() => navigation.navigate('Admin')}>
-          <Ionicons name="shield-checkmark-outline" size={16} color={colors.primary} />
-          <Text style={profileViewStyles.adminBtnText}>Panel Admin</Text>
+        <TouchableOpacity style={pv.adminBtn} onPress={() => navigation.navigate('Admin')}>
+          <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
+          <Text style={pv.adminBtnText}>Panel Admin</Text>
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity style={profileViewStyles.logoutBtn} onPress={() => supabase.auth.signOut()}>
-        <Text style={profileViewStyles.logoutText}>Se déconnecter</Text>
+      <TouchableOpacity style={pv.logoutBtn} onPress={() => supabase.auth.signOut()}>
+        <Ionicons name="log-out-outline" size={15} color={colors.error} />
+        <Text style={pv.logoutText}>Se déconnecter</Text>
       </TouchableOpacity>
 
       {/* ── Modal aperçu plein écran ── */}
       <Modal visible={!!preview} animationType="fade" transparent statusBarTranslucent>
         <TouchableOpacity
-          style={profileViewStyles.previewOverlay}
+          style={pv.previewOverlay}
           activeOpacity={1}
           onPress={() => setPreview(null)}
         >
           {preview && (
-            <Image source={{ uri: preview }} style={profileViewStyles.previewImg} resizeMode="contain" />
+            <Image source={{ uri: preview }} style={pv.previewImg} resizeMode="contain" />
           )}
-          <TouchableOpacity
-            style={profileViewStyles.previewClose}
-            onPress={() => setPreview(null)}
-          >
-            <Ionicons name="close" size={24} color="#fff" />
+          <TouchableOpacity style={pv.previewClose} onPress={() => setPreview(null)}>
+            <Ionicons name="close" size={22} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={profileViewStyles.previewDelete}
+            style={pv.previewDelete}
             onPress={() => { setPreview(null); if (preview) removePhoto(preview); }}
           >
-            <Ionicons name="trash-outline" size={20} color="#fff" />
+            <Ionicons name="trash-outline" size={18} color="#fff" />
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -975,51 +1032,277 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
   );
 }
 
-const profileViewStyles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: colors.background },
-  header:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xl },
-  avatarWrap:   {},
-  avatar:       { width: 80, height: 80, borderRadius: 40, borderWidth: 2, borderColor: colors.primary + '50' },
-  avatarFallback: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.primary + '30' },
-  statsRow:     { flex: 1, flexDirection: 'row', justifyContent: 'space-around' },
-  stat:         { alignItems: 'center' },
-  statNum:      { ...typography.h3, color: colors.text.primary, fontWeight: '700' },
-  statLabel:    { ...typography.caption, color: colors.text.secondary, marginTop: 2 },
+const pv = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
 
-  bio:          { paddingHorizontal: spacing.xl, paddingBottom: spacing.md },
-  name:         { ...typography.label, color: colors.text.primary, fontWeight: '700', fontSize: 15, marginBottom: 2 },
-  disciplines:  { ...typography.caption, color: colors.primary, fontWeight: '600', marginBottom: 4 },
-  bioText:      { ...typography.caption, color: colors.text.primary, lineHeight: 18, marginBottom: 4 },
-  locationRow:  { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 4 },
-  location:     { ...typography.caption, color: colors.text.secondary },
-  trustBadge:   { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.success + '15', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3, alignSelf: 'flex-start' },
-  trustText:    { ...typography.caption, color: colors.success, fontWeight: '700', fontSize: 11 },
+  /* Carte identité — bloc centré en haut */
+  identityCard: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  avatarWrap: {
+    marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.lg,
+  },
+  avatarFallback: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.lg,
+    backgroundColor: colors.accent + '30',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.accent + '50',
+  },
+  avatarInitial: { fontSize: 38, color: colors.accent, fontWeight: '700' },
+  name: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text.primary,
+    letterSpacing: -0.3,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  disciplineRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  disciplineChip: {
+    backgroundColor: colors.primary + '18',
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: colors.primary + '35',
+  },
+  disciplineChipText: { fontSize: 11, color: colors.primary, fontWeight: '600' },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.xs,
+  },
+  locationText: { ...typography.caption, color: colors.text.secondary },
 
-  actions:      { flexDirection: 'row', paddingHorizontal: spacing.xl, gap: spacing.sm, marginBottom: spacing.md },
-  btnEdit:      { flex: 1, backgroundColor: colors.muted, borderRadius: radius.lg, paddingVertical: 9, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
-  btnEditText:  { ...typography.label, color: colors.text.primary, fontWeight: '600' },
-  btnShare:     { width: 38, height: 38, borderRadius: radius.lg, backgroundColor: colors.muted, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+  /* Métriques — 3 tuiles */
+  metricsRow: {
+    flexDirection: 'row',
+    marginHorizontal: spacing.xl,
+    marginVertical: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  metricTile: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  metricTileMid: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.border,
+  },
+  metricVal: { fontSize: 20, fontWeight: '700', color: colors.text.primary },
+  metricLabel: { ...typography.caption, color: colors.text.secondary, marginTop: 2 },
 
-  grid:          { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
-  addCell:       { backgroundColor: colors.muted, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed' },
-  emptyGrid:     { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl },
-  emptyGridText: { ...typography.h3, color: colors.text.primary, marginTop: spacing.md },
-  emptyGridSub:  { ...typography.body, color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs },
-  previewOverlay:{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center' },
-  previewImg:    { width: '100%', height: '80%' },
-  previewClose:  { position: 'absolute', top: 56, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
-  previewDelete: { position: 'absolute', bottom: 48, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(220,38,38,0.7)', alignItems: 'center', justifyContent: 'center' },
+  /* Bio + infos */
+  section: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  bioText: {
+    ...typography.body,
+    color: colors.text.primary,
+    lineHeight: 22,
+  },
 
-  badgesRow:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
-  siretBadge:     { backgroundColor: colors.primary + '15', borderColor: colors.primary + '50' },
-  insuranceBadge: { backgroundColor: colors.secondary + '15', borderColor: colors.secondary + '50' },
-  availRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
-  availChip:      { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.muted, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3, borderWidth: 1, borderColor: colors.border },
-  availChipText:  { ...typography.caption, color: colors.text.secondary, fontSize: 11 },
-  adminBtn:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginHorizontal: spacing.xl, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.primary, padding: spacing.md, borderRadius: radius.md },
-  adminBtnText:   { color: colors.primary, fontWeight: '600' },
-  logoutBtn:      { marginHorizontal: spacing.xl, marginTop: spacing.xl, marginBottom: spacing.lg, borderWidth: 1, borderColor: colors.error, padding: spacing.md, borderRadius: radius.md, alignItems: 'center' },
-  logoutText:     { color: colors.error, fontWeight: '600' },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.full,
+    borderWidth: 1,
+  },
+  badgeText: { ...typography.caption, fontWeight: '700', fontSize: 11 },
+  badgeGreen: { backgroundColor: colors.success + '15', borderColor: colors.success + '40' },
+  badgePrimary: { backgroundColor: colors.primary + '15', borderColor: colors.primary + '40' },
+  badgeSecondary: { backgroundColor: colors.secondary + '15', borderColor: colors.secondary + '40' },
+
+  availRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  availText: { ...typography.caption, color: colors.text.secondary },
+
+  linksRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  linkChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.surface,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+  },
+  linkChipText: { ...typography.caption, color: colors.text.secondary },
+
+  /* Boutons actions */
+  actions: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.xl,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  btnEdit: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  btnEditText: { ...typography.label, color: colors.text.primary, fontWeight: '600' },
+  btnIconOnly: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
+  /* Séparateur section */
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.md,
+    gap: spacing.md,
+  },
+  sectionLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  sectionTitle: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+  },
+
+  /* Portfolio horizontal */
+  portfolioCard: {
+    width: PV_CARD_W,
+    height: PV_CARD_H,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+  },
+  portfolioCardAdd: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  emptyPortfolio: {
+    marginHorizontal: spacing.xl,
+    marginBottom: spacing.xl,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  emptyPortfolioIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.full,
+    backgroundColor: colors.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  emptyPortfolioText: {
+    ...typography.label,
+    color: colors.text.primary,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  emptyPortfolioSub: { ...typography.caption, color: colors.text.secondary, textAlign: 'center' },
+
+  /* Admin + logout */
+  adminBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.xl,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primary + '60',
+    padding: spacing.md,
+    borderRadius: radius.md,
+  },
+  adminBtnText: { color: colors.primary, fontWeight: '600', ...typography.label },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.xl,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.error + '50',
+    padding: spacing.md,
+    borderRadius: radius.md,
+  },
+  logoutText: { color: colors.error, fontWeight: '600', ...typography.label },
+
+  /* Preview plein écran */
+  previewOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
+  previewImg:     { width: '100%', height: '80%' },
+  previewClose:   { position: 'absolute', top: 56, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
+  previewDelete:  { position: 'absolute', bottom: 48, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(220,38,38,0.8)', alignItems: 'center', justifyContent: 'center' },
 });
 
 // ─── Main ProfileScreen ───────────────────────────────────────────────────────

@@ -29,7 +29,7 @@ export function Skeleton({
   const opacity = shimmerAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.25, 0.55, 0.25] })
 
   return (
-    <Animated.View style={[styles.skeleton, { width, height, borderRadius, opacity }, style]} />
+    <Animated.View style={[styles.skeleton, { width, height, borderRadius } as any, { opacity }, style]} />
   )
 }
 
@@ -100,7 +100,7 @@ export function SkeletonHorizontalList({ variant = 'event', count = 3 }: { varia
 }
 
 const styles = StyleSheet.create({
-  skeleton: { backgroundColor: colors.muted },
+  skeleton: { backgroundColor: '#E2E8F0' },
   group: { padding: spacing.md },
   swipeCard: {
     backgroundColor: colors.surface,

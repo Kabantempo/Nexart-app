@@ -109,5 +109,5 @@ const s = StyleSheet.create({
 
   scroll:   { flex: 1 },
   content:  { padding: spacing.xl, paddingBottom: spacing.xxl },
-  text:     { ...typography.body, color: colors.text.secondary, lineHeight: 22, whiteSpace: 'pre-wrap' as never },
+  text:     { ...typography.body, color: colors.text.secondary, lineHeight: 22 },
 });

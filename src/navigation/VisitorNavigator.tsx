@@ -28,7 +28,7 @@ const VISIBLE_TABS = TABS.slice(0, 4);
 export default function VisitorNavigator() {
   return (
     <Tab.Navigator
-      sceneContainerStyle={{ paddingBottom: 80 }}
+      
       screenOptions={({ route }) => {
         const tab = TABS.find(t => t.name === route.name);
         return {

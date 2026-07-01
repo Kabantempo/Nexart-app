@@ -15,12 +15,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fr.nexart.app",
+      "buildNumber": "1",
       "associatedDomains": [
         "applinks:nexart.app"
       ]
     },
     "android": {
       "package": "fr.nexart.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png"
