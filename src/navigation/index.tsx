@@ -16,6 +16,7 @@ import AboutScreen        from '../screens/info/AboutScreen';
 import ContactScreen      from '../screens/info/ContactScreen';
 import LegalScreen        from '../screens/info/LegalScreen';
 import AdminScreen        from '../screens/admin/AdminScreen';
+import ReviewScreen       from '../screens/shared/ReviewScreen';
 
 const Stack = createStackNavigator();
 
@@ -84,6 +85,11 @@ export default function RootNavigator() {
           name="Admin"
           component={AdminScreen}
           options={{ headerShown: true, title: 'Panel Admin', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Review"
+          component={ReviewScreen}
+          options={{ headerShown: false, presentation: 'modal' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
