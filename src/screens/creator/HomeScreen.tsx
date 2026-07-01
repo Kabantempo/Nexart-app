@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { useCreatorApplications } from '../../hooks/useApplications';
@@ -140,6 +141,24 @@ export default function CreatorHomeScreen() {
         <Text style={s.subtitle}>Trouvez vos prochains marchés</Text>
       </View>
 
+      {/* Banner — profil artisan non créé */}
+      {!creatorProfile && (
+        <TouchableOpacity
+          style={s.onboardBanner}
+          onPress={() => nav.navigate('Marchés', { screen: 'CreateProfile' })}
+          activeOpacity={0.85}
+        >
+          <View style={s.onboardIconWrap}>
+            <Ionicons name="person-add-outline" size={22} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.onboardTitle}>Créez votre profil artisan</Text>
+            <Text style={s.onboardSub}>Les organisateurs ne peuvent pas vous trouver sans profil.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+        </TouchableOpacity>
+      )}
+
       {/* Stats */}
       <View style={s.statsRow}>
         <View style={[s.statCard, s.statCardPending]}>
@@ -208,6 +227,21 @@ const s = StyleSheet.create({
   // Greeting
   greetingWrap: { marginBottom: spacing.xl },
   greeting:     { ...typography.h2, color: colors.text.primary, fontWeight: '700', marginBottom: spacing.xs },
+
+  onboardBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    backgroundColor: colors.primary + '12',
+    borderWidth: 1.5, borderColor: colors.primary + '30',
+    borderRadius: radius.xl, padding: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  onboardIconWrap: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: colors.primary + '20',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  onboardTitle: { ...typography.label, color: colors.primary, fontWeight: '700', marginBottom: 2 },
+  onboardSub:   { ...typography.caption, color: colors.text.secondary, lineHeight: 17 },
   subtitle:     { ...typography.body, color: colors.text.secondary },
 
   // Stats
