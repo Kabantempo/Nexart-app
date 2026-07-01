@@ -45,7 +45,7 @@ export function AppFooter() {
 
 const s = StyleSheet.create({
   footer: {
-    backgroundColor: colors.muted,
+    backgroundColor: colors.surface,
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
@@ -59,13 +59,12 @@ const s = StyleSheet.create({
     marginBottom: spacing.md,
   },
   link: {
-    fontSize: 12,
+    ...typography.caption,
     color: colors.text.secondary,
     fontWeight: '500',
-    ...typography.caption,
   },
   divider: {
-    color: colors.text.muted,
+    color: colors.text.secondary,
     fontSize: 10,
   },
   social: {
@@ -74,8 +73,7 @@ const s = StyleSheet.create({
     marginBottom: spacing.md,
   },
   copyright: {
-    fontSize: 12,
-    color: colors.text.muted,
+    color: colors.text.secondary,
     textAlign: 'center',
     ...typography.caption,
   },

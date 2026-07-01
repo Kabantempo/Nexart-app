@@ -185,7 +185,7 @@ const card = StyleSheet.create({
   header:        { height: CARD_H, overflow: 'hidden' },
   coverImg:      { width: '100%', height: '100%' },
   gradient:        { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  gradientOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.25)' },
+  gradientOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.25)' },
   gradientLabel:   { fontSize: 32, fontWeight: '800', color: 'rgba(255,255,255,0.35)', letterSpacing: 4 },
   headerBadges:  { position: 'absolute', top: spacing.sm, left: spacing.sm, right: spacing.sm, flexDirection: 'row', gap: spacing.xs, flexWrap: 'wrap' },
   typeBadge:     { paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full },
@@ -369,7 +369,7 @@ function FiltersSheet({
 
 const fs = StyleSheet.create({
   overlay:   { flex: 1 },
-  backdrop:  { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.55)' },
+  backdrop:  { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.55)' },
   panel: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: colors.surface,

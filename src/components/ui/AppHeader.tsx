@@ -89,10 +89,8 @@ const s = StyleSheet.create({
     borderRadius: 6,
   },
   logoText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.primary,
     ...typography.h3,
+    color: colors.primary,
   },
   actions: {
     flexDirection: 'row',

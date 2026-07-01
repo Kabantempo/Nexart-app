@@ -8,7 +8,7 @@ import { ANIMATION_DURATIONS } from '../constants/animations'
 
 // Page transition options
 export const pageTransitionOptions: StackNavigationOptions = {
-  animationEnabled: true,
+  animation: 'default',
   cardStyleInterpolator: ({ current, layouts }) => {
     return {
       cardStyle: {
@@ -45,7 +45,7 @@ export const pageTransitionOptions: StackNavigationOptions = {
 
 // Quick transition for modals
 export const modalTransitionOptions: StackNavigationOptions = {
-  animationEnabled: true,
+  animation: 'default',
   cardStyleInterpolator: ({ current, layouts }) => {
     return {
       cardStyle: {

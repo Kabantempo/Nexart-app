@@ -93,8 +93,8 @@ export default function EtherealBackground({ children, intensity = 0.20 }: Ether
 
 const s = StyleSheet.create({
   container: { flex: 1, overflow: 'hidden', backgroundColor: '#f8fafc' },
-  base:      { ...StyleSheet.absoluteFillObject, backgroundColor: '#f8fafc' },
-  blobLayer: { ...StyleSheet.absoluteFillObject },
-  veil:      { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(248,250,252,0.50)' },
+  base:      { ...StyleSheet.absoluteFill, backgroundColor: '#f8fafc' },
+  blobLayer: { ...StyleSheet.absoluteFill },
+  veil:      { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(248,250,252,0.50)' },
   content:   { flex: 1 },
 });

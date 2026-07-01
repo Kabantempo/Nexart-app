@@ -20,22 +20,22 @@ export function AnimatedTouchableOpacity({
 }: AnimatedTouchableOpacityProps) {
   const scaleAnim = useRef(new Animated.Value(1)).current
 
-  const handlePressIn = () => {
+  const handlePressIn = (e: any) => {
     Animated.timing(scaleAnim, {
       toValue: scaleFactor,
       duration,
       useNativeDriver: true,
     }).start()
-    onPressIn?.()
+    onPressIn?.(e)
   }
 
-  const handlePressOut = () => {
+  const handlePressOut = (e: any) => {
     Animated.timing(scaleAnim, {
       toValue: 1,
       duration,
       useNativeDriver: true,
     }).start()
-    onPressOut?.()
+    onPressOut?.(e)
   }
 
   return (

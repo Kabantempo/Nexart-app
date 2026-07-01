@@ -367,7 +367,7 @@ const s = StyleSheet.create({
   filterBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   filterBtnText:   { ...typography.caption, color: colors.text.secondary, fontWeight: '600' },
   filterBtnTextActive: { color: colors.text.inverse },
-  overlay:   { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
+  overlay:   { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
 });
 
 const f = StyleSheet.create({

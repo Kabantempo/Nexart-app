@@ -4,6 +4,7 @@ import {
   ScrollView, Alert, ActivityIndicator, Platform, Image,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { createPost, extractHashtags, PostType } from '../../hooks/usePosts';
