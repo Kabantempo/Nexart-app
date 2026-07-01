@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Platform,
   ScrollView, ActivityIndicator, Animated, Dimensions,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useGeoEvents, DEFAULT_FILTERS, MapFilters, GeoEvent } from '../../hooks/useGeoEvents';
@@ -229,10 +230,25 @@ export default function EventMapScreen() {
         </View>
       </View>
 
-      {loading
-        ? <View style={s.centered}><ActivityIndicator color={colors.primary} size="large" /></View>
-        : <MapContent events={events} userPos={userPos} onSelect={setSelected} />
-      }
+      {loading ? (
+        <View style={s.centered}><ActivityIndicator color={colors.primary} size="large" /></View>
+      ) : (
+        <>
+          <MapContent events={events} userPos={userPos} onSelect={setSelected} />
+          {events.length === 0 && (
+            <View style={s.emptyOverlay} pointerEvents="box-none">
+              <View style={s.emptyCard}>
+                <Ionicons name="map-outline" size={32} color={colors.text.secondary} />
+                <Text style={s.emptyTitle}>Aucun marché dans cette zone</Text>
+                <Text style={s.emptySub}>Élargissez le rayon ou modifiez les filtres</Text>
+                <TouchableOpacity style={s.emptyBtn} onPress={() => toggleFilters(true)}>
+                  <Text style={s.emptyBtnText}>Modifier les filtres</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </>
+      )}
 
       {/* Legend */}
       {showLegend && <Legend />}
@@ -351,6 +367,12 @@ function WebMap({ events, userPos, onSelect }: { events: GeoEvent[]; userPos: { 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  emptyOverlay: { ...StyleSheet.absoluteFill, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: 80 },
+  emptyCard: { backgroundColor: colors.surface + 'F2', borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', borderWidth: 1, borderColor: colors.border, gap: spacing.sm, maxWidth: 300 },
+  emptyTitle: { ...typography.h3, color: colors.text.primary, textAlign: 'center', fontWeight: '700' },
+  emptySub:   { ...typography.body, color: colors.text.secondary, textAlign: 'center', lineHeight: 20 },
+  emptyBtn:   { marginTop: spacing.xs, backgroundColor: colors.primary, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  emptyBtnText: { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
   topBar: {
     position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
     flexDirection: 'row', alignItems: 'center', paddingTop: spacing.xxl,

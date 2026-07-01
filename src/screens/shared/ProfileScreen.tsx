@@ -674,28 +674,75 @@ function CreatorProfileSection({ userId, onSaved }: { userId: string; onSaved?: 
 
 // ─── Organizer profile section ───────────────────────────────────────────────
 
+const ORG_EVENT_TYPE_COLORS: Record<string, string> = {
+  permanent: '#3B82F6', seasonal: '#F59E0B',
+  popup: '#A855F7', salon: '#10B981', fair: '#EF4444',
+};
+const ORG_EVENT_TYPE_LABELS: Record<string, string> = {
+  permanent: 'Permanent', seasonal: 'Saisonnier',
+  popup: 'Pop-up', salon: 'Salon', fair: 'Foire',
+};
+
 function OrganizerProfileSection({ userId }: { userId: string }) {
+  const { profile, refetchProfile } = useAuth();
   const [orgName, setOrgName]     = useState('');
   const [website, setWebsite]     = useState('');
   const [instagram, setInstagram] = useState('');
+  const [coverImage, setCoverImage] = useState('');
   const [loaded, setLoaded]       = useState(false);
   const [saving, setSaving]       = useState(false);
   const [editing, setEditing]     = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [orgEvents, setOrgEvents] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.from('organizer_profiles').select('*').eq('user_id', userId).maybeSingle()
       .then(({ data }) => {
-        if (data) { setOrgName(data.organization_name ?? ''); setWebsite(data.website ?? ''); setInstagram(data.instagram ?? ''); }
-        else setEditing(true);
+        if (data) {
+          setOrgName(data.organization_name ?? '');
+          setWebsite(data.website ?? '');
+          setInstagram(data.instagram ?? '');
+          setCoverImage(data.cover_image ?? '');
+        } else setEditing(true);
         setLoaded(true);
       });
+    supabase.from('events')
+      .select('id, title, city, start_date, end_date, event_type, status, stand_count')
+      .eq('organizer_id', userId)
+      .order('start_date', { ascending: false })
+      .limit(8)
+      .then(({ data }) => setOrgEvents(data ?? []));
   }, [userId]);
+
+  const pickCoverImage = async () => {
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') { Alert.alert('Permission requise'); return; }
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, aspect: [16, 9], quality: 0.85,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    setUploadingCover(true);
+    const asset = result.assets[0];
+    const ext = asset.uri.split('.').pop() ?? 'jpg';
+    const path = `${userId}/cover.${ext}`;
+    const resp = await fetch(asset.uri);
+    const blob = await resp.blob();
+    const { error } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true });
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      setCoverImage(publicUrl);
+    }
+    setUploadingCover(false);
+  };
 
   const handleSave = async () => {
     if (!orgName.trim()) { Alert.alert('Erreur', "Le nom de l'organisation est requis."); return; }
     setSaving(true);
     await supabase.from('organizer_profiles').upsert(
-      { user_id: userId, organization_name: orgName.trim(), website: website.trim() || null, instagram: instagram.trim() || null },
+      { user_id: userId, organization_name: orgName.trim(), website: website.trim() || null, instagram: instagram.trim() || null, cover_image: coverImage || null },
       { onConflict: 'user_id' },
     );
     setSaving(false);
@@ -706,10 +753,77 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
 
   if (!editing) return (
     <View>
-      <Text style={styles.fieldLabel}>Organisation</Text>
-      <Text style={styles.fieldValue}>{orgName || '—'}</Text>
-      {website   && <><Text style={styles.fieldLabel}>Site web</Text><Text style={styles.link}>{website}</Text></>}
-      {instagram && <><Text style={styles.fieldLabel}>Instagram</Text><Text style={styles.link}>@{instagram}</Text></>}
+      {/* Cover photo */}
+      {coverImage ? (
+        <View style={orgSt.coverWrap}>
+          <Image source={{ uri: coverImage }} style={orgSt.cover} resizeMode="cover" />
+          <View style={orgSt.coverOverlay} />
+          <View style={orgSt.coverInfo}>
+            <Text style={orgSt.coverOrgName}>{orgName}</Text>
+            {website && (
+              <TouchableOpacity onPress={() => Linking.openURL(website.startsWith('http') ? website : `https://${website}`)}>
+                <Text style={orgSt.coverLink}>{website.replace(/^https?:\/\//, '')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      ) : (
+        <View style={orgSt.noCoverWrap}>
+          <View style={orgSt.orgInitialCircle}>
+            <Text style={orgSt.orgInitialText}>{orgName[0]?.toUpperCase() ?? '?'}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={orgSt.orgNameText}>{orgName || '—'}</Text>
+            {website && <Text style={orgSt.orgMeta}>{website.replace(/^https?:\/\//, '')}</Text>}
+            {instagram && <Text style={orgSt.orgMeta}>@{instagram}</Text>}
+          </View>
+        </View>
+      )}
+
+      {/* Stats rapides */}
+      <View style={orgSt.statsRow}>
+        <View style={orgSt.statTile}>
+          <Text style={orgSt.statNum}>{orgEvents.length}</Text>
+          <Text style={orgSt.statLabel}>marchés</Text>
+        </View>
+        <View style={[orgSt.statTile, orgSt.statTileMid]}>
+          <Text style={orgSt.statNum}>{orgEvents.filter(e => e.status === 'published').length}</Text>
+          <Text style={orgSt.statLabel}>publiés</Text>
+        </View>
+        <View style={orgSt.statTile}>
+          <Text style={orgSt.statNum}>{orgEvents.filter(e => new Date(e.end_date) > new Date()).length}</Text>
+          <Text style={orgSt.statLabel}>à venir</Text>
+        </View>
+      </View>
+
+      {/* Liste des marchés */}
+      {orgEvents.length > 0 && (
+        <View style={orgSt.eventsSection}>
+          <Text style={styles.fieldLabel}>Mes marchés</Text>
+          {orgEvents.map(ev => {
+            const accent = ORG_EVENT_TYPE_COLORS[ev.event_type] ?? colors.primary;
+            const isPast = ev.end_date && new Date(ev.end_date) < new Date();
+            return (
+              <View key={ev.id} style={[orgSt.eventRow, { borderLeftColor: accent, opacity: isPast ? 0.6 : 1 }]}>
+                <View style={[orgSt.eventTypeDot, { backgroundColor: accent }]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={orgSt.eventTitle} numberOfLines={1}>{ev.title}</Text>
+                  <Text style={orgSt.eventMeta}>
+                    {ev.city ?? '—'}  ·  {new Date(ev.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {ev.stand_count ? `  ·  ${ev.stand_count} stands` : ''}
+                  </Text>
+                </View>
+                <View style={[orgSt.statusPill, isPast && orgSt.statusPillPast]}>
+                  <Text style={[orgSt.statusPillText, isPast && orgSt.statusPillTextPast]}>
+                    {isPast ? 'Passé' : ORG_EVENT_TYPE_LABELS[ev.event_type] ?? ev.event_type}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
       <TouchableOpacity style={styles.btnSecondary} onPress={() => setEditing(true)}>
         <Text style={styles.btnSecondaryText}>Modifier mon profil</Text>
       </TouchableOpacity>
@@ -724,6 +838,27 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
           <Text style={styles.setupSubtitle}>Visible par les créateurs qui candidatent à vos marchés.</Text>
         </View>
       )}
+
+      {/* Photo de couverture */}
+      <Text style={styles.fieldLabel}>Photo de couverture <Text style={styles.hint}>(optionnel)</Text></Text>
+      <TouchableOpacity style={orgSt.coverPickerBtn} onPress={pickCoverImage} disabled={uploadingCover}>
+        {coverImage ? (
+          <Image source={{ uri: coverImage }} style={orgSt.coverPreview} resizeMode="cover" />
+        ) : (
+          <View style={orgSt.coverPlaceholder}>
+            {uploadingCover
+              ? <ActivityIndicator color={colors.primary} />
+              : <><Ionicons name="image-outline" size={24} color={colors.text.secondary} /><Text style={orgSt.coverPlaceholderText}>Ajouter une bannière 16:9</Text></>
+            }
+          </View>
+        )}
+        {coverImage && !uploadingCover && (
+          <View style={orgSt.coverPickerOverlay}>
+            <Ionicons name="camera-outline" size={20} color="#fff" />
+          </View>
+        )}
+      </TouchableOpacity>
+
       <Text style={styles.fieldLabel}>Nom de l'organisation</Text>
       <TextInput style={styles.input} value={orgName} onChangeText={setOrgName} placeholder="Ex : Marché des Créateurs de Lyon" placeholderTextColor={colors.text.secondary} />
       <Text style={styles.fieldLabel}>Site web <Text style={styles.hint}>(optionnel)</Text></Text>
@@ -739,6 +874,48 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
     </View>
   );
 }
+
+const orgSt = StyleSheet.create({
+  coverWrap:    { height: 160, borderRadius: radius.lg, overflow: 'hidden', marginBottom: spacing.lg, position: 'relative' },
+  cover:        { width: '100%', height: '100%' },
+  coverOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
+  coverInfo:    { position: 'absolute', bottom: spacing.md, left: spacing.md, right: spacing.md },
+  coverOrgName: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 2 },
+  coverLink:    { ...typography.caption, color: 'rgba(255,255,255,0.8)', textDecorationLine: 'underline' },
+
+  noCoverWrap:     { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
+  orgInitialCircle:{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.primary + '20', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.primary + '40' },
+  orgInitialText:  { fontSize: 22, fontWeight: '700', color: colors.primary },
+  orgNameText:     { ...typography.h3, color: colors.text.primary, fontWeight: '700', marginBottom: 2 },
+  orgMeta:         { ...typography.caption, color: colors.text.secondary },
+
+  statsRow:    { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.lg, overflow: 'hidden' },
+  statTile:    { flex: 1, alignItems: 'center', paddingVertical: spacing.md },
+  statTileMid: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border },
+  statNum:     { fontSize: 22, fontWeight: '700', color: colors.text.primary },
+  statLabel:   { ...typography.caption, color: colors.text.secondary, marginTop: 2 },
+
+  eventsSection: { marginBottom: spacing.md },
+  eventRow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    backgroundColor: colors.surface, borderRadius: radius.md,
+    padding: spacing.md, marginBottom: spacing.xs,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 3,
+  },
+  eventTypeDot:  { width: 8, height: 8, borderRadius: 4 },
+  eventTitle:    { ...typography.label, color: colors.text.primary, fontWeight: '600', marginBottom: 2 },
+  eventMeta:     { ...typography.caption, color: colors.text.secondary },
+  statusPill:    { backgroundColor: colors.primary + '15', borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 3 },
+  statusPillText:{ ...typography.caption, color: colors.primary, fontWeight: '600', fontSize: 10 },
+  statusPillPast:{ backgroundColor: colors.border },
+  statusPillTextPast: { color: colors.text.secondary },
+
+  coverPickerBtn: { marginBottom: spacing.md, borderRadius: radius.md, overflow: 'hidden' },
+  coverPreview:   { width: '100%', height: 120 },
+  coverPlaceholder: { height: 120, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  coverPlaceholderText: { ...typography.caption, color: colors.text.secondary },
+  coverPickerOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center', justifyContent: 'center' } as any,
+});
 
 // ─── Creator profile view (design artisan — pas Instagram) ───────────────────
 

@@ -185,9 +185,38 @@ export default function ApplicationsScreen() {
     refused: applications.filter(a => a.status === 'refused').length,
   };
 
+  const pastAcceptedCount = applications.filter(a =>
+    a.status === 'accepted' &&
+    a.event?.end_date &&
+    new Date(a.event.end_date) < new Date()
+  ).length;
+
+  const showReviewBanner = pastAcceptedCount > 0 && filter !== 'accepted';
+
   return (
     <View style={[s.container, { paddingTop: insets.top + spacing.sm }]}>
       <Text style={s.title}>Mes candidatures</Text>
+
+      {/* Bannière avis en attente */}
+      {showReviewBanner && (
+        <TouchableOpacity
+          style={s.reviewBanner}
+          onPress={() => setFilter('accepted')}
+          activeOpacity={0.85}
+        >
+          <View style={s.reviewBannerIcon}>
+            <Ionicons name="star-outline" size={16} color={colors.secondary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.reviewBannerTitle}>
+              {pastAcceptedCount} marché{pastAcceptedCount > 1 ? 's' : ''} à évaluer
+            </Text>
+            <Text style={s.reviewBannerSub}>Laissez un avis pour aider la communauté</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={15} color={colors.secondary} />
+        </TouchableOpacity>
+      )}
+
       {applications.length > 0 && (
         <View style={s.statsRow}>
           <View style={s.statItem}><Text style={s.statNum}>{counts.pending}</Text><Text style={s.statLabel}>En attente</Text></View>
@@ -265,7 +294,7 @@ const s = StyleSheet.create({
   btnMsgText: { ...typography.caption, color: colors.primary, fontWeight: '600' },
   btnPay: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: spacing.sm, borderRadius: radius.md, backgroundColor: colors.success },
   btnPayText: { ...typography.caption, color: colors.text.inverse, fontWeight: '700' },
-  badgePending: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: spacing.sm, borderRadius: radius.md, backgroundColor: colors.muted, borderWidth: 1, borderColor: colors.border },
+  badgePending: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: spacing.sm, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   badgePendingText: { ...typography.caption, color: colors.text.secondary },
   badgePaid: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: spacing.sm, borderRadius: radius.md, backgroundColor: colors.success + '15', borderWidth: 1, borderColor: colors.success + '40' },
   badgePaidText: { ...typography.caption, color: colors.success, fontWeight: '600' },
@@ -273,6 +302,20 @@ const s = StyleSheet.create({
   btnReviewText: { ...typography.caption, color: colors.secondary, fontWeight: '600' },
   reviewedBadge: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center' },
   reviewedText: { ...typography.caption, color: colors.text.secondary },
+  reviewBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    marginHorizontal: spacing.xl, marginBottom: spacing.md,
+    backgroundColor: colors.secondary + '12',
+    borderWidth: 1, borderColor: colors.secondary + '40',
+    borderRadius: radius.lg, padding: spacing.md,
+  },
+  reviewBannerIcon: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: colors.secondary + '20',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  reviewBannerTitle: { ...typography.label, color: colors.secondary, fontWeight: '700', marginBottom: 2 },
+  reviewBannerSub:   { ...typography.caption, color: colors.text.secondary },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: spacing.xxl },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl },
   emptyTitle: { ...typography.h3, color: colors.text.primary, marginBottom: spacing.xs, textAlign: 'center' },
