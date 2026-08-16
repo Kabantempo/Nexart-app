@@ -129,36 +129,39 @@ function AddModal({
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><X size={20} color="#888" /></button>
         </div>
 
-        {/* Upload zone */}
-        <div
-          onClick={() => fileRef.current?.click()}
-          style={{
-            width: '100%', aspectRatio: `${col}/${row}`, maxHeight: '260px',
-            borderRadius: '10px', border: '2px dashed #E5E7EB',
-            backgroundColor: '#FAFAFA', cursor: 'pointer', overflow: 'hidden',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginBottom: '20px', transition: 'border-color 150ms ease',
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#6366F1' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#E5E7EB' }}
-        >
-          {preview
-            // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : (
-              <div style={{ textAlign: 'center', padding: '20px' }}>
-                <Plus size={32} color="#9CA3AF" />
-                <p style={{ fontSize: '14px', color: '#9CA3AF', margin: '8px 0 0' }}>Cliquez pour choisir une photo</p>
-              </div>
-            )
-          }
-        </div>
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+        {/* Upload + Taille côte à côte */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', alignItems: 'flex-start' }}>
+          {/* Upload zone */}
+          <div
+            onClick={() => fileRef.current?.click()}
+            style={{
+              flex: '0 0 160px', height: '160px',
+              borderRadius: '10px', border: '2px dashed #E5E7EB',
+              backgroundColor: '#FAFAFA', cursor: 'pointer', overflow: 'hidden',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'border-color 150ms ease',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#6366F1' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#E5E7EB' }}
+          >
+            {preview
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : (
+                <div style={{ textAlign: 'center', padding: '12px' }}>
+                  <Plus size={28} color="#9CA3AF" />
+                  <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '6px 0 0' }}>Choisir une photo</p>
+                </div>
+              )
+            }
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
 
-        {/* Taille */}
-        <div style={{ marginBottom: '20px' }}>
-          <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', marginBottom: '10px' }}>Taille dans la grille</p>
-          <SizePicker selected={{ col, row }} onSelect={(c, r) => { setCol(c); setRow(r) }} />
+          {/* Taille */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: '#1A1A1A', marginBottom: '10px', marginTop: 0 }}>Taille dans la grille</p>
+            <SizePicker selected={{ col, row }} onSelect={(c, r) => { setCol(c); setRow(r) }} />
+          </div>
         </div>
 
         {/* Info taille */}
