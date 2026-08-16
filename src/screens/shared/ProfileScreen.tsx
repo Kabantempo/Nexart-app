@@ -1205,9 +1205,9 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
         <FlatList
           data={[...portfolioImages, 'ADD']}
           keyExtractor={(item, i) => `${item}-${i}`}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.sm }}
+          numColumns={3}
+          columnWrapperStyle={{ gap: spacing.xs, justifyContent: 'center' }}
+          contentContainerStyle={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}
           renderItem={({ item }) => {
             if (item === 'ADD') {
               if (portfolioImages.length >= 20) return null;
@@ -1255,23 +1255,9 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
         <Text style={pv.logoutText}>Se déconnecter</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={pv.deleteAccountBtn} onPress={() => {
-        Alert.alert(
-          'Supprimer mon compte',
-          'Cette action est irréversible. Toutes vos données (profil, portfolio, candidatures, messages) seront supprimées définitivement.',
-          [
-            { text: 'Annuler', style: 'cancel' },
-            { text: 'Supprimer définitivement', style: 'destructive', onPress: async () => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              const { error } = await supabase.rpc('delete_user');
-              if (error) Alert.alert('Erreur', 'La suppression a échoué. Contactez support@nexart.fr');
-              else supabase.auth.signOut();
-            }},
-          ],
-        );
-      }}>
-        <Ionicons name="trash-outline" size={13} color={colors.text.secondary} />
-        <Text style={pv.deleteAccountText}>Supprimer mon compte</Text>
+      <TouchableOpacity style={pv.settingsBtn} onPress={() => navigation.navigate('Settings')}>
+        <Ionicons name="settings-outline" size={15} color={colors.text.secondary} />
+        <Text style={pv.settingsBtnText}>Paramètres</Text>
       </TouchableOpacity>
 
       {/* ── Modal aperçu plein écran ── */}
@@ -1529,11 +1515,11 @@ const pv = StyleSheet.create({
     letterSpacing: 1.2,
   },
 
-  /* Portfolio horizontal */
+  /* Portfolio grille 3 colonnes */
   portfolioCard: {
-    width: PV_CARD_W,
-    height: PV_CARD_H,
-    borderRadius: radius.md,
+    width: IMG_SIZE,
+    height: IMG_SIZE,
+    borderRadius: radius.sm,
     backgroundColor: colors.surface,
   },
   portfolioCardAdd: {
@@ -1599,8 +1585,8 @@ const pv = StyleSheet.create({
     borderRadius: radius.md,
   },
   logoutText: { ...typography.label, color: colors.error, fontWeight: '600' },
-  deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, justifyContent: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
-  deleteAccountText: { ...typography.caption, color: colors.text.secondary, textDecorationLine: 'underline' },
+  settingsBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, justifyContent: 'center', paddingVertical: spacing.sm, marginTop: spacing.xs },
+  settingsBtnText: { ...typography.caption, color: colors.text.secondary },
 
   /* Preview plein écran */
   previewOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
