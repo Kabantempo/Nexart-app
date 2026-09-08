@@ -25,6 +25,11 @@ const STEPS: Record<UserRole, Array<{ icon: IoniconName; title: string; body: st
     { icon: 'person-outline', title: 'Découvrez les créateurs', body: 'Parcourez les portfolios, voyez leurs prochains marchés, et contactez-les directement.' },
     { icon: 'heart-outline', title: 'Sauvegardez vos favoris', body: 'Gardez une trace des marchés et créateurs qui vous inspirent.' },
   ],
+  admin: [
+    { icon: 'shield-checkmark-outline', title: 'Espace administration', body: 'Modération des signalements, gestion des utilisateurs et des événements.' },
+    { icon: 'document-text-outline', title: 'Vérifications SIRET', body: 'Validez ou refusez les demandes de badge « Créateur vérifié ».' },
+    { icon: 'stats-chart-outline', title: 'Statistiques', body: 'Suivez les inscriptions, candidatures et événements publiés.' },
+  ],
 };
 
 const STORAGE_KEY = 'nexart_onboarding_seen';

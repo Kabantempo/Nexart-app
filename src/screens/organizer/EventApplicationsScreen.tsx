@@ -13,7 +13,8 @@ import { useAuth } from '../../stores/auth';
 import { getOrCreateConversation } from '../../hooks/useConversations';
 import { useHasReviewed } from '../../hooks/useReviews';
 import { getPushTokenForUser, sendPushNotification } from '../../hooks/usePushNotifications';
-import { ApplicationStatus } from '../../types';
+import { ApplicationStatus, RejectionReason } from '../../types';
+import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason, toRejectionReason } from '../../utils/applications';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 import { DEMO_MODE, DEMO_ORGANIZER_APPLICATIONS } from '../../lib/demoData';
 
@@ -26,7 +27,7 @@ interface ApplicationItem {
   id: string;
   status: ApplicationStatus;
   message: string | null;
-  refusal_reason: string | null;
+  rejection_reason: RejectionReason | null;
   stripe_payment_id: string | null;
   created_at: string;
   creator: {
@@ -37,11 +38,7 @@ interface ApplicationItem {
   };
 }
 
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
-  pending:  { label: 'En attente', color: colors.text.secondary, bg: colors.border },
-  accepted: { label: 'Acceptée',   color: colors.secondary,      bg: colors.secondary + '25' },
-  refused:  { label: 'Refusée',    color: colors.error,          bg: colors.error + '20' },
-};
+const STATUS_CONFIG = APPLICATION_STATUS_CONFIG;
 
 const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Toutes',     value: 'all' },
@@ -259,13 +256,13 @@ function ApplicationCard({
         </View>
       )}
 
-      {item.status === 'refused' && item.refusal_reason && (
+      {item.status === 'refused' && formatRejectionReason(item.rejection_reason) && (
         <View style={styles.refusalBox}>
           <View style={styles.refusalHeader}>
             <Ionicons name="close" size={10} color={colors.error} />
             <Text style={styles.refusalHeaderLabel}>Motif communiqué</Text>
           </View>
-          <Text style={styles.refusalText}>{item.refusal_reason}</Text>
+          <Text style={styles.refusalText}>{formatRejectionReason(item.rejection_reason)}</Text>
         </View>
       )}
 
@@ -366,7 +363,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     const { data } = await supabase
       .from('applications')
       .select(`
-        id, status, message, refusal_reason, created_at,
+        id, status, message, rejection_reason, created_at,
         creator:profiles!creator_id (
           id, full_name, avatar_url,
           creator_profile:creator_profiles (disciplines, city)
@@ -396,7 +393,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
 
     if (!DEMO_MODE) {
       await supabase.from('applications')
-        .update({ status: 'refused', refusal_reason: reason || null })
+        .update({ status: 'refused', rejection_reason: toRejectionReason(reason) })
         .eq('id', refusalTarget.id);
       const token = await getPushTokenForUser(refusalTarget.creator.id);
       if (token) sendPushNotification(
@@ -407,7 +404,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     } else {
       setApplications(prev => prev.map(a =>
         a.id === refusalTarget.id
-          ? { ...a, status: 'refused', refusal_reason: reason || null }
+          ? { ...a, status: 'refused', rejection_reason: toRejectionReason(reason) }
           : a,
       ));
     }
@@ -502,12 +499,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
   };
 
   const filtered = filter === 'all' ? applications : applications.filter(a => a.status === filter);
-  const counts = {
-    all:      applications.length,
-    pending:  applications.filter(a => a.status === 'pending').length,
-    accepted: applications.filter(a => a.status === 'accepted').length,
-    refused:  applications.filter(a => a.status === 'refused').length,
-  };
+  const counts = countByStatus(applications);
 
   const demoEvent = DEMO_MODE
     ? (require('../../lib/demoData').DEMO_EVENTS as any[]).find((e: any) => e.id === eventId)

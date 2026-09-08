@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { supabase } from './src/lib/supabase';
 import { AuthContext } from './src/stores/auth';
+import { ThemeProvider, useTheme } from './src/stores/theme';
 import { Profile } from './src/types';
 import RootNavigator from './src/navigation';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
@@ -44,10 +45,11 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
 function AppInner({ profile }: { profile: Profile | null }) {
   usePushNotifications(profile?.id);
   const { visible, dismiss } = useOnboarding(profile?.role);
+  const { scheme } = useTheme();
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <RootNavigator />
       {profile?.role && visible && (
         <OnboardingModal role={profile.role} visible={visible} onDismiss={dismiss} />
@@ -103,9 +105,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthContext.Provider value={{ session, user, profile, loading, refetchProfile, setProfile }}>
-        <ToastProvider>
-          <AppInner profile={profile} />
-        </ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            <AppInner profile={profile} />
+          </ToastProvider>
+        </ThemeProvider>
       </AuthContext.Provider>
     </SafeAreaProvider>
   );

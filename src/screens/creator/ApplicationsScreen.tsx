@@ -9,6 +9,7 @@ import { getOrCreateConversation } from '../../hooks/useConversations';
 import { useHasReviewed } from '../../hooks/useReviews';
 import { supabase } from '../../lib/supabase';
 import { ApplicationStatus } from '../../types';
+import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason } from '../../utils/applications';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 async function createCheckoutSession(applicationId: string, eventTitle: string, standPrice: number): Promise<{ url: string | null; error: string | null }> {
@@ -41,11 +42,7 @@ const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Refusées', value: 'refused' },
 ];
 
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
-  pending:  { label: 'En attente', color: colors.text.secondary, bg: colors.border },
-  accepted: { label: 'Acceptée',   color: colors.secondary,      bg: colors.secondary + '25' },
-  refused:  { label: 'Refusée',    color: colors.error,          bg: colors.error + '20' },
-};
+const STATUS_CONFIG = APPLICATION_STATUS_CONFIG;
 
 function formatDateRange(start: string, end: string) {
   const s = new Date(start).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
@@ -125,13 +122,13 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
           <Text style={s.messageText} numberOfLines={2}>{item.message}</Text>
         </View>
       )}
-      {item.status === 'refused' && item.refusal_reason && (
+      {item.status === 'refused' && formatRejectionReason(item.rejection_reason) && (
         <View style={s.refusalBox}>
           <View style={s.refusalHeader}>
             <Ionicons name="close" size={11} color={colors.error} />
             <Text style={s.refusalLabel}>Motif du refus</Text>
           </View>
-          <Text style={s.refusalText}>{item.refusal_reason}</Text>
+          <Text style={s.refusalText}>{formatRejectionReason(item.rejection_reason)}</Text>
         </View>
       )}
       {item.status === 'accepted' && (
@@ -178,12 +175,7 @@ export default function ApplicationsScreen() {
   const [filter, setFilter] = useState<ApplicationStatus | 'all'>('all');
 
   const filtered = filter === 'all' ? applications : applications.filter(a => a.status === filter);
-  const counts = {
-    all: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    accepted: applications.filter(a => a.status === 'accepted').length,
-    refused: applications.filter(a => a.status === 'refused').length,
-  };
+  const counts = countByStatus(applications);
 
   const pastAcceptedCount = applications.filter(a =>
     a.status === 'accepted' &&

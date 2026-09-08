@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView,
 } from 'react-native';
@@ -7,11 +7,31 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { useTheme, ThemePreference } from '../../stores/theme';
+import { ThemeColors, spacing, typography, radius } from '../../constants/theme';
+
+/**
+ * Écran de référence pour le thème clair/sombre : les styles sont construits
+ * à partir de `useTheme().colors` au lieu d'importer `colors` en statique.
+ * C'est le patron à suivre pour migrer les autres écrans.
+ */
+
+const THEME_OPTIONS: { value: ThemePreference; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'system', label: 'Système', icon: 'phone-portrait-outline' },
+  { value: 'light',  label: 'Clair',   icon: 'sunny-outline' },
+  { value: 'dark',   label: 'Sombre',  icon: 'moon-outline' },
+];
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const { colors, preference, setPreference } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+
+  const handleThemeChange = (value: ThemePreference) => {
+    Haptics.selectionAsync();
+    setPreference(value);
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -45,6 +65,37 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.content}>
+        {/* Apparence */}
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Apparence</Text>
+          <View style={s.themeRow}>
+            {THEME_OPTIONS.map(opt => {
+              const active = preference === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[s.themeCard, active && s.themeCardActive]}
+                  onPress={() => handleThemeChange(opt.value)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Ionicons
+                    name={opt.icon}
+                    size={20}
+                    color={active ? colors.primary : colors.text.secondary}
+                  />
+                  <Text style={[s.themeCardText, active && s.themeCardTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={s.hint}>
+            « Système » suit le réglage clair/sombre de votre téléphone.
+          </Text>
+        </View>
+
         {/* Zone danger */}
         <View style={s.section}>
           <Text style={s.sectionLabel}>Zone dangereuse</Text>
@@ -52,7 +103,7 @@ export default function SettingsScreen() {
             <Ionicons name="trash-outline" size={18} color={colors.error} />
             <Text style={s.deleteBtnText}>Supprimer mon compte</Text>
           </TouchableOpacity>
-          <Text style={s.deleteHint}>
+          <Text style={s.hint}>
             Action irréversible — toutes vos données seront définitivement supprimées.
           </Text>
         </View>
@@ -61,7 +112,7 @@ export default function SettingsScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
@@ -70,7 +121,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.surface,
+    borderBottomColor: colors.border,
   },
   backBtn: { width: 40, alignItems: 'flex-start' },
   title: { ...typography.h3, color: colors.text.primary },
@@ -83,6 +134,23 @@ const s = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: spacing.md,
   },
+  themeRow: { flexDirection: 'row', gap: spacing.sm },
+  themeCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+  },
+  themeCardActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.accent,
+  },
+  themeCardText: { ...typography.label, color: colors.text.secondary },
+  themeCardTextActive: { color: colors.primary, fontWeight: '600' },
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,7 +162,7 @@ const s = StyleSheet.create({
     padding: spacing.md,
   },
   deleteBtnText: { ...typography.label, color: colors.error, fontWeight: '600' },
-  deleteHint: {
+  hint: {
     ...typography.caption,
     color: colors.text.secondary,
     marginTop: spacing.sm,

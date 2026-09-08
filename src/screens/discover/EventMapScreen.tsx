@@ -20,6 +20,7 @@ export const EVENT_TYPE_COLORS: Record<EventType, string> = {
   popup:     '#A855F7',
   salon:     '#10B981',
   fair:      '#EF4444',
+  marche:    '#6366F1',
 };
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
@@ -28,6 +29,7 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   popup:     'Pop-up',
   salon:     'Salon',
   fair:      'Foire',
+  marche:    'Marché',
 };
 
 const RADIUS_OPTIONS = [
