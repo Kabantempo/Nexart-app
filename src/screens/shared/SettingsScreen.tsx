@@ -8,6 +8,7 @@ import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useTheme, ThemePreference } from '../../stores/theme';
+import { useAuth } from '../../stores/auth';
 import { ThemeColors, spacing, typography, radius } from '../../constants/theme';
 
 /**
@@ -26,6 +27,14 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { colors, preference, setPreference } = useTheme();
+  const { profile } = useAuth();
+  const isCreator = profile?.role === 'creator';
+  const links: { label: string; icon: keyof typeof Ionicons.glyphMap; route: string; show: boolean }[] = [
+    { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
+    { label: 'Parrainage', icon: 'gift-outline', route: 'Referral', show: true },
+    { label: 'Mes documents', icon: 'document-text-outline', route: 'Documents', show: isCreator },
+    { label: 'Créateur vérifié', icon: 'shield-checkmark-outline', route: 'Verification', show: isCreator },
+  ];
   const s = useMemo(() => makeStyles(colors), [colors]);
 
   const handleThemeChange = (value: ThemePreference) => {
@@ -65,6 +74,18 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={s.content}>
+        {/* Mon compte */}
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Mon compte</Text>
+          {links.filter(l => l.show).map(l => (
+            <TouchableOpacity key={l.route} style={s.linkRow} onPress={() => navigation.navigate(l.route)}>
+              <Ionicons name={l.icon} size={20} color={colors.primary} />
+              <Text style={s.linkText}>{l.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Apparence */}
         <View style={s.section}>
           <Text style={s.sectionLabel}>Apparence</Text>
@@ -162,6 +183,12 @@ const makeStyles = (colors: ThemeColors) => StyleSheet.create({
     padding: spacing.md,
   },
   deleteBtnText: { ...typography.label, color: colors.error, fontWeight: '600' },
+  linkRow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm,
+  },
+  linkText: { ...typography.label, color: colors.text.primary, flex: 1 },
   hint: {
     ...typography.caption,
     color: colors.text.secondary,

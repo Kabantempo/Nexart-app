@@ -447,6 +447,7 @@ export interface EventDocument {
   sent_at: string | null;
   downloaded_at: string | null;
   created_at: string;
+  event?: { id: string; title: string; start_date: string | null; city: string | null } | null;
 }
 
 export interface Notification {
