@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import EventScreenShell from '../../components/EventScreenShell';
 import { useTheme } from '../../stores/theme';
 import { useSiteData, euros } from '../../hooks/useSiteData';
+import { downloadInvoice, invoiceNumber } from '../../lib/invoice';
 import { ThemeColors, spacing, typography, radius } from '../../constants/theme';
 
 interface Payment {
@@ -10,6 +11,8 @@ interface Payment {
   amount_cents: number;
   status: string;
   created_at: string;
+  application_id: string | null;
+  stripe_payment_id: string | null;
   event?: { id: string; title: string; start_date: string | null; city: string | null; organizer?: { full_name: string | null } | null } | null;
 }
 
@@ -24,6 +27,15 @@ export default function PaymentsScreen({ navigation }: any) {
     '/api/creator/payments', 'Impossible de charger vos paiements.',
   );
   const payments = data?.payments ?? [];
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const getInvoice = async (p: Payment) => {
+    setBusyId(p.id);
+    const err = await downloadInvoice(p);
+    setBusyId(null);
+    if (err) Alert.alert('Facture indisponible', err);
+  };
+  const canInvoice = (p: Payment) => !!p.application_id && ['completed', 'succeeded', 'paid'].includes(p.status);
 
   return (
     <EventScreenShell title="Mes paiements" onBack={() => navigation.goBack()} loading={loading} error={error} onRetry={refetch}>
@@ -41,6 +53,12 @@ export default function PaymentsScreen({ navigation }: any) {
             <Text style={s.meta}>
               {STATUS_LABELS[p.status] ?? p.status} · {new Date(p.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
             </Text>
+            {canInvoice(p) ? (
+              <TouchableOpacity style={[s.invoice, busyId === p.id && { opacity: 0.5 }]} disabled={busyId !== null} onPress={() => getInvoice(p)}
+                accessibilityRole="button" accessibilityLabel={`Télécharger la facture ${invoiceNumber(p)}`}>
+                <Text style={s.invoiceText}>{busyId === p.id ? 'Génération…' : 'Télécharger la facture (PDF)'}</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         ))}
       </ScrollView>
@@ -58,4 +76,6 @@ const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   name: { ...typography.label, color: colors.text.primary, fontWeight: '600', flex: 1 },
   amount: { ...typography.label, color: colors.primary, fontWeight: '700' },
   meta: { ...typography.caption, color: colors.text.secondary },
+  invoice: { marginTop: spacing.sm, minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
+  invoiceText: { ...typography.label, color: colors.primary, fontWeight: '600' },
 });

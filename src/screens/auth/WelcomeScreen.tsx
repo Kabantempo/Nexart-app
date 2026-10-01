@@ -33,7 +33,7 @@ function mockProfile(over: Pick<Profile, 'id' | 'role' | 'full_name'> & Partial<
     is_banned: false,
     is_creator: over.role === 'creator',
     is_organizer: over.role === 'organizer',
-    onboarding_done: false,
+    onboarding_done: true,
     created_at: new Date().toISOString(),
     notification_prefs: DEFAULT_NOTIFICATION_PREFS,
     profile_visibility: 'public',
@@ -114,6 +114,10 @@ export default function WelcomeScreen({ navigation }: Props) {
             activeOpacity={0.85}
           >
             <Text style={s.btnSecondaryText}>Créer un compte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={s.btnGhost} onPress={() => navigation.navigate('Showcase')} activeOpacity={0.7}>
+            <Text style={s.btnGhostText}>Découvrir Nexart</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

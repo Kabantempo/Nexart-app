@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "nexart",
     "slug": "nexart",
@@ -69,7 +69,8 @@
       "expo-font",
       "expo-secure-store",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-sharing"
     ],
     "runtimeVersion": {
       "policy": "appVersion"

@@ -7,6 +7,7 @@ import { ThemeColors, spacing, typography, radius } from '../../constants/theme'
 
 const TOOLS: { route: string; label: string; hint: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { route: 'EventExhibitors', label: 'Exposants',        hint: 'Liste, statuts, export CSV',          icon: 'people-outline' },
+  { route: 'EventExhibitorFields', label: 'Formulaire exposant', hint: 'Questions ajoutées à la candidature', icon: 'list-outline' },
   { route: 'EventWaitlist',   label: "Liste d'attente",  hint: 'Proposer une place libérée',          icon: 'hourglass-outline' },
   { route: 'EventVolunteers', label: 'Bénévoles',        hint: 'Bénévoles et créneaux',               icon: 'hand-left-outline' },
   { route: 'EventTeam',       label: 'Équipe',           hint: 'Co-organisateurs, invitation par @pseudo', icon: 'person-add-outline' },

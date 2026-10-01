@@ -40,6 +40,7 @@ import BoutiqueScreen      from '../screens/discover/BoutiqueScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
+import OnboardingScreen   from '../screens/auth/RoleScreen';
 
 const Stack = createStackNavigator();
 
@@ -83,6 +84,8 @@ export default function RootNavigator() {
           </>
         ) : profile?.is_banned ? (
           <Stack.Screen name="Banned"    component={BannedScreen} />
+        ) : profile && profile.onboarding_done === false && !profile.is_admin ? (
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : profile?.is_admin ? (
           <Stack.Screen name="AdminHome" component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (

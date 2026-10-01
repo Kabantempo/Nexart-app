@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, 
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/theme';
-import { useEventExhibitors, EXHIBITOR_STATUS_LABELS } from '../../hooks/useEventExhibitors';
+import { useEventExhibitors, EXHIBITOR_STATUS_LABELS, formatAnswer } from '../../hooks/useEventExhibitors';
 import { ThemeColors, spacing, typography, radius } from '../../constants/theme';
 
 export default function EventExhibitorsScreen({ route, navigation }: any) {
@@ -11,7 +11,7 @@ export default function EventExhibitorsScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const s = useMemo(() => makeStyles(colors), [colors]);
-  const { exhibitors, loading, error, toCsv, refetch } = useEventExhibitors(eventId);
+  const { exhibitors, fields, loading, error, toCsv, refetch } = useEventExhibitors(eventId);
 
   const exportCsv = async () => {
     try {
@@ -57,6 +57,9 @@ export default function EventExhibitorsScreen({ route, navigation }: any) {
                 {item.proposed_stand ? (
                   <Text style={s.mail}>Stand {item.proposed_stand.size} · {item.proposed_stand.price} €</Text>
                 ) : null}
+                {fields.filter(f => formatAnswer(item.answers[f.field_name]) !== '').map(f => (
+                  <Text key={f.field_name} style={s.mail}>{f.field_label} : {formatAnswer(item.answers[f.field_name])}</Text>
+                ))}
               </View>
               <View style={s.badge}>
                 <Text style={s.badgeText}>{EXHIBITOR_STATUS_LABELS[item.status] ?? item.status}</Text>
