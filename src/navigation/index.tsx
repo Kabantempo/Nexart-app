@@ -16,6 +16,8 @@ import AboutScreen        from '../screens/info/AboutScreen';
 import ContactScreen      from '../screens/info/ContactScreen';
 import LegalScreen        from '../screens/info/LegalScreen';
 import AdminScreen        from '../screens/admin/AdminScreen';
+import BlogScreen         from '../screens/info/BlogScreen';
+import BannedScreen       from '../screens/info/BannedScreen';
 
 const Stack = createStackNavigator();
 
@@ -56,6 +58,8 @@ export default function RootNavigator() {
             <Stack.Screen name="Auth"     component={AuthNavigator} />
             <Stack.Screen name="Discover" component={DiscoverStack} />
           </>
+        ) : profile?.is_banned ? (
+          <Stack.Screen name="Banned"    component={BannedScreen} />
         ) : profile?.is_admin ? (
           <Stack.Screen name="Admin"     component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (
@@ -79,6 +83,11 @@ export default function RootNavigator() {
           name="Legal"
           component={LegalScreen}
           options={{ headerShown: true, title: 'Mentions légales', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Blog"
+          component={BlogScreen}
+          options={{ headerShown: true, title: 'Blog', headerBackTitle: 'Retour' }}
         />
         <Stack.Screen
           name="Admin"
