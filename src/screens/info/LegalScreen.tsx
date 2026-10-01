@@ -1,9 +1,16 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
 import { useThemeColors } from '../../stores/theme';
 
 type Tab = 'terms' | 'privacy';
+
+// Les textes de référence sont publiés sur le site ; l'app en garde un résumé et renvoie vers les versions complètes.
+const SITE_LEGAL_LINKS: { label: string; url: string }[] = [
+  { label: 'Mentions légales', url: 'https://nexart.fr/mentions-legales' },
+  { label: 'Conditions générales (version complète)', url: 'https://nexart.fr/conditions' },
+  { label: 'Politique de confidentialité (version complète)', url: 'https://nexart.fr/confidentialite' },
+];
 
 const TERMS = `CONDITIONS GÉNÉRALES D'UTILISATION
 
@@ -90,6 +97,13 @@ export default function LegalScreen() {
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.text}>{tab === 'terms' ? TERMS : PRIVACY}</Text>
+
+        <Text style={s.linksTitle}>Documents complets sur nexart.fr</Text>
+        {SITE_LEGAL_LINKS.map(l => (
+          <TouchableOpacity key={l.url} style={s.link} onPress={() => Linking.openURL(l.url)} accessibilityRole="link">
+            <Text style={s.linkText}>{l.label}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </View>
   );
@@ -113,4 +127,7 @@ const makeS = (colors: ThemeColors) => StyleSheet.create({
   scroll:   { flex: 1 },
   content:  { padding: spacing.xl, paddingBottom: spacing.xxl },
   text:     { ...typography.body, color: colors.text.secondary, lineHeight: 22 },
+  linksTitle: { ...typography.caption, color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: 0.8, marginTop: spacing.xl, marginBottom: spacing.sm },
+  link:     { paddingVertical: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  linkText: { ...typography.label, color: colors.primary, fontWeight: '600' },
 });
