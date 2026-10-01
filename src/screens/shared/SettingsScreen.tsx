@@ -80,6 +80,7 @@ export default function SettingsScreen() {
     { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
     { label: 'Parrainage', icon: 'gift-outline', route: 'Referral', show: true },
     { label: 'Mes statistiques', icon: 'stats-chart-outline', route: 'CreatorAnalytics', show: isCreator },
+    { label: 'Signalements', icon: 'flag-outline', route: 'AdminReports', show: !!profile?.is_admin },
     { label: "Journal d'audit", icon: 'shield-outline', route: 'AuditLog', show: !!profile?.is_admin },
     { label: 'Carnet de route', icon: 'map-outline', route: 'Itinerary', show: isCreator },
     { label: 'Mes paiements', icon: 'card-outline', route: 'CreatorPayments', show: isCreator },

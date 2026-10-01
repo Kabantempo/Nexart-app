@@ -31,6 +31,7 @@ import PaymentsScreen      from '../screens/creator/PaymentsScreen';
 import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
 import ItineraryScreen     from '../screens/creator/ItineraryScreen';
 import AuditLogScreen      from '../screens/admin/AuditLogScreen';
+import ReportsScreen       from '../screens/admin/ReportsScreen';
 import BoutiqueScreen      from '../screens/discover/BoutiqueScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
@@ -135,6 +136,11 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Itinerary"
           component={ItineraryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminReports"
+          component={ReportsScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
