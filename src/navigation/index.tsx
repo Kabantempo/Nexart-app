@@ -21,6 +21,7 @@ import BlogScreen         from '../screens/info/BlogScreen';
 import BannedScreen       from '../screens/info/BannedScreen';
 import UsernameProfileScreen from '../screens/discover/UsernameProfileScreen';
 import CalendarScreen     from '../screens/discover/CalendarScreen';
+import SearchScreen       from '../screens/discover/SearchScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
@@ -92,9 +93,15 @@ export default function RootNavigator() {
           options={{ headerShown: true, title: 'Mentions légales', headerBackTitle: 'Retour' }}
         />
         <Stack.Screen name="Username" component={UsernameProfileScreen} />
+        <Stack.Screen name="CreatorProfile" component={UsernameProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Referral" component={ReferralScreen} />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{ headerShown: true, title: 'Recherche', headerBackTitle: 'Retour' }}
+        />
         <Stack.Screen
           name="Calendar"
           component={CalendarScreen}

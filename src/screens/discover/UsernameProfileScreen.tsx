@@ -10,11 +10,13 @@ export default function UsernameProfileScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const s = useMemo(() => makeStyles(colors), [colors]);
   const username: string = route.params?.username ?? '';
+  const directId: string | undefined = route.params?.creatorId;
   const [state, setState] = useState<{ status: 'loading' } | { status: 'missing' } | { status: 'found'; id: string }>(
-    { status: 'loading' },
+    directId ? { status: 'found', id: directId } : { status: 'loading' },
   );
 
   useEffect(() => {
+    if (directId) return;
     let cancelled = false;
     supabase
       .from('profiles')
@@ -26,7 +28,7 @@ export default function UsernameProfileScreen({ route, navigation }: any) {
         setState(data ? { status: 'found', id: (data as { id: string }).id } : { status: 'missing' });
       });
     return () => { cancelled = true; };
-  }, [username]);
+  }, [username, directId]);
 
   if (state.status === 'found') {
     return <PublicCreatorProfile route={{ params: { creatorId: state.id } } as any} navigation={navigation} />;
