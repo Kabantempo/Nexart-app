@@ -1714,6 +1714,9 @@ export default function ProfileScreen() {
       </TouchableOpacity>
 
       <View style={styles.infoLinks}>
+        <TouchableOpacity style={styles.infoLinkBtn} onPress={() => navigation.navigate('Settings')} activeOpacity={0.7}>
+          <Text style={styles.infoLinkText}>Paramètres</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.infoLinkBtn} onPress={() => navigation.navigate('About')} activeOpacity={0.7}>
           <Text style={styles.infoLinkText}>À propos</Text>
         </TouchableOpacity>
