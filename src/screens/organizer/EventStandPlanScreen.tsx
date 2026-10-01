@@ -101,11 +101,11 @@ export default function EventStandPlanScreen({ route, navigation }: any) {
           {([['Lignes', plan.rows, -1, 0, 1, 0], ['Colonnes', plan.cols, 0, -1, 0, 1]] as const).map(([label, value, dr1, dc1, dr2, dc2]) => (
             <View key={label} style={s.stepper}>
               <Text style={s.stepLabel}>{label}</Text>
-              <TouchableOpacity style={s.stepBtn} onPress={() => resize(dr1, dc1)} accessibilityLabel={`Moins de ${label.toLowerCase()}`}>
+              <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.stepBtn} onPress={() => resize(dr1, dc1)} accessibilityLabel={`Moins de ${label.toLowerCase()}`}>
                 <Ionicons name="remove" size={18} color={colors.text.primary} />
               </TouchableOpacity>
               <Text style={s.stepValue}>{value}</Text>
-              <TouchableOpacity style={s.stepBtn} onPress={() => resize(dr2, dc2)} accessibilityLabel={`Plus de ${label.toLowerCase()}`}>
+              <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.stepBtn} onPress={() => resize(dr2, dc2)} accessibilityLabel={`Plus de ${label.toLowerCase()}`}>
                 <Ionicons name="add" size={18} color={colors.text.primary} />
               </TouchableOpacity>
             </View>

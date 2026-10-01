@@ -87,7 +87,7 @@ export default function EventTasksScreen({ route, navigation }: any) {
           <View key={t.id} style={s.card}>
             <View style={s.top}>
               <Text style={[s.name, t.status === 'completed' && s.done]}>{t.title}</Text>
-              <TouchableOpacity onPress={() => confirmRemove(t.id, t.title)} accessibilityLabel={`Supprimer ${t.title}`}>
+              <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => confirmRemove(t.id, t.title)} accessibilityLabel={`Supprimer ${t.title}`}>
                 <Ionicons name="trash-outline" size={18} color={colors.error} />
               </TouchableOpacity>
             </View>

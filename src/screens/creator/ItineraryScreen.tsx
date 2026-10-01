@@ -75,7 +75,7 @@ export default function ItineraryScreen({ navigation }: any) {
                 {fmt(e.start_date)} → {fmt(e.end_date)}{[e.city, e.region].filter(Boolean).length ? ` · ${[e.city, e.region].filter(Boolean).join(', ')}` : ''}
               </Text>
             </View>
-            <TouchableOpacity onPress={() => confirmRemove(e.id, e.label)} accessibilityLabel={`Supprimer ${e.label}`}>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => confirmRemove(e.id, e.label)} accessibilityLabel={`Supprimer ${e.label}`}>
               <Ionicons name="trash-outline" size={18} color={colors.error} />
             </TouchableOpacity>
           </View>

@@ -51,11 +51,11 @@ export default function CalendarScreen() {
   return (
     <View style={s.container}>
       <View style={s.pager}>
-        <TouchableOpacity onPress={() => shift(-1)} style={s.pagerBtn} accessibilityLabel="Mois précédent">
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => shift(-1)} style={s.pagerBtn} accessibilityLabel="Mois précédent">
           <Ionicons name="chevron-back" size={22} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={s.month}>{monthLabel(cursor)}</Text>
-        <TouchableOpacity onPress={() => shift(1)} style={s.pagerBtn} accessibilityLabel="Mois suivant">
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => shift(1)} style={s.pagerBtn} accessibilityLabel="Mois suivant">
           <Ionicons name="chevron-forward" size={22} color={colors.text.primary} />
         </TouchableOpacity>
       </View>

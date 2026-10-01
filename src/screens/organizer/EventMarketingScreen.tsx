@@ -69,7 +69,7 @@ export default function EventMarketingScreen({ route, navigation }: any) {
               <Text style={s.name}>{c.name}{c.outlet ? ` · ${c.outlet}` : ''}</Text>
               <Text style={s.meta} selectable>{c.email}</Text>
             </View>
-            <TouchableOpacity onPress={() => setContacts(cs => cs.filter((_, j) => j !== i))} accessibilityLabel={`Retirer ${c.name}`}>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => setContacts(cs => cs.filter((_, j) => j !== i))} accessibilityLabel={`Retirer ${c.name}`}>
               <Ionicons name="trash-outline" size={18} color={colors.error} />
             </TouchableOpacity>
           </View>
@@ -88,7 +88,7 @@ export default function EventMarketingScreen({ route, navigation }: any) {
               <Text style={s.name}>{d.task}</Text>
               <Text style={s.meta}>{d.date}</Text>
             </View>
-            <TouchableOpacity onPress={() => setDeadlines(ds => ds.filter((_, j) => j !== i))} accessibilityLabel={`Retirer ${d.task}`}>
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => setDeadlines(ds => ds.filter((_, j) => j !== i))} accessibilityLabel={`Retirer ${d.task}`}>
               <Ionicons name="trash-outline" size={18} color={colors.error} />
             </TouchableOpacity>
           </View>

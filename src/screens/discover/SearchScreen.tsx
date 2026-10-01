@@ -80,7 +80,7 @@ export default function SearchScreen() {
           accessibilityLabel="Rechercher"
         />
         {text ? (
-          <TouchableOpacity onPress={() => setText('')} accessibilityLabel="Effacer">
+          <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => setText('')} accessibilityLabel="Effacer">
             <Ionicons name="close-circle" size={18} color={colors.text.secondary} />
           </TouchableOpacity>
         ) : null}

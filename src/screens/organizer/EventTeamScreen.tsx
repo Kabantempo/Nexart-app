@@ -43,7 +43,7 @@ export default function EventTeamScreen({ route, navigation }: any) {
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={s.back}>
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityLabel="Retour" accessibilityRole="button" onPress={() => navigation.goBack()} style={s.back}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
@@ -97,7 +97,7 @@ export default function EventTeamScreen({ route, navigation }: any) {
                     {m.profiles?.username ? ` · @${m.profiles.username}` : ''}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => confirmRemove(m.id, label)} accessibilityLabel={`Retirer ${label}`}>
+                <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => confirmRemove(m.id, label)} accessibilityLabel={`Retirer ${label}`}>
                   <Ionicons name="trash-outline" size={20} color={colors.error} />
                 </TouchableOpacity>
               </View>

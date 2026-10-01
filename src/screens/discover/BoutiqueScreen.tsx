@@ -41,7 +41,7 @@ export default function BoutiqueScreen({ route, navigation }: any) {
       <Modal visible={!!selected} animationType="slide" transparent onRequestClose={() => setSelected(null)}>
         <View style={s.overlay}>
           <View style={s.sheet}>
-            <TouchableOpacity style={s.close} onPress={() => setSelected(null)} accessibilityLabel="Fermer">
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.close} onPress={() => setSelected(null)} accessibilityLabel="Fermer">
               <Ionicons name="close" size={22} color={colors.text.primary} />
             </TouchableOpacity>
             {selected ? (

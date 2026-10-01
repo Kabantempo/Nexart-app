@@ -45,7 +45,7 @@ export default function EventWaitlistScreen({ route, navigation }: any) {
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={s.back}>
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityLabel="Retour" accessibilityRole="button" onPress={() => navigation.goBack()} style={s.back}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
@@ -85,10 +85,10 @@ export default function EventWaitlistScreen({ route, navigation }: any) {
                 <ActivityIndicator color={colors.primary} />
               ) : (
                 <View style={s.actions}>
-                  <TouchableOpacity style={s.promoteBtn} onPress={() => onPromote(item)} accessibilityLabel="Proposer la place">
+                  <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.promoteBtn} onPress={() => onPromote(item)} accessibilityLabel="Proposer la place">
                     <Ionicons name="arrow-up" size={16} color="#fff" />
                   </TouchableOpacity>
-                  <TouchableOpacity style={s.removeBtn} onPress={() => onRemove(item)} accessibilityLabel="Retirer">
+                  <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.removeBtn} onPress={() => onRemove(item)} accessibilityLabel="Retirer">
                     <Ionicons name="trash-outline" size={16} color={colors.error} />
                   </TouchableOpacity>
                 </View>

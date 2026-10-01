@@ -35,7 +35,7 @@ export default function EventChecklistScreen({ route, navigation }: any) {
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={s.back}>
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityLabel="Retour" accessibilityRole="button" onPress={() => navigation.goBack()} style={s.back}>
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
@@ -78,7 +78,7 @@ export default function EventChecklistScreen({ route, navigation }: any) {
                 <Text style={[s.name, it.completed && s.nameDone]}>{it.title}</Text>
                 {it.description ? <Text style={s.meta}>{it.description}</Text> : null}
               </View>
-              <TouchableOpacity onPress={() => confirmRemove(i)} accessibilityLabel={`Supprimer ${it.title}`}>
+              <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={() => confirmRemove(i)} accessibilityLabel={`Supprimer ${it.title}`}>
                 <Ionicons name="trash-outline" size={18} color={colors.text.secondary} />
               </TouchableOpacity>
             </TouchableOpacity>
@@ -94,7 +94,7 @@ export default function EventChecklistScreen({ route, navigation }: any) {
               onSubmitEditing={submit}
               returnKeyType="done"
             />
-            <TouchableOpacity style={s.addBtn} onPress={submit} accessibilityLabel="Ajouter la tâche">
+            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" style={s.addBtn} onPress={submit} accessibilityLabel="Ajouter la tâche">
               <Ionicons name="add" size={22} color="#fff" />
             </TouchableOpacity>
           </View>

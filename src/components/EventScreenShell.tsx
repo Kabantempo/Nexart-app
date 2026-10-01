@@ -24,7 +24,7 @@ export default function EventScreenShell({ title, subtitle, onBack, loading, err
   return (
     <View style={[s.container, { paddingTop: insets.top }]}>
       <View style={s.header}>
-        <TouchableOpacity onPress={onBack} style={s.back} accessibilityLabel="Retour">
+        <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" onPress={onBack} style={s.back} accessibilityLabel="Retour">
           <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
