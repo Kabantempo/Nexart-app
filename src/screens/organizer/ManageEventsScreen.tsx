@@ -25,19 +25,13 @@ function EventRow({
   onPress,
   onToggleStatus,
   onEdit,
-  onExhibitors,
-  onWaitlist,
-  onVolunteers,
-  onTeam,
+  onTools,
 }: {
   event: Event;
   onPress: () => void;
   onToggleStatus: (e: Event) => void;
   onEdit: () => void;
-  onExhibitors: () => void;
-  onWaitlist: () => void;
-  onVolunteers: () => void;
-  onTeam: () => void;
+  onTools: () => void;
 }) {
   const cfg = STATUS_CONFIG[event.status];
   return (
@@ -80,19 +74,8 @@ function EventRow({
         </TouchableOpacity>
       </View>
       <View style={[styles.cardActions, { borderTopWidth: 0, paddingTop: 0, marginTop: spacing.sm }]}>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onExhibitors}>
-          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Exposants</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onWaitlist}>
-          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Liste d'attente</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[styles.cardActions, { borderTopWidth: 0, paddingTop: 0, marginTop: spacing.sm }]}>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onVolunteers}>
-          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Bénévoles</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onTeam}>
-          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Équipe</Text>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onTools}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Outils de l'événement</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -145,10 +128,7 @@ export default function ManageEventsScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('EventApplications', { eventId: item.id, eventTitle: item.title })}
             onToggleStatus={toggleStatus}
             onEdit={() => navigation.navigate('EditEvent', { eventId: item.id })}
-            onExhibitors={() => navigation.navigate('EventExhibitors', { eventId: item.id, eventTitle: item.title })}
-            onWaitlist={() => navigation.navigate('EventWaitlist', { eventId: item.id, eventTitle: item.title })}
-            onVolunteers={() => navigation.navigate('EventVolunteers', { eventId: item.id, eventTitle: item.title })}
-            onTeam={() => navigation.navigate('EventTeam', { eventId: item.id, eventTitle: item.title })}
+            onTools={() => navigation.navigate('EventTools', { eventId: item.id, eventTitle: item.title })}
           />
         )}
         contentContainerStyle={styles.list}
