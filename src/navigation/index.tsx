@@ -18,6 +18,7 @@ import LegalScreen        from '../screens/info/LegalScreen';
 import AdminScreen        from '../screens/admin/AdminScreen';
 import BlogScreen         from '../screens/info/BlogScreen';
 import BannedScreen       from '../screens/info/BannedScreen';
+import UsernameProfileScreen from '../screens/discover/UsernameProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -84,6 +85,7 @@ export default function RootNavigator() {
           component={LegalScreen}
           options={{ headerShown: true, title: 'Mentions légales', headerBackTitle: 'Retour' }}
         />
+        <Stack.Screen name="Username" component={UsernameProfileScreen} />
         <Stack.Screen
           name="Blog"
           component={BlogScreen}

@@ -11,6 +11,7 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
+import * as Linking from 'expo-linking';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
@@ -33,7 +34,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${SITE_URL}/reset-password`,
+      redirectTo: Platform.OS === 'web' ? `${SITE_URL}/reset-password` : Linking.createURL('reset-password'),
     });
     setLoading(false);
     if (error) {

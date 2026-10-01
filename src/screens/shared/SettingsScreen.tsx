@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch,
+  View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch, Share,
 } from 'react-native';
 import { DEFAULT_NOTIFICATION_PREFS, NotificationPrefs } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,6 +36,34 @@ export default function SettingsScreen() {
     { key: 'reminders', label: 'Rappels' },
     { key: 'newsletter', label: 'Newsletter' },
   ];
+  const [exporting, setExporting] = React.useState(false);
+
+  const updateProfile = async (patch: { profile_visibility?: 'public' | 'private'; preferred_language?: 'fr' | 'en' }) => {
+    if (!profile) return;
+    Haptics.selectionAsync();
+    const { error } = await supabase.from('profiles').update(patch).eq('id', profile.id);
+    if (error) Alert.alert('Erreur', 'Réglage non enregistré.');
+    else await refetchProfile();
+  };
+
+  const exportData = async () => {
+    setExporting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('no session');
+      const siteUrl = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://nexart.fr';
+      const res = await fetch(`${siteUrl}/api/account/export-data`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      await Share.share({ title: 'Mes données Nexart', message: await res.text() });
+    } catch {
+      Alert.alert('Export impossible', 'Réessayez plus tard ou écrivez à support@nexart.fr.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const togglePref = async (key: keyof NotificationPrefs, value: boolean) => {
     if (!profile) return;
     Haptics.selectionAsync();
@@ -119,6 +147,45 @@ export default function SettingsScreen() {
               />
             </View>
           ))}
+        </View>
+
+        {/* Confidentialité et langue */}
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Confidentialité et langue</Text>
+          <View style={s.linkRow}>
+            <Text style={s.linkText}>Profil public</Text>
+            <Switch
+              value={(profile?.profile_visibility ?? 'public') === 'public'}
+              onValueChange={v => updateProfile({ profile_visibility: v ? 'public' : 'private' })}
+              trackColor={{ true: colors.primary, false: colors.border }}
+              disabled={!profile}
+            />
+          </View>
+          <View style={s.themeRow}>
+            {(['fr', 'en'] as const).map(lang => {
+              const active = (profile?.preferred_language ?? 'fr') === lang;
+              return (
+                <TouchableOpacity
+                  key={lang}
+                  style={[s.themeCard, active && s.themeCardActive]}
+                  onPress={() => updateProfile({ preferred_language: lang })}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[s.themeCardText, active && s.themeCardTextActive]}>
+                    {lang === 'fr' ? 'Français' : 'English'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={s.hint}>
+            La langue est enregistrée sur votre compte, comme sur le site. L'app reste en français pour l'instant.
+          </Text>
+          <TouchableOpacity style={[s.linkRow, { marginTop: spacing.md }, exporting && { opacity: 0.6 }]} onPress={exportData} disabled={exporting}>
+            <Ionicons name="download-outline" size={20} color={colors.primary} />
+            <Text style={s.linkText}>{exporting ? 'Export en cours…' : 'Exporter mes données (RGPD)'}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Apparence */}
