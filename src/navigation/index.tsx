@@ -30,6 +30,7 @@ import OrganizerRevenueScreen from '../screens/organizer/OrganizerRevenueScreen'
 import PaymentsScreen      from '../screens/creator/PaymentsScreen';
 import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
 import ItineraryScreen     from '../screens/creator/ItineraryScreen';
+import AuditLogScreen      from '../screens/admin/AuditLogScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
@@ -133,6 +134,11 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Itinerary"
           component={ItineraryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AuditLog"
+          component={AuditLogScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
