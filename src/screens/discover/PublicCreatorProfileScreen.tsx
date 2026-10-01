@@ -17,6 +17,7 @@ import { useProfileReviews } from '../../hooks/useReviews';
 import { useFavoriteCreator } from '../../hooks/useFavorites';
 import { useVisitorInquiry } from '../../hooks/useVisitorInquiry';
 import { useFollow, useFollowCounts } from '../../hooks/useFollow';
+import { useCreatorProducts } from '../../hooks/useCreatorProducts';
 import { usePosts } from '../../hooks/usePosts';
 import PostCard from '../../components/PostCard';
 import { PageSettings, DEFAULT_PAGE_SETTINGS } from '../../types';
@@ -212,6 +213,7 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
   const { isFav, toggle } = useFavoriteCreator(profile?.id, creatorId);
   const { isFollowing, toggle: toggleFollow, followers } = useFollow(profile?.id, creatorId);
   const { posts } = usePosts({ creatorId, limit: 6 });
+  const { products } = useCreatorProducts(creatorId);
 
   const [showContact, setShowContact] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
@@ -399,6 +401,16 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
             <Text style={[s.section, { color: settings.bio_color + '66', borderBottomColor: settings.accent_color + '30' }]}>Posts récents</Text>
             {posts.slice(0, 3).map(post => <PostCard key={post.id} post={post} showCreator={false} />)}
           </>
+        )}
+
+        {/* Boutique */}
+        {products.length > 0 && (
+          <TouchableOpacity
+            style={[s.contactBtn, { backgroundColor: settings.accent_color + '22', borderWidth: 1, borderColor: settings.accent_color, marginBottom: spacing.lg }]}
+            onPress={() => (navigation as any).navigate('Boutique', { creatorId, creatorName: creator?.full_name })}
+          >
+            <Text style={[s.contactBtnText, { color: settings.accent_color }]}>Voir la boutique ({products.length})</Text>
+          </TouchableOpacity>
         )}
 
         {/* Contact */}
