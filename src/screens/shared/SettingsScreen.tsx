@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch,
 } from 'react-native';
+import { DEFAULT_NOTIFICATION_PREFS, NotificationPrefs } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -27,7 +28,24 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { colors, preference, setPreference } = useTheme();
-  const { profile } = useAuth();
+  const { profile, refetchProfile } = useAuth();
+  const prefs: NotificationPrefs = { ...DEFAULT_NOTIFICATION_PREFS, ...(profile?.notification_prefs ?? {}) };
+  const PREF_ROWS: { key: keyof NotificationPrefs; label: string }[] = [
+    { key: 'messages', label: 'Messages' },
+    { key: 'applications', label: 'Candidatures' },
+    { key: 'reminders', label: 'Rappels' },
+    { key: 'newsletter', label: 'Newsletter' },
+  ];
+  const togglePref = async (key: keyof NotificationPrefs, value: boolean) => {
+    if (!profile) return;
+    Haptics.selectionAsync();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ notification_prefs: { ...prefs, [key]: value } })
+      .eq('id', profile.id);
+    if (error) Alert.alert('Erreur', 'Préférence non enregistrée.');
+    else await refetchProfile();
+  };
   const isCreator = profile?.role === 'creator';
   const links: { label: string; icon: keyof typeof Ionicons.glyphMap; route: string; show: boolean }[] = [
     { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
@@ -83,6 +101,22 @@ export default function SettingsScreen() {
               <Text style={s.linkText}>{l.label}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
             </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Préférences de notification */}
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>Préférences de notification</Text>
+          {PREF_ROWS.map(r => (
+            <View key={r.key} style={s.linkRow}>
+              <Text style={s.linkText}>{r.label}</Text>
+              <Switch
+                value={prefs[r.key]}
+                onValueChange={v => togglePref(r.key, v)}
+                trackColor={{ true: colors.primary, false: colors.border }}
+                disabled={!profile}
+              />
+            </View>
           ))}
         </View>
 
