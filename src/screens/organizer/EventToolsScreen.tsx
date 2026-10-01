@@ -10,6 +10,7 @@ const TOOLS: { route: string; label: string; hint: string; icon: keyof typeof Io
   { route: 'EventWaitlist',   label: "Liste d'attente",  hint: 'Proposer une place libérée',          icon: 'hourglass-outline' },
   { route: 'EventVolunteers', label: 'Bénévoles',        hint: 'Bénévoles et créneaux',               icon: 'hand-left-outline' },
   { route: 'EventTeam',       label: 'Équipe',           hint: 'Co-organisateurs, invitation par @pseudo', icon: 'person-add-outline' },
+  { route: 'EventCampaigns',  label: 'Campagnes e-mail', hint: 'Écrire et envoyer aux exposants',      icon: 'mail-outline' },
   { route: 'EventChecklist',  label: 'Checklist',        hint: "Tâches d'organisation",               icon: 'checkbox-outline' },
   { route: 'EventFaqs',       label: 'FAQ',              hint: 'Questions et réponses automatiques',  icon: 'help-circle-outline' },
 ];
