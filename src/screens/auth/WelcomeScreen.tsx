@@ -53,7 +53,7 @@ const MOCK_CREATOR = mockProfile({
   bio: 'Céramiste indépendante, mode test.',
 });
 const MOCK_ORGANIZER = mockProfile({
-  id: 'dev-organizer-id', role: 'organizer', full_name: 'Bob Martin (test)',
+  id: 'demo-org-1', role: 'organizer', full_name: 'Bob Martin (test)',
 });
 const MOCK_VISITOR = mockProfile({
   id: 'dev-visitor-id', role: 'visitor', full_name: 'Clara Visiteur (test)',

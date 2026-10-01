@@ -25,11 +25,15 @@ function EventRow({
   onPress,
   onToggleStatus,
   onEdit,
+  onExhibitors,
+  onWaitlist,
 }: {
   event: Event;
   onPress: () => void;
   onToggleStatus: (e: Event) => void;
   onEdit: () => void;
+  onExhibitors: () => void;
+  onWaitlist: () => void;
 }) {
   const cfg = STATUS_CONFIG[event.status];
   return (
@@ -69,6 +73,14 @@ function EventRow({
         )}
         <TouchableOpacity style={[styles.actionBtn, styles.actionBtnPrimary]} onPress={onPress}>
           <Text style={styles.actionBtnPrimaryText}>Candidatures →</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.cardActions, { borderTopWidth: 0, paddingTop: 0, marginTop: spacing.sm }]}>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onExhibitors}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Exposants</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onWaitlist}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Liste d'attente</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -121,6 +133,8 @@ export default function ManageEventsScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('EventApplications', { eventId: item.id, eventTitle: item.title })}
             onToggleStatus={toggleStatus}
             onEdit={() => navigation.navigate('EditEvent', { eventId: item.id })}
+            onExhibitors={() => navigation.navigate('EventExhibitors', { eventId: item.id, eventTitle: item.title })}
+            onWaitlist={() => navigation.navigate('EventWaitlist', { eventId: item.id, eventTitle: item.title })}
           />
         )}
         contentContainerStyle={styles.list}
