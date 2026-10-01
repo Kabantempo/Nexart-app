@@ -29,6 +29,7 @@ import OrganizerAnalyticsScreen from '../screens/organizer/OrganizerAnalyticsScr
 import OrganizerRevenueScreen from '../screens/organizer/OrganizerRevenueScreen';
 import PaymentsScreen      from '../screens/creator/PaymentsScreen';
 import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
+import ItineraryScreen     from '../screens/creator/ItineraryScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
@@ -128,6 +129,11 @@ export default function RootNavigator() {
           name="PatchNotes"
           component={PatchNotesScreen}
           options={{ headerShown: true, title: 'Nouveautés', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Itinerary"
+          component={ItineraryScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Trends"
