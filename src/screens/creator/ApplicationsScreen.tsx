@@ -1,40 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { useCreatorApplications } from '../../hooks/useApplications';
 import { getOrCreateConversation } from '../../hooks/useConversations';
 import { useHasReviewed } from '../../hooks/useReviews';
-import { supabase } from '../../lib/supabase';
 import { ApplicationStatus } from '../../types';
 import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason } from '../../utils/applications';
 import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
 import { useThemeColors } from '../../stores/theme';
-
-async function createCheckoutSession(applicationId: string, eventTitle: string, standPrice: number): Promise<{ url: string | null; error: string | null }> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { url: null, error: 'Non connecté' };
-  try {
-    const res = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/create-checkout-session`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ application_id: applicationId, event_title: eventTitle, stand_price: standPrice }),
-      },
-    );
-    const data = await res.json();
-    if (data.error) return { url: null, error: data.error };
-    return { url: data.url, error: null };
-  } catch (e: any) {
-    return { url: null, error: e.message };
-  }
-}
+import { useCheckout } from '../../hooks/useCheckout';
 
 const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Toutes', value: 'all' },
@@ -70,13 +47,14 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
     && (event?.stand_price ?? 0) > 0
     && !isPaid;
 
+  // Même route que sur le site : commission, Stripe Connect et contrôles sont appliqués côté serveur.
+  const { payStand } = useCheckout();
   const handlePay = async () => {
     if (!event?.stand_price) return;
     setPaying(true);
-    const { url, error } = await createCheckoutSession(item.id, event.title, event.stand_price);
+    const error = await payStand(item.id);
     setPaying(false);
-    if (error || !url) { Alert.alert('Erreur', error ?? 'Impossible de créer la session de paiement'); return; }
-    Linking.openURL(url);
+    if (error) Alert.alert('Paiement impossible', error);
   };
 
   const openChat = async () => {

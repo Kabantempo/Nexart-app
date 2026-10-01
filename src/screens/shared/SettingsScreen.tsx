@@ -77,6 +77,8 @@ export default function SettingsScreen() {
   const isCreator = profile?.role === 'creator';
   const isOrganizer = profile?.role === 'organizer';
   const links: { label: string; icon: keyof typeof Ionicons.glyphMap; route: string; show: boolean }[] = [
+    { label: 'Offres et abonnement', icon: 'ribbon-outline', route: 'Plans', show: isCreator || isOrganizer },
+    { label: 'Crédits', icon: 'wallet-outline', route: 'Credits', show: isCreator || isOrganizer },
     { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
     { label: 'Parrainage', icon: 'gift-outline', route: 'Referral', show: true },
     { label: 'Mes statistiques', icon: 'stats-chart-outline', route: 'CreatorAnalytics', show: isCreator },

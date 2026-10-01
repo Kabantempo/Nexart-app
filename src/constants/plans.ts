@@ -47,17 +47,26 @@ export const TIER_MONTHLY_PRICE: Record<SubscriptionTier, number> = {
   org_studio: 7900,
 };
 
+/** Identifiants de prix Stripe des abonnements mensuels (miroir de STRIPE_PRICES du site ; ce ne sont pas des secrets). */
+export const TIER_PRICE_IDS: Partial<Record<SubscriptionTier, string>> = {
+  boost:      'price_1UAF4uQWOlbwoVLWTWRUP0a3',
+  pro:        'price_1UAF4uQWOlbwoVLWh2X7xzuk',
+  premium:    'price_1UAF4uQWOlbwoVLWafjohwYh',
+  org_pro:    'price_1UAF4vQWOlbwoVLWBSeHsl9M',
+  org_studio: 'price_1UAF4vQWOlbwoVLWwPM47sLa',
+};
+
 export const CREATOR_TIERS: SubscriptionTier[]   = ['free', 'boost', 'pro', 'premium'];
 export const ORGANIZER_TIERS: SubscriptionTier[] = ['free', 'org_pro', 'org_studio'];
 
 /** Packs de crédits pay-as-you-go — miroir de STRIPE_CREDIT_PRICES du site. */
 export const CREDIT_PACKS = [
-  { key: 'boost_x1',  amount: 299,  credits: 1,  label: '1 boost candidature' },
-  { key: 'boost_x5',  amount: 1299, credits: 5,  label: '5 boosts candidature' },
-  { key: 'boost_x10', amount: 2499, credits: 10, label: '10 boosts candidature' },
-  { key: 'boost_x20', amount: 4499, credits: 20, label: '20 boosts candidature' },
-  { key: 'event_x1',  amount: 999,  credits: 1,  label: '1 événement à la carte' },
-  { key: 'event_x3',  amount: 2499, credits: 3,  label: '3 événements à la carte' },
+  { key: 'boost_x1',  priceId: 'price_1UAF4wQWOlbwoVLWIBS4ZvCD', amount: 299,  credits: 1,  label: '1 boost candidature' },
+  { key: 'boost_x5',  priceId: 'price_1UAF4wQWOlbwoVLWGQ7V3JXJ', amount: 1299, credits: 5,  label: '5 boosts candidature' },
+  { key: 'boost_x10', priceId: 'price_1UAF4wQWOlbwoVLWr96uNDeT', amount: 2499, credits: 10, label: '10 boosts candidature' },
+  { key: 'boost_x20', priceId: 'price_1UAF4wQWOlbwoVLWg7VCBiG4', amount: 4499, credits: 20, label: '20 boosts candidature' },
+  { key: 'event_x1',  priceId: 'price_1UAF4xQWOlbwoVLWw91GnEWp', amount: 999,  credits: 1,  label: '1 événement à la carte' },
+  { key: 'event_x3',  priceId: 'price_1UAF4xQWOlbwoVLW17oBbML4', amount: 2499, credits: 3,  label: '3 événements à la carte' },
 ] as const;
 
 /** 1499 → « 14,99 € » */

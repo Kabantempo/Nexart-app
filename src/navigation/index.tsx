@@ -29,6 +29,8 @@ import OrganizerAnalyticsScreen from '../screens/organizer/OrganizerAnalyticsScr
 import OrganizerRevenueScreen from '../screens/organizer/OrganizerRevenueScreen';
 import PaymentsScreen      from '../screens/creator/PaymentsScreen';
 import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
+import PlansScreen         from '../screens/shared/PlansScreen';
+import CreditsScreen       from '../screens/shared/CreditsScreen';
 import ItineraryScreen     from '../screens/creator/ItineraryScreen';
 import AuditLogScreen      from '../screens/admin/AuditLogScreen';
 import ReportsScreen       from '../screens/admin/ReportsScreen';
@@ -163,6 +165,16 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Boutique"
           component={BoutiqueScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Plans"
+          component={PlansScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Credits"
+          component={CreditsScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TIER_LIMITS, TIER_LABELS, TIER_MONTHLY_PRICE, CREDIT_PACKS, formatPrice } from '../src/constants/plans';
+import { TIER_LIMITS, TIER_LABELS, TIER_MONTHLY_PRICE, TIER_PRICE_IDS, CREDIT_PACKS, formatPrice } from '../src/constants/plans';
 
 test('formatPrice affiche les centimes en euros, à la française', () => {
   assert.equal(formatPrice(0), 'Gratuit');
@@ -31,4 +31,14 @@ test('les packs de crédits sont cohérents', () => {
   }
   const keys = CREDIT_PACKS.map(p => p.key);
   assert.equal(new Set(keys).size, keys.length, 'clés uniques');
+});
+
+test('chaque offre payante a un identifiant de prix Stripe, et chaque pack aussi', () => {
+  for (const tier of Object.keys(TIER_LIMITS)) {
+    if (tier === 'free') assert.equal(TIER_PRICE_IDS[tier as keyof typeof TIER_PRICE_IDS], undefined);
+    else assert.match(String(TIER_PRICE_IDS[tier as keyof typeof TIER_PRICE_IDS]), /^price_/, tier);
+  }
+  const ids = [...Object.values(TIER_PRICE_IDS), ...CREDIT_PACKS.map(p => p.priceId)];
+  assert.equal(new Set(ids).size, ids.length, 'identifiants de prix uniques');
+  for (const p of CREDIT_PACKS) assert.match(p.priceId, /^price_/, p.key);
 });
