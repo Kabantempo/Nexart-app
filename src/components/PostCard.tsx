@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Post, PostType, usePostLike } from '../hooks/usePosts';
 import { useAuth } from '../stores/auth';
-import { colors, spacing, typography, radius } from '../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 export const POST_TYPE_CONFIG: Record<PostType, { label: string; color: string }> = {
   guest_appearance: { label: 'Guest',       color: '#A855F7' },
   call_for_collab:  { label: 'Collab',      color: '#10B981' },
   tip:              { label: 'Conseil',     color: '#F59E0B' },
   experience:       { label: 'Expérience',  color: '#3B82F6' },
-  general:          { label: 'Post',        color: colors.text.secondary },
+  general:          { label: 'Post',        color: '#6B7280' },
 };
 
 function timeAgo(iso: string): string {
@@ -26,19 +27,22 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 }
 
-function renderContent(content: string) {
+function renderContent(content: string, hashtagStyle: object) {
   return content.split(/(#[\wÀ-ÿ]+)/gi).map((part, i) =>
     part.startsWith('#')
-      ? <Text key={i} style={s.hashtag}>{part}</Text>
+      ? <Text key={i} style={hashtagStyle}>{part}</Text>
       : <Text key={i}>{part}</Text>
   );
 }
 
 export default function PostCard({ post, showCreator = true }: { post: Post; showCreator?: boolean }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { profile } = useAuth();
   const nav = useNavigation<any>();
   const { liked, count, toggle } = usePostLike(profile?.id, post.id, post.likes_count);
-  const cfg     = POST_TYPE_CONFIG[post.post_type] ?? POST_TYPE_CONFIG.general;
+  const baseCfg = POST_TYPE_CONFIG[post.post_type] ?? POST_TYPE_CONFIG.general;
+  const cfg     = post.post_type in POST_TYPE_CONFIG && post.post_type !== 'general' ? baseCfg : { ...baseCfg, color: colors.text.secondary };
   const creator = post.creator as any;
 
   return (
@@ -74,7 +78,7 @@ export default function PostCard({ post, showCreator = true }: { post: Post; sho
       )}
 
       {/* Content */}
-      <Text style={s.content}>{renderContent(post.content)}</Text>
+      <Text style={s.content}>{renderContent(post.content, s.hashtag)}</Text>
 
       {/* Images */}
       {post.images.length > 0 && (
@@ -105,7 +109,7 @@ export default function PostCard({ post, showCreator = true }: { post: Post; sho
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     marginHorizontal: spacing.xl,

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import LogoMark from './LogoMark';
 import {
   View, TouchableOpacity, StyleSheet, Image, Text,
 } from 'react-native';
@@ -6,7 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
-import { colors, spacing, radius, typography } from '../../constants/theme';
+import { ThemeColors, colors, spacing, radius, typography } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 interface AppHeaderProps {
   showFavorites?: boolean;
@@ -19,6 +21,8 @@ export function AppHeader({
   showCreate    = false,
   onCreatePress,
 }: AppHeaderProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets              = useSafeAreaInsets();
   const nav                 = useNavigation<any>();
   const { profile, session } = useAuth();
@@ -34,7 +38,7 @@ export function AppHeader({
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>
       {/* Logo gauche */}
       <View style={s.logo}>
-        <Image source={require('../../assets/nexart-icon.png')} style={s.logoImg} />
+        <LogoMark size={28} />
         <Text style={s.logoText}>Nexart</Text>
       </View>
 
@@ -67,7 +71,7 @@ export function AppHeader({
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef } from 'react'
 import { Animated, View, Text, StyleSheet, Dimensions } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, typography, radius } from '../constants/theme'
+import { ThemeColors, colors, spacing, typography, radius } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 import { ANIMATION_DURATIONS } from '../constants/animations'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
@@ -25,6 +26,8 @@ const TOAST_CONFIG = {
  * Utilisé pour success/error messages
  */
 export function Toast({ message, type = 'info', duration = 3000, visible }: ToastProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const slideAnim = useRef(new Animated.Value(-100)).current
   const opacityAnim = useRef(new Animated.Value(0)).current
   const config = TOAST_CONFIG[type]
@@ -83,7 +86,7 @@ export function Toast({ message, type = 'info', duration = 3000, visible }: Toas
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     position: 'absolute',
     top: 0,

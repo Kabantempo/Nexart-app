@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
@@ -10,7 +10,8 @@ import { useAuth } from '../../stores/auth';
 import { useConversations, ConversationSummary } from '../../hooks/useConversations';
 import { useCreatorInquiries } from '../../hooks/useVisitorInquiry';
 import { MessageStackParams } from '../../navigation/MessageStack';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = { navigation: StackNavigationProp<MessageStackParams, 'ConversationList'> };
 
@@ -25,6 +26,8 @@ function timeAgo(iso: string): string {
 }
 
 function Avatar({ uri, name, hasUnread }: { uri?: string | null; name: string; hasUnread: boolean }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   if (uri) {
     return (
       <View style={[s.avatarWrap, hasUnread && s.avatarWrapUnread]}>
@@ -44,6 +47,8 @@ function Avatar({ uri, name, hasUnread }: { uri?: string | null; name: string; h
 }
 
 function ConversationRow({ item, userId, onPress }: { item: ConversationSummary; userId: string; onPress: () => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const isCreator = item.creator_id === userId;
   const other     = isCreator ? item.organizer : item.creator;
   const otherName = other?.full_name ?? '—';
@@ -73,6 +78,8 @@ function ConversationRow({ item, userId, onPress }: { item: ConversationSummary;
 }
 
 function InquiryRow({ item, onReply }: { item: any; onReply: (id: string, msg: string, replyText: string) => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
 
@@ -139,6 +146,8 @@ function InquiryRow({ item, onReply }: { item: any; onReply: (id: string, msg: s
 }
 
 export default function MessagesScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { conversations, loading, refetch } = useConversations(profile?.id);
@@ -254,7 +263,7 @@ export default function MessagesScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   title:     { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.sm, fontWeight: '700' },

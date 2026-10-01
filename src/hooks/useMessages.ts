@@ -84,6 +84,10 @@ export function useMessages(conversationId: string | undefined, currentUserId: s
         content:         content.trim(),
         read_at:         null,
         created_at:      new Date().toISOString(),
+        updated_at:      null,
+        attachment_url:  null,
+        attachment_type: null,
+        attachment_name: null,
       };
       setMessages(prev => [...prev, fakeMsg]);
       setSending(false);

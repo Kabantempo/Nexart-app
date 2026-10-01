@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 import FeedScreen       from '../screens/feed/FeedScreen';
 import CreatePostScreen from '../screens/feed/CreatePostScreen';
@@ -13,6 +14,7 @@ export type FeedStackParams = {
 const Stack = createStackNavigator<FeedStackParams>();
 
 export default function FeedStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="Feed"       component={FeedScreen} />

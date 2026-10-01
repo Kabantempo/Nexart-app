@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import { TabIcon } from '../components/ui/TabIcon';
 
 import OrganizerHomeScreen from '../screens/organizer/HomeScreen';
@@ -9,21 +10,26 @@ import OrganizerEventStack from './OrganizerEventStack';
 import CreateEventScreen   from '../screens/organizer/CreateEventScreen';
 import CreatorMapScreen    from '../screens/organizer/CreatorMapScreen';
 import MessageStack        from './MessageStack';
+import FeedStack           from './FeedStack';
+import DiscoverStack       from './DiscoverStack';
 import ProfileScreen       from '../screens/shared/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
-const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; component: React.ComponentType<any> }[] = [
+const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; component: React.ComponentType<any>; hidden?: boolean }[] = [
+  { name: 'Fil',             icon: 'home-outline',       iconActive: 'home',         component: FeedStack },
   { name: 'Tableau de bord', icon: 'grid-outline',       iconActive: 'grid',         component: OrganizerHomeScreen },
   { name: 'Mes marchés',     icon: 'storefront-outline', iconActive: 'storefront',   component: OrganizerEventStack },
   { name: 'Créer',           icon: 'add-circle-outline', iconActive: 'add-circle',   component: CreateEventScreen },
   { name: 'Carte',           icon: 'map-outline',        iconActive: 'map',          component: CreatorMapScreen },
   { name: 'Messages',        icon: 'chatbubble-outline', iconActive: 'chatbubble',   component: MessageStack },
   { name: 'Profil',          icon: 'person-outline',     iconActive: 'person',       component: ProfileScreen },
+  { name: 'Découvrir',       icon: 'compass-outline',    iconActive: 'compass',      component: DiscoverStack, hidden: true },
 ];
 
 export default function OrganizerNavigator() {
+  const colors = useThemeColors();
   return (
     <Tab.Navigator
       
@@ -58,6 +64,8 @@ export default function OrganizerNavigator() {
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.text.secondary,
           tabBarShowLabel: false,
+          tabBarButton: tab?.hidden ? () => null : undefined,
+          tabBarItemStyle: tab?.hidden ? { display: 'none' } : undefined,
         };
       }}
     >

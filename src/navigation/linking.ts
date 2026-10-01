@@ -17,6 +17,7 @@ export const unauthLinking: LinkingOptions<ReactNavigation.RootParamList> = {
   config: {
     screens: {
       Auth:     { screens: {} },
+      Username: 'u/:username',
       Discover: { screens: discoverScreens },
     },
   },
@@ -27,6 +28,7 @@ export const visitorLinking: LinkingOptions<ReactNavigation.RootParamList> = {
   prefixes,
   config: {
     screens: {
+      Username: 'u/:username',
       Visitor: {
         screens: {
           'Découvrir': { screens: discoverScreens },
@@ -41,6 +43,7 @@ export const creatorLinking: LinkingOptions<ReactNavigation.RootParamList> = {
   prefixes,
   config: {
     screens: {
+      Username: 'u/:username',
       Creator: {
         screens: {
           'Marchés': {
@@ -58,5 +61,5 @@ export const creatorLinking: LinkingOptions<ReactNavigation.RootParamList> = {
 // Config par défaut (admin, organizer)
 export const defaultLinking: LinkingOptions<ReactNavigation.RootParamList> = {
   prefixes,
-  config: { screens: {} },
+  config: { screens: { Username: 'u/:username' } },
 };

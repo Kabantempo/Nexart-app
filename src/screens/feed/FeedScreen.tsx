@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, FlatList,
   TouchableOpacity, ActivityIndicator, Image,
@@ -15,7 +15,8 @@ import { AppHeader } from '../../components/ui/AppHeader';
 import { MarketCard } from '../../components/ui/MarketCard';
 import { CreatorCard } from '../../components/ui/CreatorCard';
 import { CreationCard } from '../../components/ui/CreationCard';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const today     = new Date();
 const inDays    = (d: string, n: number) => new Date(d) <= new Date(today.getTime() + n * 86400000);
@@ -46,6 +47,8 @@ function SectionTitle({ icon, title, count, onSeeAll, onMap }: {
   icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string; count?: number; onSeeAll?: () => void; onMap?: () => void;
 }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.sectionHead}>
       <Ionicons name={icon} size={16} color={colors.primary} />
@@ -73,6 +76,8 @@ function SectionTitle({ icon, title, count, onSeeAll, onMap }: {
 // ─── Horizontal event row ─────────────────────────────────
 
 function EventRow({ events, onPressEvent, isCreator = false }: { events: any[]; onPressEvent: (id: string) => void; isCreator?: boolean }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W } = useWindowDimensions();
   const cardWidth = Math.min(W * 0.60, 220);
   if (!events.length) return null;
@@ -99,6 +104,8 @@ function EventRow({ events, onPressEvent, isCreator = false }: { events: any[]; 
 // ─── Creator recommendation card ─────────────────────────
 
 function CreatorChip({ creator, onPress }: { creator: any; onPress: () => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <TouchableOpacity style={s.creatorChip} onPress={onPress} activeOpacity={0.85}>
       {creator.avatar_url ? (
@@ -119,10 +126,15 @@ function CreatorChip({ creator, onPress }: { creator: any; onPress: () => void }
 // ─── Main screen ──────────────────────────────────────────
 
 export default function FeedScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav         = useNavigation<any>();
   const { profile } = useAuth();
   const followedIds = useFollowedCreators(profile?.id);
   const isCreator   = profile?.role === 'creator';
+  const [filter, setFilter] = useState<'all' | 'events' | 'creators'>('all');
+  const showEvents   = filter !== 'creators';
+  const showCreators = filter !== 'events';
   const firstName   = profile?.full_name?.split(' ')[0] ?? '';
 
   const { events, loading: evLoad }    = useEvents({ limit: 20 });
@@ -138,6 +150,10 @@ export default function FeedScreen() {
     ...creators.filter(c => followedIds.includes(c.id)),
     ...creators.filter(c => !followedIds.includes(c.id)),
   ], [creators, followedIds]);
+
+  // Les créateurs n'ont pas la même liste complète des marchés que les autres rôles.
+  const seeAllEvents = () =>
+    isCreator ? nav.navigate('Marchés') : nav.navigate('Découvrir', { screen: 'EventMap' });
 
   const goEvent = (id: string) =>
     nav.navigate('Découvrir', { screen: 'PublicEventDetail', params: { eventId: id } });
@@ -164,8 +180,18 @@ export default function FeedScreen() {
             </View>
           ) : null}
 
+          {/* Filtre : Tout / Marchés / Créateurs, comme sur le site */}
+          <View style={s.filterRow}>
+            {([['all', 'Tout'], ['events', 'Marchés'], ['creators', 'Créateurs']] as const).map(([key, label]) => (
+              <TouchableOpacity key={key} style={[s.filterChip, filter === key && s.filterChipOn]} onPress={() => setFilter(key)}
+                accessibilityRole="tab" accessibilityState={{ selected: filter === key }}>
+                <Text style={[s.filterText, filter === key && s.filterTextOn]}>{label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           {/* ── En cours ── */}
-          {ongoing.length > 0 && (
+          {showEvents && ongoing.length > 0 && (
             <View style={s.section}>
               <SectionTitle
                 icon="radio-button-on" title="En cours" count={ongoing.length}
@@ -176,7 +202,7 @@ export default function FeedScreen() {
           )}
 
           {/* ── Cette semaine ── */}
-          {soon.length > 0 && (
+          {showEvents && soon.length > 0 && (
             <View style={s.section}>
               <SectionTitle
                 icon="time-outline" title="Cette semaine" count={soon.length}
@@ -187,11 +213,11 @@ export default function FeedScreen() {
           )}
 
           {/* ── À venir ── */}
-          {upcoming.length > 0 && (
+          {showEvents && upcoming.length > 0 && (
             <View style={s.section}>
               <SectionTitle
                 icon="calendar-outline" title="À venir" count={upcoming.length}
-                onSeeAll={() => nav.navigate('Marchés')}
+                onSeeAll={seeAllEvents}
                 onMap={() => nav.navigate('Découvrir', { screen: 'EventMap' })}
               />
               <EventRow events={upcoming} onPressEvent={goEvent} isCreator={isCreator} />
@@ -199,7 +225,7 @@ export default function FeedScreen() {
           )}
 
           {/* ── Artistes pour vous ── */}
-          {recommended.length > 0 && (
+          {showCreators && recommended.length > 0 && (
             <View style={s.section}>
               <SectionTitle
                 icon="sparkles-outline"
@@ -229,7 +255,7 @@ export default function FeedScreen() {
           )}
 
           {/* ── Nouvelles créations ── */}
-          {posts.length > 0 && (
+          {showCreators && posts.length > 0 && (
             <View style={s.section}>
               <SectionTitle
                 icon="color-palette-outline"
@@ -251,7 +277,7 @@ export default function FeedScreen() {
           )}
 
           {/* Empty state si rien */}
-          {!ongoing.length && !soon.length && !upcoming.length && !posts.length && (
+          {(!showEvents || (!ongoing.length && !soon.length && !upcoming.length)) && (!showCreators || (!recommended.length && !posts.length)) && (
             <View style={s.empty}>
               <View style={s.emptyIcon}><Ionicons name="sparkles-outline" size={28} color={colors.primary} /></View>
               <Text style={s.emptyTitle}>Votre fil est vide</Text>
@@ -269,11 +295,16 @@ export default function FeedScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll:    { paddingBottom: spacing.xxl },
 
+  filterRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.xl, paddingBottom: spacing.md },
+  filterChip: { paddingHorizontal: spacing.md, paddingVertical: 8, minHeight: 36, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, justifyContent: 'center' },
+  filterChipOn: { borderColor: colors.primary, backgroundColor: colors.accent },
+  filterText: { ...typography.label, color: colors.text.secondary },
+  filterTextOn: { color: colors.primary, fontWeight: '700' },
   greeting:  { paddingHorizontal: spacing.xl, paddingVertical: spacing.md },
   greetText: { ...typography.h3, color: colors.text.primary, fontWeight: '700' },
 

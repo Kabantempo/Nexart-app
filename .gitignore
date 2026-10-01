@@ -43,3 +43,6 @@ yarn-error.*
 
 # claude code (local docs + secrets)
 CLAUDE.md
+
+# tests compilés
+.test-build/

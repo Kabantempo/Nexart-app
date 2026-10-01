@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,12 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
+import * as Linking from 'expo-linking';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
 
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'ForgotPassword'> };
@@ -22,6 +24,8 @@ type Props = { navigation: StackNavigationProp<AuthStackParams, 'ForgotPassword'
 const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export default function ForgotPasswordScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -33,7 +37,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${SITE_URL}/reset-password`,
+      redirectTo: Platform.OS === 'web' ? `${SITE_URL}/reset-password` : Linking.createURL('reset-password'),
     });
     setLoading(false);
     if (error) {
@@ -108,7 +112,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   scroll: { flexGrow: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xl },
 
   back: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginBottom: spacing.xl },
@@ -124,7 +128,7 @@ const s = StyleSheet.create({
   fieldWrap: { gap: spacing.xs },
   fieldLabel: { ...typography.caption, color: colors.text.secondary, fontWeight: '600', marginLeft: 2, letterSpacing: 0.3 },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: colors.surface + 'D9',
     color: colors.text.primary,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
@@ -153,7 +157,7 @@ const s = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: radius.xl,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: colors.surface + 'CC',
     borderWidth: 1,
     borderColor: colors.border,
     marginTop: spacing.lg,

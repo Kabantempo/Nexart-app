@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
@@ -10,7 +10,8 @@ import { MarketStackParams } from '../../navigation/MarketStack';
 import { useAuth } from '../../stores/auth';
 import { useEvent, useApplicationStatus } from '../../hooks/useEvent';
 import { useApply } from '../../hooks/useApplications';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = {
   navigation: StackNavigationProp<MarketStackParams, 'EventDetail'>;
@@ -27,17 +28,19 @@ const TYPE_COLORS: Record<string, string> = {
   popup: '#A855F7', salon: '#10B981', fair: '#EF4444',
 };
 
-const STATUS_CONFIG = {
+const makeStatusConfig = (colors: ThemeColors) => ({
   pending:  { label: 'Candidature envoyée',  bg: colors.text.secondary + '20', color: colors.text.secondary },
   accepted: { label: 'Candidature acceptée', bg: colors.secondary + '20',      color: colors.secondary },
   refused:  { label: 'Candidature refusée',  bg: colors.error + '20',          color: colors.error },
-};
+});
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.infoRow}>
       <Text style={s.infoLabel}>{label}</Text>
@@ -47,6 +50,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.section}>
       <View style={s.sectionHeader}>
@@ -61,6 +66,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 // ─── Apply section ────────────────────────────────────────
 
 function ApplySection({ eventId, userId }: { eventId: string; userId: string }) {
+  const colors = useThemeColors();
+  const STATUS_CONFIG = useMemo(() => makeStatusConfig(colors), [colors]);
+  const s = useMemo(() => makeS(colors), [colors]);
   const { status, loading: statusLoading } = useApplicationStatus(eventId, userId);
   const { apply, loading: applying } = useApply(eventId, userId);
   const [expanded, setExpanded] = useState(false);
@@ -147,6 +155,8 @@ function ApplySection({ eventId, userId }: { eventId: string; userId: string }) 
 // ─── Main screen ──────────────────────────────────────────
 
 export default function EventDetailScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { eventId } = route.params;
   const { profile } = useAuth();
   const { event, loading, error } = useEvent(eventId);
@@ -268,7 +278,7 @@ export default function EventDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },

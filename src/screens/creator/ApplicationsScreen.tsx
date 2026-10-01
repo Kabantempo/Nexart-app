@@ -1,38 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { useCreatorApplications } from '../../hooks/useApplications';
 import { getOrCreateConversation } from '../../hooks/useConversations';
 import { useHasReviewed } from '../../hooks/useReviews';
-import { supabase } from '../../lib/supabase';
 import { ApplicationStatus } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
-
-async function createCheckoutSession(applicationId: string, eventTitle: string, standPrice: number): Promise<{ url: string | null; error: string | null }> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { url: null, error: 'Non connecté' };
-  try {
-    const res = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/create-checkout-session`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ application_id: applicationId, event_title: eventTitle, stand_price: standPrice }),
-      },
-    );
-    const data = await res.json();
-    if (data.error) return { url: null, error: data.error };
-    return { url: data.url, error: null };
-  } catch (e: any) {
-    return { url: null, error: e.message };
-  }
-}
+import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason } from '../../utils/applications';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
+import { useCheckout } from '../../hooks/useCheckout';
 
 const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Toutes', value: 'all' },
@@ -41,19 +20,17 @@ const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Refusées', value: 'refused' },
 ];
 
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
-  pending:  { label: 'En attente', color: colors.text.secondary, bg: colors.border },
-  accepted: { label: 'Acceptée',   color: colors.secondary,      bg: colors.secondary + '25' },
-  refused:  { label: 'Refusée',    color: colors.error,          bg: colors.error + '20' },
-};
+const STATUS_CONFIG = APPLICATION_STATUS_CONFIG;
 
 function formatDateRange(start: string, end: string) {
-  const s = new Date(start).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-  const e = new Date(end).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-  return start === end ? s : `${s} → ${e}`;
+  const from = new Date(start).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  const to = new Date(end).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  return start === end ? from : `${from} → ${to}`;
 }
 
 function ApplicationCard({ item, userId }: { item: any; userId: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const cfg = STATUS_CONFIG[item.status as ApplicationStatus];
   const nav = useNavigation<any>();
   const event = item.event;
@@ -70,13 +47,14 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
     && (event?.stand_price ?? 0) > 0
     && !isPaid;
 
+  // Même route que sur le site : commission, Stripe Connect et contrôles sont appliqués côté serveur.
+  const { payStand } = useCheckout();
   const handlePay = async () => {
     if (!event?.stand_price) return;
     setPaying(true);
-    const { url, error } = await createCheckoutSession(item.id, event.title, event.stand_price);
+    const error = await payStand(item.id);
     setPaying(false);
-    if (error || !url) { Alert.alert('Erreur', error ?? 'Impossible de créer la session de paiement'); return; }
-    Linking.openURL(url);
+    if (error) Alert.alert('Paiement impossible', error);
   };
 
   const openChat = async () => {
@@ -125,13 +103,13 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
           <Text style={s.messageText} numberOfLines={2}>{item.message}</Text>
         </View>
       )}
-      {item.status === 'refused' && item.refusal_reason && (
+      {item.status === 'refused' && formatRejectionReason(item.rejection_reason) && (
         <View style={s.refusalBox}>
           <View style={s.refusalHeader}>
             <Ionicons name="close" size={11} color={colors.error} />
             <Text style={s.refusalLabel}>Motif du refus</Text>
           </View>
-          <Text style={s.refusalText}>{item.refusal_reason}</Text>
+          <Text style={s.refusalText}>{formatRejectionReason(item.rejection_reason)}</Text>
         </View>
       )}
       {item.status === 'accepted' && (
@@ -172,18 +150,15 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
 }
 
 export default function ApplicationsScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { applications, loading, refetch } = useCreatorApplications(profile?.id);
   const [filter, setFilter] = useState<ApplicationStatus | 'all'>('all');
 
   const filtered = filter === 'all' ? applications : applications.filter(a => a.status === filter);
-  const counts = {
-    all: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    accepted: applications.filter(a => a.status === 'accepted').length,
-    refused: applications.filter(a => a.status === 'refused').length,
-  };
+  const counts = countByStatus(applications);
 
   const pastAcceptedCount = applications.filter(a =>
     a.status === 'accepted' &&
@@ -255,7 +230,7 @@ export default function ApplicationsScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   title: { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
   statsRow: { flexDirection: 'row', marginHorizontal: spacing.xl, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.lg },

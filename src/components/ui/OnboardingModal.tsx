@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const SLIDES = [
   {
@@ -35,6 +36,8 @@ interface Props {
 }
 
 export function OnboardingModal({ visible, onDismiss }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [step, setStep] = useState(0);
   const stepRef        = useRef(step);
   const lastScrollTime = useRef(0);
@@ -147,7 +150,7 @@ export function OnboardingModal({ visible, onDismiss }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',

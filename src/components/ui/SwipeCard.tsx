@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   Image, useWindowDimensions, ScrollView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 export interface CardStat {
   icon: React.ComponentProps<typeof Ionicons>['name'];
@@ -25,6 +26,8 @@ export interface SwipeCardProps {
 export function SwipeCard({
   title, subtitle, images, stats, description, accent, onPress,
 }: SwipeCardProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W }  = useWindowDimensions();
   const cardWidth     = Math.min(W * 0.78, 300);
   const coverHeight   = cardWidth * 0.55;      // ratio 16:9 ≈
@@ -111,7 +114,7 @@ export function SwipeCard({
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.xl,

@@ -1,11 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   Image, Animated, useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { Post, usePostLike } from '../../hooks/usePosts';
 import { useAuth } from '../../stores/auth';
 
@@ -14,7 +15,6 @@ const POST_TYPE_COLORS: Record<string, string> = {
   call_for_collab:  '#10B981',
   tip:              '#F59E0B',
   experience:       '#3B82F6',
-  general:          colors.text.secondary,
 };
 
 const POST_TYPE_LABELS: Record<string, string> = {
@@ -26,6 +26,8 @@ const POST_TYPE_LABELS: Record<string, string> = {
 };
 
 export function CreationCard({ post }: { post: Post }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W } = useWindowDimensions();
   const CARD_W = Math.min(W * 0.60, 220);
   const IMG_H  = CARD_W * 0.65;
@@ -121,7 +123,7 @@ export function CreationCard({ post }: { post: Post }) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   // ── Structure identique à MarketCard ──────────────────
   card: {
     backgroundColor: colors.surface,

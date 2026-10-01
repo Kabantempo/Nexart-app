@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Dimensions, Easing } from 'react-native';
+import { useTheme } from '../../stores/theme';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -14,6 +15,8 @@ interface BlobConfig {
   toScale: number;
 }
 
+const DARK_BLOB_COLORS = ['#312e81', '#3730a3', '#1e1b4b', '#4c1d95'];
+
 const BLOBS: BlobConfig[] = [
   { x: -W * 0.2, y: -H * 0.08, size: W * 0.85, color: '#c7d2fe', duration: 6000, delay: 0,    fromScale: 0.9,  toScale: 1.15 },
   { x: W * 0.35, y: H * 0.42,  size: W * 0.70, color: '#a5b4fc', duration: 7500, delay: 700,  fromScale: 1.0,  toScale: 1.2  },
@@ -21,7 +24,7 @@ const BLOBS: BlobConfig[] = [
   { x: W * 0.5,  y: -H * 0.05, size: W * 0.55, color: '#ddd6fe', duration: 5500, delay: 350,  fromScale: 1.05, toScale: 0.85 },
 ];
 
-function Blob({ cfg }: { cfg: BlobConfig }) {
+function Blob({ cfg, color }: { cfg: BlobConfig; color: string }) {
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -58,7 +61,7 @@ function Blob({ cfg }: { cfg: BlobConfig }) {
         width:   cfg.size,
         height:  cfg.size,
         borderRadius: cfg.size / 2,
-        backgroundColor: cfg.color,
+        backgroundColor: color,
         transform: [{ scale }],
         opacity,
       }}
@@ -72,18 +75,21 @@ interface EtherealBackgroundProps {
 }
 
 export default function EtherealBackground({ children, intensity = 0.20 }: EtherealBackgroundProps) {
+  const { colors, scheme } = useTheme();
+  const dark = scheme === 'dark';
+
   return (
-    <View style={s.container}>
-      {/* Fond blanc */}
-      <View style={s.base} />
+    <View style={[s.container, { backgroundColor: colors.background }]}>
+      {/* Fond */}
+      <View style={[s.base, { backgroundColor: colors.background }]} />
 
       {/* Blobs */}
-      <View style={[s.blobLayer, { opacity: intensity }]}>
-        {BLOBS.map((b, i) => <Blob key={i} cfg={b} />)}
+      <View style={[s.blobLayer, { opacity: dark ? Math.min(1, intensity * 2.5) : intensity }]}>
+        {BLOBS.map((b, i) => <Blob key={i} cfg={b} color={dark ? DARK_BLOB_COLORS[i] : b.color} />)}
       </View>
 
       {/* Voile */}
-      <View style={s.veil} />
+      <View style={[s.veil, { backgroundColor: dark ? 'rgba(15,15,15,0.50)' : 'rgba(248,250,252,0.50)' }]} />
 
       {/* Contenu */}
       <View style={s.content}>{children}</View>

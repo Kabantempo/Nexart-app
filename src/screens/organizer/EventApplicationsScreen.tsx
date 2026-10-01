@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator, Alert, TextInput, Modal, Animated,
@@ -13,8 +13,10 @@ import { useAuth } from '../../stores/auth';
 import { getOrCreateConversation } from '../../hooks/useConversations';
 import { useHasReviewed } from '../../hooks/useReviews';
 import { getPushTokenForUser, sendPushNotification } from '../../hooks/usePushNotifications';
-import { ApplicationStatus } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ApplicationStatus, RejectionReason } from '../../types';
+import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason, toRejectionReason } from '../../utils/applications';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { DEMO_MODE, DEMO_ORGANIZER_APPLICATIONS } from '../../lib/demoData';
 
 type Props = {
@@ -26,7 +28,7 @@ interface ApplicationItem {
   id: string;
   status: ApplicationStatus;
   message: string | null;
-  refusal_reason: string | null;
+  rejection_reason: RejectionReason | null;
   stripe_payment_id: string | null;
   created_at: string;
   creator: {
@@ -37,11 +39,7 @@ interface ApplicationItem {
   };
 }
 
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string; bg: string }> = {
-  pending:  { label: 'En attente', color: colors.text.secondary, bg: colors.border },
-  accepted: { label: 'Acceptée',   color: colors.secondary,      bg: colors.secondary + '25' },
-  refused:  { label: 'Refusée',    color: colors.error,          bg: colors.error + '20' },
-};
+const STATUS_CONFIG = APPLICATION_STATUS_CONFIG;
 
 const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
   { label: 'Toutes',     value: 'all' },
@@ -60,6 +58,8 @@ function RefusalModal({
   onClose: () => void;
   onConfirm: (reason: string) => void;
 }) {
+  const colors = useThemeColors();
+  const modal = useMemo(() => makeModal(colors), [colors]);
   const [reason, setReason] = React.useState('');
 
   const handleClose = () => { setReason(''); onClose(); };
@@ -125,6 +125,8 @@ function AcceptancePostModal({
   onClose: () => void;
   onAccept: (publishPost: boolean) => void;
 }) {
+  const colors = useThemeColors();
+  const modal = useMemo(() => makeModal(colors), [colors]);
   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   const dates = eventStart === eventEnd
     ? `le ${fmt(eventStart)}`
@@ -196,6 +198,8 @@ function ApplicationCard({
   onConfirmPayment?: (applicationId: string) => void;
   onReview: (creatorId: string, creatorName: string) => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const cfg = STATUS_CONFIG[item.status];
   const disciplines = item.creator?.creator_profile?.disciplines ?? [];
   const city = item.creator?.creator_profile?.city;
@@ -259,13 +263,13 @@ function ApplicationCard({
         </View>
       )}
 
-      {item.status === 'refused' && item.refusal_reason && (
+      {item.status === 'refused' && formatRejectionReason(item.rejection_reason) && (
         <View style={styles.refusalBox}>
           <View style={styles.refusalHeader}>
             <Ionicons name="close" size={10} color={colors.error} />
             <Text style={styles.refusalHeaderLabel}>Motif communiqué</Text>
           </View>
-          <Text style={styles.refusalText}>{item.refusal_reason}</Text>
+          <Text style={styles.refusalText}>{formatRejectionReason(item.rejection_reason)}</Text>
         </View>
       )}
 
@@ -339,6 +343,8 @@ function ApplicationCard({
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function EventApplicationsScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { eventId, eventTitle } = route.params;
   const { profile } = useAuth();
   const rootNav = useNavigation<any>();
@@ -366,7 +372,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     const { data } = await supabase
       .from('applications')
       .select(`
-        id, status, message, refusal_reason, created_at,
+        id, status, message, rejection_reason, created_at,
         creator:profiles!creator_id (
           id, full_name, avatar_url,
           creator_profile:creator_profiles (disciplines, city)
@@ -396,7 +402,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
 
     if (!DEMO_MODE) {
       await supabase.from('applications')
-        .update({ status: 'refused', refusal_reason: reason || null })
+        .update({ status: 'refused', rejection_reason: toRejectionReason(reason) })
         .eq('id', refusalTarget.id);
       const token = await getPushTokenForUser(refusalTarget.creator.id);
       if (token) sendPushNotification(
@@ -407,7 +413,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
     } else {
       setApplications(prev => prev.map(a =>
         a.id === refusalTarget.id
-          ? { ...a, status: 'refused', refusal_reason: reason || null }
+          ? { ...a, status: 'refused', rejection_reason: toRejectionReason(reason) }
           : a,
       ));
     }
@@ -502,12 +508,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
   };
 
   const filtered = filter === 'all' ? applications : applications.filter(a => a.status === filter);
-  const counts = {
-    all:      applications.length,
-    pending:  applications.filter(a => a.status === 'pending').length,
-    accepted: applications.filter(a => a.status === 'accepted').length,
-    refused:  applications.filter(a => a.status === 'refused').length,
-  };
+  const counts = countByStatus(applications);
 
   const demoEvent = DEMO_MODE
     ? (require('../../lib/demoData').DEMO_EVENTS as any[]).find((e: any) => e.id === eventId)
@@ -585,7 +586,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
   back: { paddingHorizontal: spacing.xl, marginBottom: spacing.md },
@@ -658,7 +659,7 @@ const styles = StyleSheet.create({
   emptySubtitle: { ...typography.body, color: colors.text.secondary },
 });
 
-const modal = StyleSheet.create({
+const makeModal = (colors: ThemeColors) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   panel: {
     backgroundColor: colors.surface,

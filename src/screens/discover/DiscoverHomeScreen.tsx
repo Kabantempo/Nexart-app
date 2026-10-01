@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
@@ -9,7 +9,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useEvents } from '../../hooks/useEvents';
 import { usePublicCreators } from '../../hooks/usePublicCreators';
 import { DISCIPLINE_TAGS, Event, PublicCreatorProfile } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { SwipeCard, CardStat } from '../../components/ui/SwipeCard';
 import { HorizontalCardList } from '../../components/ui/HorizontalCardList';
 import { AppHeader } from '../../components/ui/AppHeader';
@@ -82,6 +83,8 @@ function creatorToCardProps(creator: PublicCreatorProfile, onPress: () => void) 
 }
 
 export default function DiscoverHomeScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const nav = useNavigation<any>();
   const [search, setSearch]         = useState('');
@@ -199,7 +202,7 @@ export default function DiscoverHomeScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { paddingBottom: spacing.xxl },
 

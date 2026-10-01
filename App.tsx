@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import * as Linking from 'expo-linking';
+import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
 import { Session, User } from '@supabase/supabase-js';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { supabase } from './src/lib/supabase';
 import { AuthContext } from './src/stores/auth';
+import { ThemeProvider, useTheme } from './src/stores/theme';
 import { Profile } from './src/types';
 import RootNavigator from './src/navigation';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
@@ -44,10 +47,11 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
 function AppInner({ profile }: { profile: Profile | null }) {
   usePushNotifications(profile?.id);
   const { visible, dismiss } = useOnboarding(profile?.role);
+  const { scheme } = useTheme();
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <RootNavigator />
       {profile?.role && visible && (
         <OnboardingModal role={profile.role} visible={visible} onDismiss={dismiss} />
@@ -62,6 +66,24 @@ export default function App() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [recovering, setRecovering] = useState(false);
+
+  // Le mail de réinitialisation ouvre l'app sur nexart://reset-password#access_token=…&type=recovery.
+  const handleRecoveryUrl = useCallback(async (url: string | null) => {
+    if (!url || !url.includes('type=recovery')) return;
+    const params = new URLSearchParams(url.split('#')[1] ?? '');
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (!access_token || !refresh_token) return;
+    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+    if (!error) setRecovering(true);
+  }, []);
+
+  useEffect(() => {
+    Linking.getInitialURL().then(handleRecoveryUrl);
+    const sub = Linking.addEventListener('url', e => handleRecoveryUrl(e.url));
+    return () => sub.remove();
+  }, [handleRecoveryUrl]);
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
@@ -103,9 +125,13 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthContext.Provider value={{ session, user, profile, loading, refetchProfile, setProfile }}>
-        <ToastProvider>
-          <AppInner profile={profile} />
-        </ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            {recovering
+              ? <ResetPasswordScreen onDone={() => setRecovering(false)} />
+              : <AppInner profile={profile} />}
+          </ToastProvider>
+        </ThemeProvider>
       </AuthContext.Provider>
     </SafeAreaProvider>
   );

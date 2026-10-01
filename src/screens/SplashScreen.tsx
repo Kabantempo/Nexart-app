@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef } from 'react'
 import { View, Animated, StyleSheet, Image } from 'react-native'
-import { colors } from '../constants/theme'
+import { ThemeColors, colors } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 import { ANIMATION_DURATIONS } from '../constants/animations'
 
 type Props = {
@@ -12,6 +13,8 @@ type Props = {
  * Logo zoom in uniquement (sans texte)
  */
 export default function SplashScreen({ onFinish }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const scaleAnim = useRef(new Animated.Value(0.5)).current
   const opacityAnim = useRef(new Animated.Value(0)).current
   const rotateAnim = useRef(new Animated.Value(0)).current
@@ -92,10 +95,10 @@ export default function SplashScreen({ onFinish }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },

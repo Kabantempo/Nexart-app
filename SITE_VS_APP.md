@@ -1,193 +1,107 @@
-# Nexart — Site Web vs App Mobile
+# Nexart — Site web vs App mobile
 
-## Architecture finale
+_Mis à jour le 09/09/2026._
+
+## Architecture réelle
+
+Deux dépôts distincts, **une seule base Supabase** (`cvqeysnymnkfxfithhsr`).
 
 ```
-nexart/
-├── App.tsx + src/              ← APP MOBILE (React Native + Expo)
-│   └── Dashboard private (créateurs/organisateurs)
+Claude/github-repos/
+├── Nexart-site/     ← SITE WEB — Next.js 13 App Router, déployé sur nexart.fr (Hostinger VPS)
+│                       Public + dashboards complets + back-office admin
 │
-└── web/                         ← SITE WEB (React + Tailwind)
-    └── Site public marketing + auth
+└── Nexart-app/      ← APP MOBILE — React Native 0.85 + Expo SDK 56 (iOS, Android, web)
+                        Usage nomade : candidater, échanger, suivre ses marchés
 ```
+
+> ⚠️ Le dossier `Nexart-app/web/` est un **ancien clone partiel** du site, antérieur
+> au dépôt `Nexart-site`. Il est obsolète, exclu du `tsconfig.json`, et destiné à
+> être supprimé. Ne rien y développer.
 
 ---
 
-## 🌐 SITE WEB (`web/`)
+## Qui fait quoi
 
-**URL** : nexart.fr (quand déployé)  
-**Public** : Tout le monde peut accéder  
-**Framework** : React + React Router + Tailwind + Shadcn/ui  
+| | Site (`nexart.fr`) | App mobile |
+|---|---|---|
+| **Audience** | tout le monde, SEO, partage | utilisateurs connectés |
+| **Point fort** | profondeur fonctionnelle, gros formulaires, back-office | rapidité, notifications push, géoloc, appareil photo |
+| **Source de vérité** | **charte graphique, schéma DB, règles métier, paiements** | consommateur de ces règles |
+| **Migrations Supabase** | `supabase/migrations/` — toutes partent d'ici | aucune |
+| **Stripe** | crée les sessions, reçoit les webhooks | edge function pour les stands uniquement |
 
-### Pages publiques
-
-| Page | URL | Contenu | Authentification |
-|------|-----|---------|-----------------|
-| **Home** | `/` | Hero animé + présentation | ❌ Public |
-| **Créateurs** | `/creators` | Galerie 500+ créateurs | ❌ Public |
-| **Événements** | `/events` | Recherche 200+ marchés | ❌ Public |
-| **À propos** | `/about` | Histoire, mission, team | ❌ Public |
-| **Login** | `/login` | Formulaire connexion | ❌ Public |
-| **Register** | `/register` | Inscription avec rôle | ❌ Public |
-
-### Après authentification (App section)
-
-| Rôle | Path | Pages | Interface |
-|------|------|-------|-----------|
-| **Créateur** | `/app/dashboard` | Dashboard, Events, Profile | Dashboard avec sidebar |
-| **Organisateur** | `/app/dashboard` | Dashboard, Events, Create | Dashboard avec sidebar |
-| **Visiteur** | `/app/events` | Events, Creators | Dashboard simplifié |
+**Règle simple : une nouveauté produit se conçoit sur le site, puis se porte dans l'app.**
 
 ---
 
-## 📱 APP MOBILE (`src/`)
+## Ce que fait le site et pas (encore) l'app
 
-**Plateforme** : iOS + Android (via Expo)  
-**Framework** : React Native + Expo SDK 54  
-**Private** : Authentification requise  
+Le site a pris ~264 commits d'avance depuis le 1er août 2026.
 
-### Navigation
+| Domaine | Site | App |
+|---|---|---|
+| Abonnements Stripe (Boost/Pro/Premium, Org Pro/Studio) | ✅ | ❌ écran manquant, `TIER_LIMITS` en place |
+| Packs de crédits pay-as-you-go | ✅ | ❌ écran manquant, `CREDIT_PACKS` en place |
+| Parrainage | ✅ | ⚠️ hook prêt, écran manquant |
+| Badge « Créateur vérifié » (SIRET) | ✅ | ⚠️ hook prêt, écran manquant |
+| Documents événement (contrat, règlement, convocation) | ✅ | ⚠️ hook prêt, écran manquant |
+| Plan de stands interactif | ✅ | ❌ |
+| Portfolio en grille (`portfolio_grid`) | ✅ | ❌ (portfolio en liste) |
+| Stands payants : `awaiting_payment` → `confirmed`, contre-proposition | ✅ | ❌ statuts typés, flux absent |
+| Bénévoles, campagnes email, exposants, checklists, FAQ | ✅ | ❌ |
+| Analytics organisateur + export CSV | ✅ | ❌ |
+| Back-office admin complet | ✅ | ⚠️ panel réduit |
+| RGPD : export de données, suppression de compte | ✅ | ⚠️ suppression seulement |
+| Blog / SEO / pages légales | ✅ | ⚠️ pages info statiques |
 
-| Rôle | Navigation | Pages |
-|------|-----------|-------|
-| **Créateur** | Bottom tabs | Home, SearchEvents, Applications, Messages, Profile |
-| **Organisateur** | Bottom tabs | Home, CreateEvent, ManageEvents, Applications, Messages |
-| **Visiteur** | Bottom tabs | Discover, EventMap, Creators, Messages, Favorites |
+## Ce que fait l'app et pas le site
 
----
-
-## 🎯 Différences clés
-
-### Site Web = Marketing + Public
-
-```
-/ (Home)
-├── Hero animé Framer Motion
-├── Stats (500+ créateurs, 200+ marchés)
-├── 6 features cards
-├── CTA signup
-└── Newsletter
-
-/creators
-├── Galerie créateurs avec filtres
-├── Profil créateur cliquable
-├── Rating + badges
-└── "Télécharger l'app"
-
-/events
-├── Recherche 200+ marchés
-├── Filtres type + localisation
-├── Carte interactive (futur)
-└── "Rejoindre via app"
-
-/about
-├── Notre histoire
-├── Mission & valeurs
-├── Team presentation
-└── Investors (futur)
-```
-
-### App Mobile = Fonctionnel + Private
-
-```
-Dashboard (Créateur)
-├── Stats candidatures
-├── Événements recommandés
-├── Candidatures en cours
-├── Messages non lus
-
-Search Events
-├── Filtres avancés (région, budget, discipline)
-├── Résultats en liste + carte
-└── Candidature 1-click
-
-Profile
-├── Portfolio + photos
-├── Disciplines + localisation
-├── Disponibilités
-└── Badges vérification
-
-Messaging
-├── Chat 1:1 Realtime
-├── Historique complet
-└── Notifications push
-```
+| | |
+|---|---|
+| Notifications push natives | Expo Notifications, token stocké dans `profiles.push_token` |
+| Carte plein écran avec géoloc temps réel | `react-native-maps` |
+| Appareil photo / galerie | `expo-image-picker` pour le portfolio |
+| Partage natif | fiche marché, profil créateur |
+| Haptique, swipe cards, pull-to-refresh | ergonomie mobile |
 
 ---
 
-## 🔄 Flux utilisateur
+## Ce qui doit rester synchronisé
 
-### Découverte (Site web public)
-```
-Landing page → Voir créateurs → Voir événements → Intéressé ?
-                                                     ↓
-                                          "Télécharger l'app"
-                                                     ↓
-                                            Créer un compte
-```
+| Élément | Côté site | Côté app | Comment |
+|---|---|---|---|
+| Charte graphique | `lib/design-tokens.ts` | `src/constants/theme.ts` | port manuel, mêmes valeurs |
+| Thème clair/sombre | CSS vars dans `app/globals.css` | `lightColors` / `darkColors` | mêmes hex |
+| Schéma DB | `supabase/migrations/` | `src/types/index.ts` | relire les colonnes après chaque migration |
+| Offres & limites | `lib/stripe.ts` | `src/constants/plans.ts` | mêmes montants, mêmes limites |
+| Statuts de candidature | enum `application_status` | `ApplicationStatus` + `APPLICATION_STATUS_CONFIG` | 7 valeurs |
+| Disciplines | liste site | `DISCIPLINE_TAGS` | 24 tags |
 
-### Utilisation (App mobile private)
-```
-Tableau de bord → Chercher événements → Candidater → Chat → Participer
-                                                              ↓
-                                                    Laisser un avis
-```
+### Points de vigilance déjà rencontrés
 
----
-
-## 📊 Avantages cette architecture
-
-| Aspect | Site | App |
-|--------|------|-----|
-| **Audience** | Publique (SEO, sharing) | Private (auth) |
-| **UX** | Marketing focused | Functional focused |
-| **Performance** | Fast load (Vercel) | Offline capable |
-| **Engagement** | Découverte passive | Engagement actif |
-| **Monétisation** | Premium creator listing | Stripe Connect |
-| **Social** | Share créateurs | Real-time messaging |
+- `applications.rejection_reason` est un **`jsonb` `{ reasons: string[] }`**.
+  L'app écrivait `refusal_reason` (colonne inexistante) : le refus échouait
+  silencieusement en production. Corrigé le 09/09/2026.
+- Le solde de crédits est la **somme de `credits.amount`**, pas une colonne.
+- `event_type` a gagné la valeur `marche`, `user_role` la valeur `admin`,
+  `application_status` quatre valeurs liées aux stands payants.
 
 ---
 
-## 🚀 Déploiement
+## Flux utilisateur
 
-### Site Web
-```bash
-cd web
-npm install
-npm run build
-# Deploy sur Vercel
+**Découverte** — le site fait entrer (SEO, partage, pages publiques) :
 ```
-**URL** : nexart.fr
-
-### App Mobile
-```bash
-npx eas build --platform ios --profile production
-npx eas build --platform android --profile production
-# Upload sur App Store + Google Play
+nexart.fr → marchés / créateurs → inscription → « continuer sur l'app »
 ```
-**URLs** : 
-- iOS: App Store
-- Android: Google Play
 
----
+**Usage courant** — l'app prend le relais :
+```
+candidater → notification push de la réponse → message avec l'organisateur → jour J
+```
 
-## 💡 Résumé
-
-**Nexart = 2 produits différents**
-
-- 🌐 **Site** : Plateforme de découverte + marketing
-- 📱 **App** : Tool de gestion + candidatures
-
-**Une base de données partagée** (Supabase)  
-**Hooks réutilisés** pour logique métier  
-**Design cohérent** (couleurs Nexart)  
-**Contenu distinct** (site public vs app private)
-
----
-
-**Status** ✅
-- [x] Site web : Home + Créateurs + Événements + About
-- [x] App mobile : Dashboard par rôle
-- [x] Auth partagée : Supabase Auth
-- [x] Navigation distincte : Site public vs App private
-- [ ] Déploiement production : Vercel (web) + EAS (app)
+**Gestion lourde** — retour au site :
+```
+créer un événement détaillé · gérer bénévoles et exposants · analytics · facturation
+```

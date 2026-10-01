@@ -16,6 +16,7 @@
     "expo-av": "^16.0.8",
     "expo-constants": "^56.0.16",
     "expo-dev-client": "^56.0.18",
+    "expo-file-system": "~56.0.11",
     "expo-font": "~56.0.7",
     "expo-haptics": "~56.0.3",
     "expo-image-picker": "~56.0.18",
@@ -23,6 +24,7 @@
     "expo-location": "~56.0.18",
     "expo-notifications": "^56.0.15",
     "expo-secure-store": "~56.0.4",
+    "expo-sharing": "~56.0.26",
     "expo-status-bar": "~56.0.4",
     "expo-updates": "~56.0.19",
     "expo-web-browser": "~56.0.5",
@@ -46,6 +48,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "test": "tsc -p tsconfig.test.json && node --test \".test-build/tests/*.test.js\"",
     "web:build": "cd web && npm run build",
     "web:start": "cd web && npm run start",
     "web:dev": "cd web && npm run dev"

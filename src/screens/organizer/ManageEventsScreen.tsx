@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { OrganizerEventStackParams } from '../../navigation/OrganizerEventStack';
@@ -6,15 +6,16 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { Event, EventStatus } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = { navigation: StackNavigationProp<OrganizerEventStackParams, 'ManageEvents'> };
 
-const STATUS_CONFIG: Record<EventStatus, { label: string; color: string; bg: string }> = {
+const makeStatusConfig = (colors: ThemeColors): Record<EventStatus, { label: string; color: string; bg: string }> => ({
   draft:     { label: 'Brouillon', color: colors.text.secondary, bg: colors.border },
   published: { label: 'Publié',    color: colors.secondary,      bg: colors.secondary + '25' },
   closed:    { label: 'Fermé',     color: colors.error,          bg: colors.error + '20' },
-};
+});
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -24,11 +25,18 @@ function EventRow({
   event,
   onPress,
   onToggleStatus,
+  onEdit,
+  onTools,
 }: {
   event: Event;
   onPress: () => void;
   onToggleStatus: (e: Event) => void;
+  onEdit: () => void;
+  onTools: () => void;
 }) {
+  const colors = useThemeColors();
+  const STATUS_CONFIG = useMemo(() => makeStatusConfig(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const cfg = STATUS_CONFIG[event.status];
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
@@ -46,6 +54,9 @@ function EventRow({
       </View>
 
       <View style={styles.cardActions}>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onEdit}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Modifier</Text>
+        </TouchableOpacity>
         {event.status === 'draft' && (
           <TouchableOpacity
             style={[styles.actionBtn, { borderColor: colors.secondary }]}
@@ -66,11 +77,18 @@ function EventRow({
           <Text style={styles.actionBtnPrimaryText}>Candidatures →</Text>
         </TouchableOpacity>
       </View>
+      <View style={[styles.cardActions, { borderTopWidth: 0, paddingTop: 0, marginTop: spacing.sm }]}>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onTools}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Outils de l'événement</Text>
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 }
 
 export default function ManageEventsScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile } = useAuth();
   const { events, loading, refetch } = useEvents({ organizerId: profile?.id, limit: 50 });
 
@@ -115,6 +133,8 @@ export default function ManageEventsScreen({ navigation }: Props) {
             event={item}
             onPress={() => navigation.navigate('EventApplications', { eventId: item.id, eventTitle: item.title })}
             onToggleStatus={toggleStatus}
+            onEdit={() => navigation.navigate('EditEvent', { eventId: item.id })}
+            onTools={() => navigation.navigate('EventTools', { eventId: item.id, eventTitle: item.title })}
           />
         )}
         contentContainerStyle={styles.list}
@@ -129,7 +149,7 @@ export default function ManageEventsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   title: { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },

@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "nexart",
     "slug": "nexart",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f8fafc"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
@@ -69,7 +69,8 @@
       "expo-font",
       "expo-secure-store",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-sharing"
     ],
     "runtimeVersion": {
       "policy": "appVersion"

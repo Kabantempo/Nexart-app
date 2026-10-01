@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import LogoMark from '../../components/ui/LogoMark';
 import {
   View,
   Text,
@@ -11,28 +12,61 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useAuth } from '../../stores/auth';
-import { Profile } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { DEFAULT_NOTIFICATION_PREFS, Profile } from '../../types';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
 
 type Props = {
   navigation: StackNavigationProp<AuthStackParams, 'Welcome'> & { getParent: () => any };
 };
 
-const MOCK_CREATOR: Profile = {
+/** Profil de test — valeurs par défaut alignées sur les colonnes de `profiles`. */
+function mockProfile(over: Pick<Profile, 'id' | 'role' | 'full_name'> & Partial<Profile>): Profile {
+  return {
+    avatar_url: null,
+    banner_url: null,
+    bio: null,
+    username: null,
+    show_real_name: true,
+    push_token: null,
+    is_banned: false,
+    is_creator: over.role === 'creator',
+    is_organizer: over.role === 'organizer',
+    onboarding_done: true,
+    created_at: new Date().toISOString(),
+    notification_prefs: DEFAULT_NOTIFICATION_PREFS,
+    profile_visibility: 'public',
+    preferred_language: 'fr',
+    referral_code: null,
+    stripe_customer_id: null,
+    subscription_tier: 'free',
+    subscription_status: null,
+    subscription_id: null,
+    subscription_ends_at: null,
+    deleted_at: null,
+    is_hard_deleted: false,
+    ...over,
+  };
+}
+
+const MOCK_CREATOR = mockProfile({
   id: 'dev-creator-id', role: 'creator', full_name: 'Alice Dupont (test)',
-  avatar_url: null, bio: 'Céramiste indépendante, mode test.', created_at: new Date().toISOString(),
-};
-const MOCK_ORGANIZER: Profile = {
-  id: 'dev-organizer-id', role: 'organizer', full_name: 'Bob Martin (test)',
-  avatar_url: null, bio: null, created_at: new Date().toISOString(),
-};
-const MOCK_VISITOR: Profile = {
+  bio: 'Céramiste indépendante, mode test.',
+});
+const MOCK_ORGANIZER = mockProfile({
+  id: 'demo-org-1', role: 'organizer', full_name: 'Bob Martin (test)',
+});
+const MOCK_ADMIN = mockProfile({
+  id: 'dev-admin-id', role: 'admin', is_admin: true, full_name: 'Dana Admin (test)',
+});
+const MOCK_VISITOR = mockProfile({
   id: 'dev-visitor-id', role: 'visitor', full_name: 'Clara Visiteur (test)',
-  avatar_url: null, bio: null, created_at: new Date().toISOString(),
-};
+});
 
 export default function WelcomeScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { setProfile } = useAuth();
 
   return (
@@ -43,7 +77,7 @@ export default function WelcomeScreen({ navigation }: Props) {
 
         {/* Brand header */}
         <View style={s.header}>
-          <Image source={require('../../../assets/logo-mark.png')} style={s.logoMark} />
+          <LogoMark size={32} />
           <Text style={s.brandName}>Nexart</Text>
         </View>
 
@@ -82,6 +116,10 @@ export default function WelcomeScreen({ navigation }: Props) {
             <Text style={s.btnSecondaryText}>Créer un compte</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity style={s.btnGhost} onPress={() => navigation.navigate('Showcase')} activeOpacity={0.7}>
+            <Text style={s.btnGhostText}>Découvrir Nexart</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={s.btnGhost}
             onPress={() => (navigation as any).getParent()?.navigate('Discover')}
@@ -110,6 +148,9 @@ export default function WelcomeScreen({ navigation }: Props) {
                 <TouchableOpacity style={[s.devBtn, s.devBtnVisitor]} onPress={() => setProfile(MOCK_VISITOR)}>
                   <Text style={s.devBtnText}>Visiteur</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[s.devBtn, s.devBtnVisitor]} onPress={() => setProfile(MOCK_ADMIN)}>
+                  <Text style={s.devBtnText}>Admin</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -119,7 +160,7 @@ export default function WelcomeScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacing.xl,
@@ -176,7 +217,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 5,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.surface + 'B3',
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -220,7 +261,7 @@ const s = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: radius.xl,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: colors.surface + 'CC',
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -270,7 +311,7 @@ const s = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.surface + 'B3',
     borderWidth: 1,
     borderColor: colors.primary + '40',
     alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Image,
@@ -10,7 +10,8 @@ import { MessageStackParams } from '../../navigation/MessageStack';
 import { useAuth } from '../../stores/auth';
 import { useMessages } from '../../hooks/useMessages';
 import { Message } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = {
   navigation: StackNavigationProp<MessageStackParams, 'Conversation'>;
@@ -26,6 +27,8 @@ function formatDay(iso: string) {
 }
 
 function MiniAvatar({ avatarUrl, name }: { avatarUrl?: string | null; name: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   if (avatarUrl) {
     return <Image source={{ uri: avatarUrl }} style={s.miniAvatar} />;
   }
@@ -39,6 +42,8 @@ function MiniAvatar({ avatarUrl, name }: { avatarUrl?: string | null; name: stri
 function Bubble({ msg, isOwn, otherAvatarUrl, otherName }: {
   msg: Message; isOwn: boolean; otherAvatarUrl?: string | null; otherName: string;
 }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={[s.bubbleWrap, isOwn && s.bubbleWrapOwn]}>
       {!isOwn && (
@@ -57,6 +62,8 @@ function Bubble({ msg, isOwn, otherAvatarUrl, otherName }: {
 }
 
 export default function ConversationScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { conversationId, eventTitle, otherPartyName, otherPartyId } = route.params;
   const { profile } = useAuth();
   const { messages, loading, sending, sendMessage } = useMessages(conversationId, profile?.id);
@@ -194,7 +201,7 @@ export default function ConversationScreen({ navigation, route }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   header: {

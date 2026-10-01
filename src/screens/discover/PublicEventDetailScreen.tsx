@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -9,7 +9,8 @@ import { useEvent } from '../../hooks/useEvent';
 import { useFavoriteEvent } from '../../hooks/useFavorites';
 import { useEventReviews } from '../../hooks/useReviews';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = {
   navigation: StackNavigationProp<DiscoverStackParams, 'PublicEventDetail'>;
@@ -26,6 +27,8 @@ function fmt(d: string) {
 }
 
 export default function PublicEventDetailScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { eventId } = route.params;
   const { profile }  = useAuth();
   const { event, loading } = useEvent(eventId);
@@ -134,7 +137,7 @@ export default function PublicEventDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },

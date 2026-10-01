@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   Image, Animated, useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 // ─── Types ────────────────────────────────────────────────
 
@@ -32,6 +33,8 @@ export function MarketCard({
   imageUrl, title, subtitle, rating, price,
   originalPrice, discountLabel, variant = 'visitor', onPress,
 }: MarketCardProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W } = useWindowDimensions();
   const CARD_W    = Math.min(W * 0.60, 220);
   const IMG_H     = CARD_W * 0.65;
@@ -122,7 +125,7 @@ export function MarketCard({
 
 // ─── Styles ───────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.xl,
@@ -159,7 +162,7 @@ const s = StyleSheet.create({
 
   ratingBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 2,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.accent,
     borderRadius: radius.full,
     paddingHorizontal: 6, paddingVertical: 2,
     flexShrink: 0,

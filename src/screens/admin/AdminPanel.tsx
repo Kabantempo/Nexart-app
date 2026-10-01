@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../../lib/supabase'
-import { colors, spacing, typography, radius } from '../../constants/theme'
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme'
+import { useThemeColors } from '../../stores/theme';
 import { Toast } from '../../components/Toast'
 
 interface Creator {
@@ -23,6 +24,8 @@ interface Creator {
 }
 
 export default function AdminPanel() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [loading, setLoading] = useState(true)
   const [creators, setCreators] = useState<Creator[]>([])
   const [filter, setFilter] = useState<'all' | 'pending'>('pending')
@@ -309,7 +312,7 @@ export default function AdminPanel() {
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -391,7 +394,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background,
   },
   filterBtnActive: {
     backgroundColor: colors.primary,
@@ -471,11 +474,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   documentVerified: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.success + '20',
     borderColor: '#A7F3D0',
   },
   documentPending: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F59E0B20',
     borderColor: '#FDE68A',
   },
 

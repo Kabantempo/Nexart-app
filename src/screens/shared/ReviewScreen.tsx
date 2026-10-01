@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
   ScrollView, ActivityIndicator, Alert,
@@ -10,7 +10,8 @@ import { RouteProp } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
 import { submitReview } from '../../hooks/useReviews';
 import { CREATOR_REVIEW_TAGS, ORGANIZER_REVIEW_TAGS, ReviewerRole } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 export type ReviewScreenParams = {
   eventId: string;
@@ -27,6 +28,8 @@ type Props = {
 const RATING_LABELS = ['', 'Très décevant', 'Décevant', 'Correct', 'Bien', 'Excellent'];
 
 export default function ReviewScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { eventId, reviewedId, reviewedName, reviewerRole } = route.params;
@@ -159,7 +162,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   header: {

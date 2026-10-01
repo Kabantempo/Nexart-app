@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NavigationContainer, DefaultTheme, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import { pageTransitionOptions } from '../lib/navigationConfig';
 import { unauthLinking, visitorLinking, creatorLinking, defaultLinking } from './linking';
 
@@ -16,10 +17,35 @@ import AboutScreen        from '../screens/info/AboutScreen';
 import ContactScreen      from '../screens/info/ContactScreen';
 import LegalScreen        from '../screens/info/LegalScreen';
 import AdminScreen        from '../screens/admin/AdminScreen';
+import BlogScreen         from '../screens/info/BlogScreen';
+import BannedScreen       from '../screens/info/BannedScreen';
+import UsernameProfileScreen from '../screens/discover/UsernameProfileScreen';
+import CalendarScreen     from '../screens/discover/CalendarScreen';
+import SearchScreen       from '../screens/discover/SearchScreen';
+import TrendsScreen       from '../screens/discover/TrendsScreen';
+import CompareScreen      from '../screens/discover/CompareScreen';
+import CreatorAnalyticsScreen from '../screens/shared/CreatorAnalyticsScreen';
+import OrganizerAnalyticsScreen from '../screens/organizer/OrganizerAnalyticsScreen';
+import OrganizerRevenueScreen from '../screens/organizer/OrganizerRevenueScreen';
+import PaymentsScreen      from '../screens/creator/PaymentsScreen';
+import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
+import PlansScreen         from '../screens/shared/PlansScreen';
+import CreditsScreen       from '../screens/shared/CreditsScreen';
+import ItineraryScreen     from '../screens/creator/ItineraryScreen';
+import AuditLogScreen      from '../screens/admin/AuditLogScreen';
+import ReportsScreen       from '../screens/admin/ReportsScreen';
+import AdminUsersScreen    from '../screens/admin/AdminUsersScreen';
+import AdminEventsScreen   from '../screens/admin/AdminEventsScreen';
+import BoutiqueScreen      from '../screens/discover/BoutiqueScreen';
+import SettingsScreen     from '../screens/shared/SettingsScreen';
+import NotificationsScreen from '../screens/shared/NotificationsScreen';
+import ReferralScreen     from '../screens/shared/ReferralScreen';
+import OnboardingScreen   from '../screens/auth/RoleScreen';
 
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
+  const colors = useThemeColors();
   const { session, profile, loading } = useAuth();
 
   if (loading) return null;
@@ -56,8 +82,12 @@ export default function RootNavigator() {
             <Stack.Screen name="Auth"     component={AuthNavigator} />
             <Stack.Screen name="Discover" component={DiscoverStack} />
           </>
+        ) : profile?.is_banned ? (
+          <Stack.Screen name="Banned"    component={BannedScreen} />
+        ) : profile && profile.onboarding_done === false && !profile.is_admin ? (
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : profile?.is_admin ? (
-          <Stack.Screen name="Admin"     component={AdminNavigator} />
+          <Stack.Screen name="AdminHome" component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (
           <Stack.Screen name="Creator"   component={CreatorNavigator} />
         ) : profile?.role === 'organizer' ? (
@@ -79,6 +109,101 @@ export default function RootNavigator() {
           name="Legal"
           component={LegalScreen}
           options={{ headerShown: true, title: 'Mentions légales', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen name="Username" component={UsernameProfileScreen} />
+        <Stack.Screen name="CreatorProfile" component={UsernameProfileScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="Referral" component={ReferralScreen} />
+        <Stack.Screen
+          name="CreatorAnalytics"
+          component={CreatorAnalyticsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrganizerAnalytics"
+          component={OrganizerAnalyticsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrganizerRevenue"
+          component={OrganizerRevenueScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatorPayments"
+          component={PaymentsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PatchNotes"
+          component={PatchNotesScreen}
+          options={{ headerShown: true, title: 'Nouveautés', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Itinerary"
+          component={ItineraryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminUsers"
+          component={AdminUsersScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminEvents"
+          component={AdminEventsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminReports"
+          component={ReportsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AuditLog"
+          component={AuditLogScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Boutique"
+          component={BoutiqueScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Plans"
+          component={PlansScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Credits"
+          component={CreditsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Trends"
+          component={TrendsScreen}
+          options={{ headerShown: true, title: 'Tendances', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Compare"
+          component={CompareScreen}
+          options={{ headerShown: true, title: 'Comparateur', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{ headerShown: true, title: 'Recherche', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Calendar"
+          component={CalendarScreen}
+          options={{ headerShown: true, title: 'Calendrier', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Blog"
+          component={BlogScreen}
+          options={{ headerShown: true, title: 'Blog', headerBackTitle: 'Retour' }}
         />
         <Stack.Screen
           name="Admin"

@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { useOrganizerApplications } from '../../hooks/useApplications';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { Event } from '../../types';
 
-const STATUS_CFG = {
+const makeStatusCfg = (colors: ThemeColors) => ({
   published: { label: 'Publié',   bg: colors.secondary + '20', color: colors.secondary },
   draft:     { label: 'Brouillon', bg: colors.text.secondary + '18', color: colors.text.secondary },
   closed:    { label: 'Fermé',    bg: colors.error + '18', color: colors.error },
-};
+});
 
 // ─── EventCard ────────────────────────────────────────────
 
 function EventCard({ event }: { event: Event }) {
+  const colors = useThemeColors();
+  const STATUS_CFG = useMemo(() => makeStatusCfg(colors), [colors]);
+  const s = useMemo(() => makeS(colors), [colors]);
   const start = new Date(event.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   const end   = new Date(event.end_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   const cfg   = STATUS_CFG[event.status] ?? STATUS_CFG.draft;
@@ -40,6 +44,8 @@ function EventCard({ event }: { event: Event }) {
 // ─── ApplicationRow ───────────────────────────────────────
 
 function ApplicationRow({ application }: { application: any }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const initials = application.creator?.full_name?.[0]?.toUpperCase() ?? '?';
   const date     = new Date(application.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 
@@ -62,6 +68,8 @@ function ApplicationRow({ application }: { application: any }) {
 // ─── EmptyState ───────────────────────────────────────────
 
 function EmptyState({ message }: { message: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.emptyState}>
       <View style={s.emptyDot} />
@@ -73,6 +81,8 @@ function EmptyState({ message }: { message: string }) {
 // ─── SectionTitle ─────────────────────────────────────────
 
 function SectionTitle({ children }: { children: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.sectionHeader}>
       <View style={s.sectionAccent} />
@@ -84,6 +94,8 @@ function SectionTitle({ children }: { children: string }) {
 // ─── Main screen ──────────────────────────────────────────
 
 export default function OrganizerHomeScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { events, loading: evLoading }     = useEvents({ organizerId: profile?.id, limit: 5 });
@@ -142,7 +154,7 @@ export default function OrganizerHomeScreen() {
 
 // ─── Styles ───────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
 
