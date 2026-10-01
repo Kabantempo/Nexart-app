@@ -6,9 +6,11 @@ import { ReviewScreenParams } from '../screens/shared/ReviewScreen';
 import ManageEventsScreen from '../screens/organizer/ManageEventsScreen';
 import EventApplicationsScreen from '../screens/organizer/EventApplicationsScreen';
 import ReviewScreen from '../screens/shared/ReviewScreen';
+import CreateEventScreen from '../screens/organizer/CreateEventScreen';
 
 export type OrganizerEventStackParams = {
   ManageEvents: undefined;
+  EditEvent: { eventId: string };
   EventApplications: { eventId: string; eventTitle: string };
   Review: ReviewScreenParams;
 };
@@ -19,6 +21,7 @@ export default function OrganizerEventStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="ManageEvents"       component={ManageEventsScreen} />
+      <Stack.Screen name="EditEvent"          component={CreateEventScreen} />
       <Stack.Screen name="EventApplications"  component={EventApplicationsScreen} />
       <Stack.Screen name="Review"             component={ReviewScreen} />
     </Stack.Navigator>

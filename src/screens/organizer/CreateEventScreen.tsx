@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
   TouchableOpacity, Alert, ActivityIndicator, Switch,
@@ -6,11 +7,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../stores/auth';
-import { useCreateEvent, EMPTY_FORM, EventFormData } from '../../hooks/useCreateEvent';
+import { useCreateEvent, EMPTY_FORM, EventFormData, formFromEvent } from '../../hooks/useCreateEvent';
 import { DISCIPLINE_TAGS, EventType } from '../../types';
 import { colors, spacing, typography, radius } from '../../constants/theme';
 
 const EVENT_TYPES: { label: string; value: EventType }[] = [
+  { label: 'Marché',     value: 'marche' },
   { label: 'Pop-up',     value: 'popup' },
   { label: 'Salon',      value: 'salon' },
   { label: 'Foire',      value: 'fair' },
@@ -82,13 +84,30 @@ function DisciplinePicker({ selected, onChange }: { selected: string[]; onChange
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
-export default function CreateEventScreen() {
+export default function CreateEventScreen({ route, navigation }: any) {
   const { profile } = useAuth();
-  const { save, saving } = useCreateEvent();
+  const { save, update, saving } = useCreateEvent();
   const [form, setForm] = useState<EventFormData>({ ...EMPTY_FORM });
+  const eventId: string | undefined = route?.params?.eventId;
+  const [loadingEvent, setLoadingEvent] = useState(!!eventId);
+
+  useEffect(() => {
+    if (!eventId) return;
+    supabase.from('events').select('*').eq('id', eventId).single().then(({ data }) => {
+      if (data) setForm(formFromEvent(data as any));
+      setLoadingEvent(false);
+    });
+  }, [eventId]);
 
   const set = (key: keyof EventFormData) => (value: string) =>
     setForm(f => ({ ...f, [key]: value }));
+
+  const handleUpdate = async () => {
+    if (!eventId) return;
+    const { error } = await update(eventId, form);
+    if (error) { Alert.alert('Erreur', error); return; }
+    Alert.alert('Modifications enregistrées', undefined, [{ text: 'OK', onPress: () => navigation?.goBack() }]);
+  };
 
   const handleSave = async (publish: boolean) => {
     if (!profile?.id) return;
@@ -103,10 +122,18 @@ export default function CreateEventScreen() {
     );
   };
 
+  if (loadingEvent) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={styles.title}>Créer un marché</Text>
+      <Text style={styles.title}>{eventId ? 'Modifier le marché' : 'Créer un marché'}</Text>
 
       {/* Infos générales */}
       <Field label="Nom du marché" value={form.title} onChange={set('title')} placeholder="Ex : Marché de Noël de Lyon" />
@@ -207,23 +234,43 @@ export default function CreateEventScreen() {
 
       {/* Actions */}
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={[styles.btnDraft, saving && { opacity: 0.5 }]}
-          onPress={() => handleSave(false)}
-          disabled={saving}
-        >
-          <Text style={styles.btnDraftText}>Enregistrer en brouillon</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.btnPublish, saving && { opacity: 0.5 }]}
-          onPress={() => handleSave(true)}
-          disabled={saving}
-        >
-          {saving
-            ? <ActivityIndicator color={colors.text.inverse} />
-            : <Text style={styles.btnPublishText}>Publier maintenant</Text>
-          }
-        </TouchableOpacity>
+        {eventId ? (
+          <TouchableOpacity
+            style={[styles.btnPublish, saving && { opacity: 0.5 }]}
+            onPress={handleUpdate}
+            disabled={saving}
+          >
+            {saving
+              ? <ActivityIndicator color={colors.text.inverse} />
+              : <Text style={styles.btnPublishText}>Enregistrer les modifications</Text>
+            }
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={[styles.btnDraft, saving && { opacity: 0.5 }]}
+              onPress={() => handleSave(false)}
+              disabled={saving}
+            >
+              <Text style={styles.btnDraftText}>Enregistrer en brouillon</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.btnPublish, saving && { opacity: 0.5 }]}
+              onPress={() => handleSave(true)}
+              disabled={saving}
+            >
+              {saving
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : <Text style={styles.btnPublishText}>Publier maintenant</Text>
+              }
+            </TouchableOpacity>
+          </>
+        )}
+        {eventId && (
+          <TouchableOpacity style={styles.btnDraft} onPress={() => navigation?.goBack()}>
+            <Text style={styles.btnDraftText}>Annuler</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
     </KeyboardAvoidingView>

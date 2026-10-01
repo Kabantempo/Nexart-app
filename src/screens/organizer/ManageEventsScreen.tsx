@@ -24,10 +24,12 @@ function EventRow({
   event,
   onPress,
   onToggleStatus,
+  onEdit,
 }: {
   event: Event;
   onPress: () => void;
   onToggleStatus: (e: Event) => void;
+  onEdit: () => void;
 }) {
   const cfg = STATUS_CONFIG[event.status];
   return (
@@ -46,6 +48,9 @@ function EventRow({
       </View>
 
       <View style={styles.cardActions}>
+        <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.border }]} onPress={onEdit}>
+          <Text style={[styles.actionBtnText, { color: colors.text.primary }]}>Modifier</Text>
+        </TouchableOpacity>
         {event.status === 'draft' && (
           <TouchableOpacity
             style={[styles.actionBtn, { borderColor: colors.secondary }]}
@@ -115,6 +120,7 @@ export default function ManageEventsScreen({ navigation }: Props) {
             event={item}
             onPress={() => navigation.navigate('EventApplications', { eventId: item.id, eventTitle: item.title })}
             onToggleStatus={toggleStatus}
+            onEdit={() => navigation.navigate('EditEvent', { eventId: item.id })}
           />
         )}
         contentContainerStyle={styles.list}
