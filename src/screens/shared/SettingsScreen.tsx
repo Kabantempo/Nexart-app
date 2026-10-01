@@ -75,14 +75,20 @@ export default function SettingsScreen() {
     else await refetchProfile();
   };
   const isCreator = profile?.role === 'creator';
+  const isOrganizer = profile?.role === 'organizer';
   const links: { label: string; icon: keyof typeof Ionicons.glyphMap; route: string; show: boolean }[] = [
     { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
     { label: 'Parrainage', icon: 'gift-outline', route: 'Referral', show: true },
+    { label: 'Mes statistiques', icon: 'stats-chart-outline', route: 'CreatorAnalytics', show: isCreator },
+    { label: 'Mes paiements', icon: 'card-outline', route: 'CreatorPayments', show: isCreator },
+    { label: 'Statistiques', icon: 'stats-chart-outline', route: 'OrganizerAnalytics', show: isOrganizer },
+    { label: 'Revenus', icon: 'cash-outline', route: 'OrganizerRevenue', show: isOrganizer },
     { label: 'Recherche', icon: 'search-outline', route: 'Search', show: true },
     { label: 'Tendances', icon: 'trending-up-outline', route: 'Trends', show: true },
     { label: 'Comparateur de marchés', icon: 'git-compare-outline', route: 'Compare', show: true },
     { label: 'Calendrier des marchés', icon: 'calendar-outline', route: 'Calendar', show: true },
     { label: 'Blog', icon: 'newspaper-outline', route: 'Blog', show: true },
+    { label: 'Nouveautés', icon: 'sparkles-outline', route: 'PatchNotes', show: true },
     { label: 'Mes documents', icon: 'document-text-outline', route: 'Documents', show: isCreator },
     { label: 'Créateur vérifié', icon: 'shield-checkmark-outline', route: 'Verification', show: isCreator },
   ];

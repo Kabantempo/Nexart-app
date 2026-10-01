@@ -24,6 +24,11 @@ import CalendarScreen     from '../screens/discover/CalendarScreen';
 import SearchScreen       from '../screens/discover/SearchScreen';
 import TrendsScreen       from '../screens/discover/TrendsScreen';
 import CompareScreen      from '../screens/discover/CompareScreen';
+import CreatorAnalyticsScreen from '../screens/shared/CreatorAnalyticsScreen';
+import OrganizerAnalyticsScreen from '../screens/organizer/OrganizerAnalyticsScreen';
+import OrganizerRevenueScreen from '../screens/organizer/OrganizerRevenueScreen';
+import PaymentsScreen      from '../screens/creator/PaymentsScreen';
+import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
@@ -99,6 +104,31 @@ export default function RootNavigator() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Referral" component={ReferralScreen} />
+        <Stack.Screen
+          name="CreatorAnalytics"
+          component={CreatorAnalyticsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrganizerAnalytics"
+          component={OrganizerAnalyticsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrganizerRevenue"
+          component={OrganizerRevenueScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatorPayments"
+          component={PaymentsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PatchNotes"
+          component={PatchNotesScreen}
+          options={{ headerShown: true, title: 'Nouveautés', headerBackTitle: 'Retour' }}
+        />
         <Stack.Screen
           name="Trends"
           component={TrendsScreen}
