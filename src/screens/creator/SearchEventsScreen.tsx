@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import {
@@ -11,7 +11,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { MarketStackParams } from '../../navigation/MarketStack';
 import { supabase } from '../../lib/supabase';
 import { Event, EventType, DISCIPLINE_TAGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { ANIMATION_DURATIONS } from '../../constants/animations';
 import { filterEvents, SearchEvent } from '../../lib/searchUtils';
 import { DEMO_MODE, DEMO_EVENTS } from '../../lib/demoData';
@@ -91,6 +92,8 @@ function isNew(d: string) {
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
 function EventCard({ event, onPress }: { event: Event; onPress: () => void }) {
+  const colors = useThemeColors();
+  const card = useMemo(() => makeCard(colors), [colors]);
   const cfg = TYPE_CONFIG[event.event_type] ?? DEFAULT_CONFIG;
   const multiDay = event.start_date !== event.end_date;
 
@@ -173,7 +176,7 @@ function EventCard({ event, onPress }: { event: Event; onPress: () => void }) {
 }
 
 const CARD_H = 100;
-const card = StyleSheet.create({
+const makeCard = (colors: ThemeColors) => StyleSheet.create({
   wrap: {
     backgroundColor: colors.surface,
     borderRadius: radius.xl,
@@ -216,6 +219,8 @@ const card = StyleSheet.create({
 // ─── Active filter chip ───────────────────────────────────────────────────────
 
 function ActiveChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  const colors = useThemeColors();
+  const fc = useMemo(() => makeFc(colors), [colors]);
   return (
     <TouchableOpacity style={fc.chip} onPress={onRemove} activeOpacity={0.8}>
       <Text style={fc.chipText} numberOfLines={1}>{label}</Text>
@@ -224,7 +229,7 @@ function ActiveChip({ label, onRemove }: { label: string; onRemove: () => void }
   );
 }
 
-const fc = StyleSheet.create({
+const makeFc = (colors: ThemeColors) => StyleSheet.create({
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: colors.primary + '15',
@@ -251,6 +256,9 @@ function FiltersSheet({
   onApply: (v: FilterValues) => void;
   onClose: () => void;
 }) {
+  const colors = useThemeColors();
+  const fs = useMemo(() => makeFs(colors), [colors]);
+  const s = useMemo(() => makeS(colors), [colors]);
   const [local, setLocal] = useState<FilterValues>(values);
   const set = <K extends keyof FilterValues>(k: K, v: FilterValues[K]) =>
     setLocal(p => ({ ...p, [k]: v }));
@@ -368,7 +376,7 @@ function FiltersSheet({
   );
 }
 
-const fs = StyleSheet.create({
+const makeFs = (colors: ThemeColors) => StyleSheet.create({
   overlay:   { flex: 1 },
   backdrop:  { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.55)' },
   panel: {
@@ -404,6 +412,8 @@ const fs = StyleSheet.create({
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function SearchEventsScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
 
   const [search,    setSearch]    = useState('');
@@ -623,7 +633,7 @@ export default function SearchEventsScreen({ navigation }: Props) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   searchBar: {

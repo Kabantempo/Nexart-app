@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 export default function VisitorProfileScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { profile } = useAuth();
   const navigation = useNavigation<any>();
 
@@ -35,7 +38,7 @@ export default function VisitorProfileScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.xl, paddingTop: spacing.xxl, alignItems: 'center' },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.primary + '30', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
   avatarText: { ...typography.h1, color: colors.primary },

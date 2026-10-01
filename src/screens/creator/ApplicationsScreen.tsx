@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,8 @@ import { useHasReviewed } from '../../hooks/useReviews';
 import { supabase } from '../../lib/supabase';
 import { ApplicationStatus } from '../../types';
 import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason } from '../../utils/applications';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 async function createCheckoutSession(applicationId: string, eventTitle: string, standPrice: number): Promise<{ url: string | null; error: string | null }> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -45,12 +46,14 @@ const FILTERS: { label: string; value: ApplicationStatus | 'all' }[] = [
 const STATUS_CONFIG = APPLICATION_STATUS_CONFIG;
 
 function formatDateRange(start: string, end: string) {
-  const s = new Date(start).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-  const e = new Date(end).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-  return start === end ? s : `${s} → ${e}`;
+  const from = new Date(start).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  const to = new Date(end).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  return start === end ? from : `${from} → ${to}`;
 }
 
 function ApplicationCard({ item, userId }: { item: any; userId: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const cfg = STATUS_CONFIG[item.status as ApplicationStatus];
   const nav = useNavigation<any>();
   const event = item.event;
@@ -169,6 +172,8 @@ function ApplicationCard({ item, userId }: { item: any; userId: string }) {
 }
 
 export default function ApplicationsScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const { applications, loading, refetch } = useCreatorApplications(profile?.id);
@@ -247,7 +252,7 @@ export default function ApplicationsScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   title: { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
   statsRow: { flexDirection: 'row', marginHorizontal: spacing.xl, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, marginBottom: spacing.lg },

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
@@ -20,7 +20,8 @@ import { useFollow, useFollowCounts } from '../../hooks/useFollow';
 import { usePosts } from '../../hooks/usePosts';
 import PostCard from '../../components/PostCard';
 import { PageSettings, DEFAULT_PAGE_SETTINGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = {
   navigation: StackNavigationProp<DiscoverStackParams, 'PublicCreatorProfile'>;
@@ -37,6 +38,8 @@ function formatDate(d: string) {
 // ─── Music player (floating) ──────────────────────────────────────────────────
 
 function MusicPlayer({ settings }: { settings: PageSettings }) {
+  const colors = useThemeColors();
+  const mp = useMemo(() => makeMp(colors), [colors]);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -107,7 +110,7 @@ function MusicPlayer({ settings }: { settings: PageSettings }) {
   );
 }
 
-const mp = StyleSheet.create({
+const makeMp = (colors: ThemeColors) => StyleSheet.create({
   container: {
     position: 'absolute', bottom: 90, right: 16,
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -124,6 +127,8 @@ const mp = StyleSheet.create({
 // ─── Contact section ──────────────────────────────────────────────────────────
 
 function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId: string }) {
+  const colors = useThemeColors();
+  const c = useMemo(() => makeC(colors), [colors]);
   const { inquiry, loading, saving, send, edit } = useVisitorInquiry(visitorId, creatorId);
   const [text, setText] = useState('');
   const [editing, setEditing] = useState(false);
@@ -196,6 +201,9 @@ function ContactSection({ visitorId, creatorId }: { visitorId: string; creatorId
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function PublicCreatorProfileScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
+  const lb = useMemo(() => makeLb(colors), [colors]);
   const { creatorId } = route.params;
   const { profile } = useAuth();
   const insets = useSafeAreaInsets();
@@ -411,7 +419,7 @@ export default function PublicCreatorProfileScreen({ navigation, route }: Props)
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
@@ -453,7 +461,7 @@ const s = StyleSheet.create({
   contactBtnText: { ...typography.label, color: '#fff', fontWeight: '700', fontSize: 15 },
 });
 
-const lb = StyleSheet.create({
+const makeLb = (colors: ThemeColors) => StyleSheet.create({
   overlay:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.97)', justifyContent: 'center' },
   img:      { width: W, height: W * 1.4 },
   closeBtn: { position: 'absolute', top: 52, right: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
@@ -461,7 +469,7 @@ const lb = StyleSheet.create({
   counterText: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
 });
 
-const c = StyleSheet.create({
+const makeC = (colors: ThemeColors) => StyleSheet.create({
   box:      { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   label:    { ...typography.caption, color: colors.text.secondary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: spacing.sm },
   hint:     { ...typography.caption, color: colors.text.secondary, marginBottom: spacing.sm, lineHeight: 16 },

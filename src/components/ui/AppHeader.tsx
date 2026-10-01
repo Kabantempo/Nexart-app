@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View, TouchableOpacity, StyleSheet, Image, Text,
 } from 'react-native';
@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../stores/auth';
-import { colors, spacing, radius, typography } from '../../constants/theme';
+import { ThemeColors, colors, spacing, radius, typography } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 interface AppHeaderProps {
   showFavorites?: boolean;
@@ -19,6 +20,8 @@ export function AppHeader({
   showCreate    = false,
   onCreatePress,
 }: AppHeaderProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets              = useSafeAreaInsets();
   const nav                 = useNavigation<any>();
   const { profile, session } = useAuth();
@@ -67,7 +70,7 @@ export function AppHeader({
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',

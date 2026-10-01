@@ -1,10 +1,13 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { colors, spacing, typography } from '../../constants/theme'
+import { ThemeColors, colors, spacing, typography } from '../../constants/theme'
+import { useThemeColors } from '../../stores/theme';
 
 export function AppFooter() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav = useNavigation<any>()
 
   const links = [
@@ -43,7 +46,7 @@ export function AppFooter() {
   )
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   footer: {
     backgroundColor: colors.surface,
     paddingVertical: spacing.xl,

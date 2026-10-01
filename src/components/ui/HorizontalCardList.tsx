@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View, FlatList, StyleSheet, Text, TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
-import { colors, spacing, typography } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const CARD_RATIO = 0.78; // 78% de la largeur écran
 const ITEM_GAP   = spacing.md;
@@ -22,6 +23,8 @@ export function HorizontalCardList<T>({
   data, renderCard, title, seeAllLabel = 'Voir tout',
   onSeeAll, emptyText = 'Aucun résultat', keyExtractor,
 }: HorizontalCardListProps<T>) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W } = useWindowDimensions();
   const cardWidth    = Math.min(W * CARD_RATIO, 300);
 
@@ -60,7 +63,7 @@ export function HorizontalCardList<T>({
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing.xl },
   header: {
     flexDirection: 'row', alignItems: 'center',

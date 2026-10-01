@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NavigationContainer, DefaultTheme, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../stores/auth';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import { pageTransitionOptions } from '../lib/navigationConfig';
 import { unauthLinking, visitorLinking, creatorLinking, defaultLinking } from './linking';
 
@@ -27,6 +28,7 @@ import ReferralScreen     from '../screens/shared/ReferralScreen';
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
+  const colors = useThemeColors();
   const { session, profile, loading } = useAuth();
 
   if (loading) return null;

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { UserRole } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 export default function RoleScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [loading, setLoading] = useState(false);
 
   const selectRole = async (role: UserRole) => {
@@ -49,7 +52,7 @@ export default function RoleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.xl, justifyContent: 'center' },
   title: { ...typography.h1, color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm },
   subtitle: { ...typography.body, color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xxl },

@@ -1,6 +1,7 @@
-import React, { useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { Animated, ScrollView, View, Text, StyleSheet, ViewStyle } from 'react-native'
-import { colors, spacing, typography } from '../constants/theme'
+import { ThemeColors, colors, spacing, typography } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 
 interface AnimatedScrollViewProps {
   children: React.ReactNode
@@ -17,6 +18,8 @@ export function AnimatedScrollView({
   onScroll,
   style,
 }: AnimatedScrollViewProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const scrollAnim = useRef(new Animated.Value(0)).current
 
   const handleScroll = Animated.event(
@@ -72,6 +75,8 @@ interface ParallaxHeaderProps {
 }
 
 export function ParallaxHeader({ height = 200 }: ParallaxHeaderProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const scrollAnim = useRef(new Animated.Value(0)).current
 
   const imageScale = scrollAnim.interpolate({
@@ -93,7 +98,7 @@ export function ParallaxHeader({ height = 200 }: ParallaxHeaderProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },

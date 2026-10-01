@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 import MessagesScreen      from '../screens/shared/MessagesScreen';
 import ConversationScreen  from '../screens/shared/ConversationScreen';
@@ -19,6 +20,7 @@ export type MessageStackParams = {
 const Stack = createStackNavigator<MessageStackParams>();
 
 export default function MessageStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="ConversationList" component={MessagesScreen} />

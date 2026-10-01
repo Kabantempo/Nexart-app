@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -6,7 +6,8 @@ import { RouteProp } from '@react-navigation/native';
 import { DiscoverStackParams } from '../../navigation/DiscoverStack';
 import { usePublicCreators } from '../../hooks/usePublicCreators';
 import { PublicCreatorProfile, DISCIPLINE_TAGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { SkeletonGroup } from '../../components/Skeleton';
 import { EmptyState } from '../../components/EmptyState';
 
@@ -16,6 +17,8 @@ type Props = {
 };
 
 function CreatorRow({ creator, onPress }: { creator: PublicCreatorProfile; onPress: () => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const cover = creator.portfolio_images[0];
   return (
     <TouchableOpacity style={s.row} onPress={onPress} activeOpacity={0.8}>
@@ -42,6 +45,8 @@ function CreatorRow({ creator, onPress }: { creator: PublicCreatorProfile; onPre
 }
 
 export default function CreatorsListScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [search, setSearch] = useState('');
   const [disc, setDisc]     = useState(route.params?.discipline ?? '');
 
@@ -97,7 +102,7 @@ export default function CreatorsListScreen({ navigation, route }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
   back: { paddingHorizontal: spacing.xl, marginBottom: spacing.sm },

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
 import { UserRole } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { Toast } from '../../components/Toast';
 import { GoogleLoginButton } from '../../components/GoogleLoginButton';
 import { AnimatedTouchableOpacity } from '../../components/AnimatedTouchableOpacity';
@@ -15,6 +16,8 @@ import { FloatingInput } from '../../components/ui/FloatingInput';
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Register'> };
 
 export default function RegisterScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [role, setRole]         = useState<UserRole | null>(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail]       = useState('');
@@ -191,7 +194,7 @@ export default function RegisterScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
   back: { marginBottom: spacing.xl, flexDirection: 'row', alignItems: 'center', gap: 4 },

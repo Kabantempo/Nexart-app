@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
@@ -9,7 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../stores/auth';
 import { useCreateEvent, EMPTY_FORM, EventFormData, formFromEvent } from '../../hooks/useCreateEvent';
 import { DISCIPLINE_TAGS, EventType } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const EVENT_TYPES: { label: string; value: EventType }[] = [
   { label: 'Marché',     value: 'marche' },
@@ -23,6 +24,8 @@ const EVENT_TYPES: { label: string; value: EventType }[] = [
 // ─── Reusable field components ────────────────────────────────────────────────
 
 function FieldLabel({ children, hint }: { children: string; hint?: string }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: spacing.xs, marginTop: spacing.lg }}>
       <Text style={styles.label}>{children}</Text>
@@ -38,6 +41,8 @@ function Field({
   onChange: (v: string) => void; placeholder?: string;
   multiline?: boolean; keyboardType?: any; maxLength?: number;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <>
       <FieldLabel hint={hint}>{label}</FieldLabel>
@@ -60,6 +65,8 @@ function Field({
 // ─── Discipline picker ────────────────────────────────────────────────────────
 
 function DisciplinePicker({ selected, onChange }: { selected: string[]; onChange: (v: string[]) => void }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const toggle = (tag: string) => {
     if (selected.includes(tag)) onChange(selected.filter(t => t !== tag));
     else onChange([...selected, tag]);
@@ -85,6 +92,8 @@ function DisciplinePicker({ selected, onChange }: { selected: string[]; onChange
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function CreateEventScreen({ route, navigation }: any) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile } = useAuth();
   const { save, update, saving } = useCreateEvent();
   const [form, setForm] = useState<EventFormData>({ ...EMPTY_FORM });
@@ -279,7 +288,7 @@ export default function CreateEventScreen({ route, navigation }: any) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
   title: { ...typography.h2, color: colors.text.primary, marginBottom: spacing.xl },

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { UserRole } from '../types';
-import { colors, spacing, typography, radius } from '../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -63,6 +64,8 @@ export function useOnboarding(role: UserRole | undefined) {
 }
 
 export default function OnboardingModal({ role, visible, onDismiss }: { role: UserRole; visible: boolean; onDismiss: () => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [step, setStep] = useState(0);
   const steps = STEPS[role] ?? STEPS.visitor;
   const current = steps[step];
@@ -104,7 +107,7 @@ export default function OnboardingModal({ role, visible, onDismiss }: { role: Us
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   panel:   { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.xl, width: '100%', maxWidth: 400, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   icon:    { marginBottom: spacing.lg },

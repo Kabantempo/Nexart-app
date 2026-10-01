@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useMemo, useEffect, useRef, useState } from 'react'
 import {
   View, Text, TextInput, Animated, TouchableOpacity,
   StyleSheet, TextInputProps, ViewStyle,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, radius, typography } from '../../constants/theme'
+import { ThemeColors, colors, spacing, radius, typography } from '../../constants/theme'
+import { useThemeColors } from '../../stores/theme';
 
 interface FloatingInputProps extends TextInputProps {
   label: string
@@ -26,6 +27,8 @@ export function FloatingInput({
   onRightIconPress,
   ...props
 }: FloatingInputProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [focused, setFocused] = useState(false)
   const hasContent = !!(value && value.length > 0)
   const anim = useRef(new Animated.Value(hasContent ? 1 : 0)).current
@@ -102,19 +105,19 @@ export function FloatingInput({
   )
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing.md },
 
   inputWrap: {
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.xl,
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: colors.surface + 'D9',
     position: 'relative',
     justifyContent: 'center',
   },
   inputWrapFocused: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: colors.surface + 'F2',
     shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.12,

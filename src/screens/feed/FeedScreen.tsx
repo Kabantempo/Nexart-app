@@ -15,7 +15,8 @@ import { AppHeader } from '../../components/ui/AppHeader';
 import { MarketCard } from '../../components/ui/MarketCard';
 import { CreatorCard } from '../../components/ui/CreatorCard';
 import { CreationCard } from '../../components/ui/CreationCard';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const today     = new Date();
 const inDays    = (d: string, n: number) => new Date(d) <= new Date(today.getTime() + n * 86400000);
@@ -46,6 +47,8 @@ function SectionTitle({ icon, title, count, onSeeAll, onMap }: {
   icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string; count?: number; onSeeAll?: () => void; onMap?: () => void;
 }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.sectionHead}>
       <Ionicons name={icon} size={16} color={colors.primary} />
@@ -73,6 +76,8 @@ function SectionTitle({ icon, title, count, onSeeAll, onMap }: {
 // ─── Horizontal event row ─────────────────────────────────
 
 function EventRow({ events, onPressEvent, isCreator = false }: { events: any[]; onPressEvent: (id: string) => void; isCreator?: boolean }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W } = useWindowDimensions();
   const cardWidth = Math.min(W * 0.60, 220);
   if (!events.length) return null;
@@ -99,6 +104,8 @@ function EventRow({ events, onPressEvent, isCreator = false }: { events: any[]; 
 // ─── Creator recommendation card ─────────────────────────
 
 function CreatorChip({ creator, onPress }: { creator: any; onPress: () => void }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <TouchableOpacity style={s.creatorChip} onPress={onPress} activeOpacity={0.85}>
       {creator.avatar_url ? (
@@ -119,6 +126,8 @@ function CreatorChip({ creator, onPress }: { creator: any; onPress: () => void }
 // ─── Main screen ──────────────────────────────────────────
 
 export default function FeedScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav         = useNavigation<any>();
   const { profile } = useAuth();
   const followedIds = useFollowedCreators(profile?.id);
@@ -269,7 +278,7 @@ export default function FeedScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll:    { paddingBottom: spacing.xxl },

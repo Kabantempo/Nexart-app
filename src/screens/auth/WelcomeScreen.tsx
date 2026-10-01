@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useAuth } from '../../stores/auth';
 import { DEFAULT_NOTIFICATION_PREFS, Profile } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
 
 type Props = {
@@ -60,6 +61,8 @@ const MOCK_VISITOR = mockProfile({
 });
 
 export default function WelcomeScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { setProfile } = useAuth();
 
   return (
@@ -146,7 +149,7 @@ export default function WelcomeScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacing.xl,
@@ -203,7 +206,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 5,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.surface + 'B3',
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -247,7 +250,7 @@ const s = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: radius.xl,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: colors.surface + 'CC',
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -297,7 +300,7 @@ const s = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.surface + 'B3',
     borderWidth: 1,
     borderColor: colors.primary + '40',
     alignItems: 'center',

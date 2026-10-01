@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   Image, ScrollView, useWindowDimensions, NativeScrollEvent,
@@ -6,7 +6,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 // ─── Types ────────────────────────────────────────────────
 
@@ -29,6 +30,8 @@ export function CreatorCard({
   fullName, avatarUrl, discipline, city, bio,
   portfolioImages, siretVerified, insuranceVerified, onPress,
 }: CreatorCardProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { width: W }  = useWindowDimensions();
   const CARD_W        = Math.min(W * 0.60, 220);
   const IMG_H         = CARD_W * 0.85;
@@ -151,7 +154,7 @@ export function CreatorCard({
 
 // ─── Styles ───────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.xl,

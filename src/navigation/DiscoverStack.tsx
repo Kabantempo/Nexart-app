@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 import DiscoverHomeScreen       from '../screens/discover/DiscoverHomeScreen';
 import PublicEventDetailScreen  from '../screens/discover/PublicEventDetailScreen';
@@ -19,6 +20,7 @@ export type DiscoverStackParams = {
 const Stack = createStackNavigator<DiscoverStackParams>();
 
 export default function DiscoverStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="DiscoverHome"         component={DiscoverHomeScreen} />

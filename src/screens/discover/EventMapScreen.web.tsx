@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ScrollView, ActivityIndicator, Dimensions,
@@ -6,7 +6,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useGeoEvents, DEFAULT_FILTERS, MapFilters, GeoEvent } from '../../hooks/useGeoEvents';
 import { DISCIPLINE_TAGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { EVENT_TYPE_COLORS, EVENT_TYPE_LABELS } from './EventMapScreen';
 
 const { height: SCREEN_H } = Dimensions.get('window');
@@ -43,6 +44,9 @@ function FilterPanel({
   onClose: () => void;
   userPos: { lat: number; lng: number } | null;
 }) {
+  const colors = useThemeColors();
+  const f = useMemo(() => makeF(colors), [colors]);
+  const p = useMemo(() => makeP(colors), [colors]);
   const [local, setLocal] = useState(filters);
   const set = (patch: Partial<MapFilters>) => setLocal(p => ({ ...p, ...patch }));
   const apply = () => { onChange({ ...local, userLat: userPos?.lat, userLng: userPos?.lng }); onClose(); };
@@ -111,6 +115,8 @@ function FilterPanel({
 // ─── Event preview card ───────────────────────────────────
 
 function EventPreviewCard({ event, onClose, onView }: { event: GeoEvent; onClose: () => void; onView: () => void }) {
+  const colors = useThemeColors();
+  const p = useMemo(() => makeP(colors), [colors]);
   const typeColor = EVENT_TYPE_COLORS[event.event_type] ?? colors.primary;
   return (
     <View style={p.card}>
@@ -135,6 +141,8 @@ function EventPreviewCard({ event, onClose, onView }: { event: GeoEvent; onClose
 // ─── Legend ───────────────────────────────────────────────
 
 function Legend() {
+  const colors = useThemeColors();
+  const l = useMemo(() => makeL(colors), [colors]);
   return (
     <View style={l.box}>
       {(Object.entries(EVENT_TYPE_LABELS) as [keyof typeof EVENT_TYPE_LABELS, string][]).map(([type, label]) => (
@@ -154,6 +162,8 @@ function LeafletMap({ events, userPos, onSelect }: {
   userPos: { lat: number; lng: number } | null;
   onSelect: (e: GeoEvent) => void;
 }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [ready, setReady] = useState(false);
   const RL = useRef<any>(null);
 
@@ -206,6 +216,8 @@ function LeafletMap({ events, userPos, onSelect }: {
 // ─── Main screen ──────────────────────────────────────────
 
 export default function EventMapScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav = useNavigation<any>();
   const [filters, setFilters]       = useState<MapFilters>(DEFAULT_FILTERS);
   const [userPos, setUserPos]       = useState<{ lat: number; lng: number } | null>(null);
@@ -277,7 +289,7 @@ export default function EventMapScreen() {
 
 // ─── Styles ───────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container:  { flex: 1, backgroundColor: colors.background },
   centered:   { flex: 1, alignItems: 'center', justifyContent: 'center' },
   topBar: {
@@ -299,7 +311,7 @@ const s = StyleSheet.create({
   overlay:            { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
 });
 
-const f = StyleSheet.create({
+const makeF = (colors: ThemeColors) => StyleSheet.create({
   panel: {
     position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
     backgroundColor: colors.surface, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
@@ -326,7 +338,7 @@ const f = StyleSheet.create({
   applyText:      { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 });
 
-const p = StyleSheet.create({
+const makeP = (colors: ThemeColors) => StyleSheet.create({
   card:         { position: 'absolute', bottom: spacing.xxl, left: spacing.xl, right: spacing.xl, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   closeBtn:     { position: 'absolute', top: spacing.md, right: spacing.md, padding: 4 },
   closeBtnText: { color: colors.text.secondary, fontSize: 16 },
@@ -340,7 +352,7 @@ const p = StyleSheet.create({
   viewBtnText:  { ...typography.label, color: colors.text.inverse, fontWeight: '700' },
 });
 
-const l = StyleSheet.create({
+const makeL = (colors: ThemeColors) => StyleSheet.create({
   box:   { position: 'absolute', top: 90, right: spacing.lg, backgroundColor: colors.surface + 'EE', borderRadius: radius.md, padding: spacing.sm, borderWidth: 1, borderColor: colors.border },
   row:   { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: 3 },
   dot:   { width: 10, height: 10, borderRadius: 5 },

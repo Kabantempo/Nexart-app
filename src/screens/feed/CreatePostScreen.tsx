@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   ScrollView, Alert, ActivityIndicator, Platform, Image,
@@ -10,11 +10,14 @@ import { useAuth } from '../../stores/auth';
 import { createPost, extractHashtags, PostType } from '../../hooks/usePosts';
 import { supabase } from '../../lib/supabase';
 import { POST_TYPE_CONFIG } from '../../components/PostCard';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const POST_TYPES = Object.entries(POST_TYPE_CONFIG) as [PostType, { label: string; color: string }][];
 
 export default function CreatePostScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav = useNavigation<any>();
   const { profile } = useAuth();
 
@@ -150,7 +153,7 @@ export default function CreatePostScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl },
   header:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.xl },

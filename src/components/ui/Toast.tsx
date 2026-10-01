@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, createContext, useContext, useState, useCallback } from 'react';
 import { Animated, Text, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,8 @@ const BG: Record<ToastType, string> = {
 };
 
 function Toast({ message, type, onHide }: { message: string; type: ToastType; onHide: () => void }) {
+  const colors = useThemeColors();
+  const t = useMemo(() => makeT(colors), [colors]);
   const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -68,6 +71,8 @@ function Toast({ message, type, onHide }: { message: string; type: ToastType; on
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const colors = useThemeColors();
+  const t = useMemo(() => makeT(colors), [colors]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const counter = useRef(0);
 
@@ -94,7 +99,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const t = StyleSheet.create({
+const makeT = (colors: ThemeColors) => StyleSheet.create({
   container: {
     position: 'absolute', bottom: 90, left: spacing.xl, right: spacing.xl,
     zIndex: 9999, gap: spacing.xs,

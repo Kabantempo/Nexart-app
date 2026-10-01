@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,8 @@ import { useEvents } from '../../hooks/useEvents';
 import { useCreatorApplications } from '../../hooks/useApplications';
 import { useCreatorProfile } from '../../hooks/useCreatorProfile';
 import { useEventRecommendations } from '../../hooks/useRecommendations';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { Event } from '../../types';
 import { SwipeCard, CardStat } from '../../components/ui/SwipeCard';
 import { HorizontalCardList } from '../../components/ui/HorizontalCardList';
@@ -67,6 +68,8 @@ const EVENT_TYPE_ACCENT: Record<string, string> = {
 // ─── EventCard ────────────────────────────────────────────
 
 function EventCard({ event }: { event: Event }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const accent = EVENT_TYPE_ACCENT[event.event_type] ?? colors.primary;
   return (
     <View style={[s.eventCard, { borderLeftColor: accent }]}>
@@ -97,6 +100,8 @@ function EventCard({ event }: { event: Event }) {
 // ─── ApplicationItem ──────────────────────────────────────
 
 function ApplicationItem({ application }: { application: any }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const cfg = STATUS_CONFIG[application.status] ?? STATUS_CONFIG.pending;
   return (
     <View style={s.appItem}>
@@ -115,6 +120,8 @@ function ApplicationItem({ application }: { application: any }) {
 // ─── EmptyState ───────────────────────────────────────────
 
 function EmptyState({ message }: { message: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.emptyState}>
       <View style={s.emptyDot} />
@@ -126,6 +133,8 @@ function EmptyState({ message }: { message: string }) {
 // ─── SectionTitle ─────────────────────────────────────────
 
 function SectionTitle({ children, accent }: { children: string; accent?: boolean }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={s.sectionHeader}>
       {accent && <View style={s.sectionAccent} />}
@@ -137,6 +146,8 @@ function SectionTitle({ children, accent }: { children: string; accent?: boolean
 // ─── Main screen ──────────────────────────────────────────
 
 export default function CreatorHomeScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   const nav    = useNavigation<any>();
   const { profile } = useAuth();
@@ -261,7 +272,7 @@ export default function CreatorHomeScreen() {
 
 // ─── Styles ───────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content:   { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
 

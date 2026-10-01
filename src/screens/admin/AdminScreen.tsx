@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   ActivityIndicator, Image, RefreshControl,
@@ -8,7 +8,8 @@ import * as Linking from 'expo-linking';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Creator = {
   user_id: string;
@@ -22,6 +23,8 @@ type Creator = {
 type Filter = 'pending' | 'all';
 
 export default function AdminScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { profile } = useAuth();
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
@@ -227,6 +230,8 @@ export default function AdminScreen() {
 }
 
 function StatCard({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <View style={[s.statCard, { backgroundColor: bg }]}>
       <Text style={[s.statValue, { color }]}>{value}</Text>
@@ -235,7 +240,7 @@ function StatCard({ label, value, color, bg }: { label: string; value: number; c
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: spacing.xxl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },

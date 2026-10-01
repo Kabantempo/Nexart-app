@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 
 import SearchEventsScreen from '../screens/creator/SearchEventsScreen';
 import EventDetailScreen from '../screens/creator/EventDetailScreen';
@@ -15,6 +16,7 @@ export type MarketStackParams = {
 const Stack = createStackNavigator<MarketStackParams>();
 
 export default function MarketStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator
       screenOptions={{

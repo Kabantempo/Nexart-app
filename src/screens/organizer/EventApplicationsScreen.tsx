@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   ActivityIndicator, Alert, TextInput, Modal, Animated,
@@ -15,7 +15,8 @@ import { useHasReviewed } from '../../hooks/useReviews';
 import { getPushTokenForUser, sendPushNotification } from '../../hooks/usePushNotifications';
 import { ApplicationStatus, RejectionReason } from '../../types';
 import { APPLICATION_STATUS_CONFIG, countByStatus, formatRejectionReason, toRejectionReason } from '../../utils/applications';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import { DEMO_MODE, DEMO_ORGANIZER_APPLICATIONS } from '../../lib/demoData';
 
 type Props = {
@@ -57,6 +58,8 @@ function RefusalModal({
   onClose: () => void;
   onConfirm: (reason: string) => void;
 }) {
+  const colors = useThemeColors();
+  const modal = useMemo(() => makeModal(colors), [colors]);
   const [reason, setReason] = React.useState('');
 
   const handleClose = () => { setReason(''); onClose(); };
@@ -122,6 +125,8 @@ function AcceptancePostModal({
   onClose: () => void;
   onAccept: (publishPost: boolean) => void;
 }) {
+  const colors = useThemeColors();
+  const modal = useMemo(() => makeModal(colors), [colors]);
   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   const dates = eventStart === eventEnd
     ? `le ${fmt(eventStart)}`
@@ -193,6 +198,8 @@ function ApplicationCard({
   onConfirmPayment?: (applicationId: string) => void;
   onReview: (creatorId: string, creatorName: string) => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const cfg = STATUS_CONFIG[item.status];
   const disciplines = item.creator?.creator_profile?.disciplines ?? [];
   const city = item.creator?.creator_profile?.city;
@@ -336,6 +343,8 @@ function ApplicationCard({
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function EventApplicationsScreen({ navigation, route }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { eventId, eventTitle } = route.params;
   const { profile } = useAuth();
   const rootNav = useNavigation<any>();
@@ -577,7 +586,7 @@ export default function EventApplicationsScreen({ navigation, route }: Props) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center' },
   back: { paddingHorizontal: spacing.xl, marginBottom: spacing.md },
@@ -650,7 +659,7 @@ const styles = StyleSheet.create({
   emptySubtitle: { ...typography.body, color: colors.text.secondary },
 });
 
-const modal = StyleSheet.create({
+const makeModal = (colors: ThemeColors) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   panel: {
     backgroundColor: colors.surface,

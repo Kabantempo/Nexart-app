@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 interface ScreenHeaderProps {
   title?: string;
@@ -10,6 +11,8 @@ interface ScreenHeaderProps {
 }
 
 export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const insets = useSafeAreaInsets();
   return (
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>
@@ -33,7 +36,7 @@ export function useTopInset() {
   return insets.top;
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   header: {
     backgroundColor: colors.surface,
     borderBottomWidth: 1,

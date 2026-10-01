@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef } from 'react'
 import { Animated, View, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native'
-import { colors, spacing, radius } from '../constants/theme'
+import { ThemeColors, colors, spacing, radius } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 
 interface SkeletonProps {
   width?: number | string
@@ -15,6 +16,8 @@ export function Skeleton({
   borderRadius = radius.md,
   style,
 }: SkeletonProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const shimmerAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -34,6 +37,8 @@ export function Skeleton({
 }
 
 export function SkeletonGroup() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.group}>
       <Skeleton height={150} style={{ marginBottom: spacing.md }} />
@@ -44,6 +49,8 @@ export function SkeletonGroup() {
 }
 
 export function SkeletonSwipeCard() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { width: W } = useWindowDimensions()
   const cardWidth = Math.min(W * 0.78, 300)
   const coverHeight = cardWidth * 0.55
@@ -63,6 +70,8 @@ export function SkeletonSwipeCard() {
 }
 
 export function SkeletonCreatorCard() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { width: W } = useWindowDimensions()
   const cardWidth = Math.min(W * 0.60, 220)
   const imgHeight = cardWidth * 0.85
@@ -82,6 +91,8 @@ export function SkeletonCreatorCard() {
 }
 
 export function SkeletonHorizontalList({ variant = 'event', count = 3 }: { variant?: 'event' | 'creator'; count?: number }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={{ marginBottom: spacing.xl }}>
       <View style={styles.listHeader}>
@@ -99,8 +110,8 @@ export function SkeletonHorizontalList({ variant = 'event', count = 3 }: { varia
   )
 }
 
-const styles = StyleSheet.create({
-  skeleton: { backgroundColor: '#E2E8F0' },
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
+  skeleton: { backgroundColor: colors.border },
   group: { padding: spacing.md },
   swipeCard: {
     backgroundColor: colors.surface,

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import { ReviewScreenParams } from '../screens/shared/ReviewScreen';
 
 import ManageEventsScreen from '../screens/organizer/ManageEventsScreen';
@@ -42,6 +43,7 @@ export type OrganizerEventStackParams = {
 const Stack = createStackNavigator<OrganizerEventStackParams>();
 
 export default function OrganizerEventStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="ManageEvents"       component={ManageEventsScreen} />

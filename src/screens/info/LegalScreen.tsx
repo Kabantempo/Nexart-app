@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Tab = 'terms' | 'privacy';
 
@@ -71,6 +72,8 @@ Nous utilisons des cookies pour maintenir votre session et améliorer l'expérie
 Nous utilisons Supabase (infrastructure AWS) avec chiffrement SSL pour protéger vos données.`;
 
 export default function LegalScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [tab, setTab] = useState<Tab>('terms');
 
   return (
@@ -92,7 +95,7 @@ export default function LegalScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   tabs: {

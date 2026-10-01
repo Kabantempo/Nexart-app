@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking, Image } from 'react-native';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const STATS = [
   { value: '500+', label: 'Créateurs' },
@@ -16,6 +17,8 @@ const VALUES = [
 ];
 
 export default function AboutScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       {/* Hero */}
@@ -75,7 +78,7 @@ export default function AboutScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   hero: {

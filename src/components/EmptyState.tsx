@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef } from 'react'
 import { Animated, View, Text, StyleSheet, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, typography, radius } from '../constants/theme'
+import { ThemeColors, colors, spacing, typography, radius } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 
 interface EmptyStateProps {
   icon: string
@@ -12,6 +13,8 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, title, subtitle, actionText, onAction }: EmptyStateProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const fadeAnim  = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0.85)).current
   const floatAnim = useRef(new Animated.Value(0)).current
@@ -57,7 +60,7 @@ export function EmptyState({ icon, title, subtitle, actionText, onAction }: Empt
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

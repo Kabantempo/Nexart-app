@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity,
   ScrollView, Alert, ActivityIndicator, Image, Platform,
@@ -17,7 +17,8 @@ import { useAuth } from '../../stores/auth';
 import { useCreatorProfile } from '../../hooks/useCreatorProfile';
 import { useProfileReviews } from '../../hooks/useReviews';
 import { CreatorProfile, DISCIPLINE_TAGS, TravelRadius } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const RADIUS_OPTIONS: { label: string; value: TravelRadius }[] = [
   { label: '5 km',       value: '5' },
@@ -35,6 +36,8 @@ function DisciplinePicker({
   selected: string[];
   onChange: (tags: string[]) => void;
 }) {
+  const colors = useThemeColors();
+  const tagStyles = useMemo(() => makeTagStyles(colors), [colors]);
   const toggle = (tag: string) => {
     if (selected.includes(tag)) onChange(selected.filter(t => t !== tag));
     else if (selected.length < 8) onChange([...selected, tag]);
@@ -58,7 +61,7 @@ function DisciplinePicker({
   );
 }
 
-const tagStyles = StyleSheet.create({
+const makeTagStyles = (colors: ThemeColors) => StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   tag: {
     borderWidth: 1, borderColor: colors.border, borderRadius: radius.full,
@@ -72,6 +75,9 @@ const tagStyles = StyleSheet.create({
 // ─── Portfolio section ────────────────────────────────────────────────────────
 
 function PortfolioSection({ userId, images, onUpdate }: { userId: string; images: string[]; onUpdate: (imgs: string[]) => Promise<any> }) {
+  const colors = useThemeColors();
+  const porto = useMemo(() => makePorto(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [uploading, setUploading] = useState(false);
 
   const addPhoto = async () => {
@@ -135,7 +141,7 @@ function PortfolioSection({ userId, images, onUpdate }: { userId: string; images
   );
 }
 
-const porto = StyleSheet.create({
+const makePorto = (colors: ThemeColors) => StyleSheet.create({
   placeholder: { height: 80, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
   placeholderText: { ...typography.caption, color: colors.text.secondary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
@@ -159,6 +165,9 @@ function AvailabilitySection({
   value: CreatorProfile['availability'];
   onChange: (a: CreatorProfile['availability']) => void;
 }) {
+  const colors = useThemeColors();
+  const availSt = useMemo(() => makeAvailSt(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [showModal, setShowModal] = useState(false);
   const [fromDay, setFromDay]     = useState('');
   const [fromMonth, setFromMonth] = useState('');
@@ -264,7 +273,7 @@ function AvailabilitySection({
   );
 }
 
-const availSt = StyleSheet.create({
+const makeAvailSt = (colors: ThemeColors) => StyleSheet.create({
   toggleRow:   { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   track:       { width: 44, height: 26, borderRadius: 13, backgroundColor: colors.border, justifyContent: 'center', paddingHorizontal: 3 },
   trackOn:     { backgroundColor: colors.primary },
@@ -297,6 +306,9 @@ function formatSiretInput(raw: string): string {
 // ─── Verification section ─────────────────────────────────────────────────────
 
 function VerificationSection({ userId }: { userId: string }) {
+  const colors = useThemeColors();
+  const verif = useMemo(() => makeVerif(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { creatorProfile, verifyCreatorSiret, submitInsuranceDoc } = useCreatorProfile(userId);
 
   const [siretInput, setSiretInput]         = useState('');
@@ -432,7 +444,7 @@ function VerificationSection({ userId }: { userId: string }) {
   );
 }
 
-const verif = StyleSheet.create({
+const makeVerif = (colors: ThemeColors) => StyleSheet.create({
   container: { marginTop: spacing.xl },
   card: {
     backgroundColor: colors.surface, borderRadius: radius.md,
@@ -490,6 +502,9 @@ const verif = StyleSheet.create({
 // ─── Creator profile section ──────────────────────────────────────────────────
 
 function CreatorProfileSection({ userId, onSaved }: { userId: string; onSaved?: () => void }) {
+  const colors = useThemeColors();
+  const tagStyles = useMemo(() => makeTagStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile, refetchProfile } = useAuth();
   const { creatorProfile, loading, saving, upsert, updateBio } = useCreatorProfile(userId);
   const [isEditing, setIsEditing] = useState(true); // toujours en mode édition dans le modal
@@ -685,6 +700,9 @@ const ORG_EVENT_TYPE_LABELS: Record<string, string> = {
 };
 
 function OrganizerProfileSection({ userId }: { userId: string }) {
+  const colors = useThemeColors();
+  const orgSt = useMemo(() => makeOrgSt(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile, refetchProfile } = useAuth();
   const [orgName, setOrgName]     = useState('');
   const [website, setWebsite]     = useState('');
@@ -876,7 +894,7 @@ function OrganizerProfileSection({ userId }: { userId: string }) {
   );
 }
 
-const orgSt = StyleSheet.create({
+const makeOrgSt = (colors: ThemeColors) => StyleSheet.create({
   coverWrap:    { height: 160, borderRadius: radius.lg, overflow: 'hidden', marginBottom: spacing.lg, position: 'relative' },
   cover:        { width: '100%', height: '100%' },
   coverOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
@@ -924,6 +942,8 @@ const PV_CARD_W = 160;
 const PV_CARD_H = 200;
 
 function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => void }) {
+  const colors = useThemeColors();
+  const pv = useMemo(() => makePv(colors), [colors]);
   const { creatorProfile, loading, upsert } = useCreatorProfile(userId);
   const { profile }  = useAuth();
   const { average, count, isTrusted } = useProfileReviews(userId);
@@ -1285,7 +1305,7 @@ function CreatorProfileView({ userId, onEdit }: { userId: string; onEdit: () => 
   );
 }
 
-const pv = StyleSheet.create({
+const makePv = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   /* Carte identité — bloc centré en haut */
@@ -1598,6 +1618,8 @@ const pv = StyleSheet.create({
 // ─── Main ProfileScreen ───────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile, refetchProfile } = useAuth();
   const { average, count, isTrusted } = useProfileReviews(profile?.id);
   const [showEdit, setShowEdit]       = useState(false);
@@ -1740,7 +1762,7 @@ export default function ProfileScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xxl },
 

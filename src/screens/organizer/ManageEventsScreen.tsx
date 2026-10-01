@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { OrganizerEventStackParams } from '../../navigation/OrganizerEventStack';
@@ -6,7 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
 import { useEvents } from '../../hooks/useEvents';
 import { Event, EventStatus } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = { navigation: StackNavigationProp<OrganizerEventStackParams, 'ManageEvents'> };
 
@@ -33,6 +34,8 @@ function EventRow({
   onEdit: () => void;
   onTools: () => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const cfg = STATUS_CONFIG[event.status];
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
@@ -83,6 +86,8 @@ function EventRow({
 }
 
 export default function ManageEventsScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { profile } = useAuth();
   const { events, loading, refetch } = useEvents({ organizerId: profile?.id, limit: 50 });
 
@@ -143,7 +148,7 @@ export default function ManageEventsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingTop: spacing.xxl },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   title: { ...typography.h2, color: colors.text.primary, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import ProfileScreen from '../screens/shared/ProfileScreen';
 import PageCustomizationScreen from '../screens/shared/PageCustomizationScreen';
 import SettingsScreen from '../screens/shared/SettingsScreen';
@@ -22,6 +23,7 @@ export type ProfileStackParams = {
 const Stack = createStackNavigator<ProfileStackParams>();
 
 export default function ProfileStack() {
+  const colors = useThemeColors();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: colors.background }, animation: 'default' }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />

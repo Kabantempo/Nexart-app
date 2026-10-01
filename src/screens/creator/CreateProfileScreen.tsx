@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
   ScrollView, Alert, ActivityIndicator, Image, Platform, Modal, FlatList,
@@ -12,7 +12,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../stores/auth';
 import { DISCIPLINE_TAGS, TravelRadius } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 type Props = { navigation: StackNavigationProp<any, 'CreateProfile'> };
 
@@ -31,6 +32,8 @@ const RADIUS_OPTIONS: { label: string; value: TravelRadius }[] = [
 ];
 
 export default function CreateProfileScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const { profile } = useAuth();
   const [step, setStep] = useState(1); // 1: basic | 2: disciplines | 3: location | 4: photo
 
@@ -361,7 +364,7 @@ export default function CreateProfileScreen({ navigation }: Props) {
 
 // ─── STYLES ──────────────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   scrollContent: { padding: spacing.xl, paddingBottom: spacing.xxl },
 

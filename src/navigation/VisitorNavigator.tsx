@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/theme';
+import { ThemeColors, colors } from '../constants/theme';
+import { useThemeColors } from '../stores/theme';
 import { TabIcon } from '../components/ui/TabIcon';
 
 import FeedStack             from './FeedStack';
@@ -26,6 +27,7 @@ const TABS: { name: string; icon: IoniconName; iconActive: IoniconName; componen
 const VISIBLE_TABS = TABS.slice(0, 4);
 
 export default function VisitorNavigator() {
+  const colors = useThemeColors();
   return (
     <Tab.Navigator
       

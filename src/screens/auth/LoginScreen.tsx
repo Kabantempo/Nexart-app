@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { supabase } from '../../lib/supabase';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 import EtherealBackground from '../../components/ui/EtherealBackground';
 import { Toast } from '../../components/Toast';
 import { GoogleLoginButton } from '../../components/GoogleLoginButton';
@@ -26,6 +27,8 @@ import { FloatingInput } from '../../components/ui/FloatingInput';
 type Props = { navigation: StackNavigationProp<AuthStackParams, 'Login'> };
 
 export default function LoginScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [loading, setLoading]     = useState(false);
@@ -167,7 +170,7 @@ export default function LoginScreen({ navigation }: Props) {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   scroll: {
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
@@ -230,7 +233,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.3,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: colors.surface + 'D9',
     color: colors.text.primary,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
@@ -241,7 +244,7 @@ const s = StyleSheet.create({
   },
   inputFocused: {
     borderColor: colors.primary,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: colors.surface + 'F2',
   },
   inputError: {
     borderColor: colors.error,
@@ -295,7 +298,7 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: radius.xl,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: colors.surface + 'E6',
     borderWidth: 1.5,
     borderColor: colors.border,
     flexDirection: 'row',
@@ -319,7 +322,7 @@ const s = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: radius.xl,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: colors.surface + 'CC',
     borderWidth: 1,
     borderColor: colors.border,
   },

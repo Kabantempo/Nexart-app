@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Text, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, typography, radius } from '../constants/theme'
+import { ThemeColors, colors, spacing, typography, radius } from '../constants/theme'
+import { useThemeColors } from '../stores/theme';
 import { AnimatedTouchableOpacity } from './AnimatedTouchableOpacity'
 
 interface GoogleLoginButtonProps {
@@ -18,6 +19,8 @@ export function GoogleLoginButton({
   loading = false,
   disabled = false,
 }: GoogleLoginButtonProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <AnimatedTouchableOpacity
       style={[
@@ -42,13 +45,13 @@ export function GoogleLoginButton({
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ThemeColors) => StyleSheet.create({
   button: {
     width: '100%',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.lg,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',

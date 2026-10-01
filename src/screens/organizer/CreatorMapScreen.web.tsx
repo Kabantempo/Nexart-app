@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ActivityIndicator, ScrollView,
@@ -6,13 +6,16 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useGeoCreators } from '../../hooks/useGeoCreators';
 import { DISCIPLINE_TAGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 const RADIUS_OPTIONS = [10, 20, 50, 100];
 
 // ─── Leaflet map (web only) ───────────────────────────────
 
 function WebCreatorMap({ creators, centerLat, centerLng, radiusKm, onSelect }: any) {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const [ready, setReady] = useState(false);
   const RL = useRef<any>(null);
 
@@ -64,6 +67,8 @@ function WebCreatorMap({ creators, centerLat, centerLng, radiusKm, onSelect }: a
 // ─── Main screen ──────────────────────────────────────────
 
 export default function CreatorMapScreen() {
+  const colors = useThemeColors();
+  const s = useMemo(() => makeS(colors), [colors]);
   const nav = useNavigation<any>();
   const [radiusKm, setRadius]     = useState(30);
   const [discipline, setDisc]     = useState('');
@@ -149,7 +154,7 @@ export default function CreatorMapScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const makeS = (colors: ThemeColors) => StyleSheet.create({
   container:      { flex: 1, backgroundColor: colors.background },
   centered:       { flex: 1, alignItems: 'center', justifyContent: 'center' },
   topBar:         { flexDirection: 'row', alignItems: 'center', paddingTop: spacing.xxl, paddingHorizontal: spacing.xl, paddingBottom: spacing.sm, gap: spacing.md, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.border },

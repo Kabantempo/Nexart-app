@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, KeyboardAvoidingView, Platform, ActivityIndicator,
@@ -12,7 +12,8 @@ import { useAuth } from '../../stores/auth';
 import { useCreatorProfile } from '../../hooks/useCreatorProfile';
 import { supabase } from '../../lib/supabase';
 import { PageSettings, PageFont, DEFAULT_PAGE_SETTINGS } from '../../types';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
+import { useThemeColors } from '../../stores/theme';
 
 // ─── Presets ──────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,8 @@ const FONTS: { label: string; value: PageFont; sample: string; fontFamily?: stri
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionHeader({ icon, title }: { icon: string; title: string }) {
+  const colors = useThemeColors();
+  const sc = useMemo(() => makeSc(colors), [colors]);
   return (
     <View style={sc.sectionRow}>
       <Ionicons name={icon as any} size={14} color={colors.primary} />
@@ -62,6 +65,8 @@ function SwatchRow({ options, value, onChange }: {
   value: string;
   onChange: (v: string) => void;
 }) {
+  const colors = useThemeColors();
+  const sc = useMemo(() => makeSc(colors), [colors]);
   return (
     <View style={sc.swatchRow}>
       {options.map(o => (
@@ -81,6 +86,8 @@ function SwatchRow({ options, value, onChange }: {
 // ─── Mini preview ─────────────────────────────────────────────────────────────
 
 function MiniPreview({ settings, name, bio }: { settings: PageSettings; name: string; bio: string }) {
+  const colors = useThemeColors();
+  const sc = useMemo(() => makeSc(colors), [colors]);
   const fontFamily = settings.bio_font === 'default' ? undefined
     : settings.bio_font === 'serif' ? 'serif'
     : 'monospace';
@@ -118,6 +125,8 @@ function MiniPreview({ settings, name, bio }: { settings: PageSettings; name: st
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function PageCustomizationScreen() {
+  const colors = useThemeColors();
+  const sc = useMemo(() => makeSc(colors), [colors]);
   const nav    = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
@@ -307,7 +316,7 @@ export default function PageCustomizationScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const sc = StyleSheet.create({
+const makeSc = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {
