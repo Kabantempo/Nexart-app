@@ -15,7 +15,6 @@ const POST_TYPE_COLORS: Record<string, string> = {
   call_for_collab:  '#10B981',
   tip:              '#F59E0B',
   experience:       '#3B82F6',
-  general:          colors.text.secondary,
 };
 
 const POST_TYPE_LABELS: Record<string, string> = {

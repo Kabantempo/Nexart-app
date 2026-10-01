@@ -8,16 +8,17 @@ import { ThemeColors, colors, spacing, typography, radius } from '../../constant
 import { useThemeColors } from '../../stores/theme';
 import { Event } from '../../types';
 
-const STATUS_CFG = {
+const makeStatusCfg = (colors: ThemeColors) => ({
   published: { label: 'Publié',   bg: colors.secondary + '20', color: colors.secondary },
   draft:     { label: 'Brouillon', bg: colors.text.secondary + '18', color: colors.text.secondary },
   closed:    { label: 'Fermé',    bg: colors.error + '18', color: colors.error },
-};
+});
 
 // ─── EventCard ────────────────────────────────────────────
 
 function EventCard({ event }: { event: Event }) {
   const colors = useThemeColors();
+  const STATUS_CFG = useMemo(() => makeStatusCfg(colors), [colors]);
   const s = useMemo(() => makeS(colors), [colors]);
   const start = new Date(event.start_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
   const end   = new Date(event.end_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });

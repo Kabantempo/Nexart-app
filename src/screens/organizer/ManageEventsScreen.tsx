@@ -11,11 +11,11 @@ import { useThemeColors } from '../../stores/theme';
 
 type Props = { navigation: StackNavigationProp<OrganizerEventStackParams, 'ManageEvents'> };
 
-const STATUS_CONFIG: Record<EventStatus, { label: string; color: string; bg: string }> = {
+const makeStatusConfig = (colors: ThemeColors): Record<EventStatus, { label: string; color: string; bg: string }> => ({
   draft:     { label: 'Brouillon', color: colors.text.secondary, bg: colors.border },
   published: { label: 'Publié',    color: colors.secondary,      bg: colors.secondary + '25' },
   closed:    { label: 'Fermé',     color: colors.error,          bg: colors.error + '20' },
-};
+});
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -35,6 +35,7 @@ function EventRow({
   onTools: () => void;
 }) {
   const colors = useThemeColors();
+  const STATUS_CONFIG = useMemo(() => makeStatusConfig(colors), [colors]);
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const cfg = STATUS_CONFIG[event.status];
   return (

@@ -12,7 +12,7 @@ export const POST_TYPE_CONFIG: Record<PostType, { label: string; color: string }
   call_for_collab:  { label: 'Collab',      color: '#10B981' },
   tip:              { label: 'Conseil',     color: '#F59E0B' },
   experience:       { label: 'Expérience',  color: '#3B82F6' },
-  general:          { label: 'Post',        color: colors.text.secondary },
+  general:          { label: 'Post',        color: '#6B7280' },
 };
 
 function timeAgo(iso: string): string {
@@ -41,7 +41,8 @@ export default function PostCard({ post, showCreator = true }: { post: Post; sho
   const { profile } = useAuth();
   const nav = useNavigation<any>();
   const { liked, count, toggle } = usePostLike(profile?.id, post.id, post.likes_count);
-  const cfg     = POST_TYPE_CONFIG[post.post_type] ?? POST_TYPE_CONFIG.general;
+  const baseCfg = POST_TYPE_CONFIG[post.post_type] ?? POST_TYPE_CONFIG.general;
+  const cfg     = post.post_type in POST_TYPE_CONFIG && post.post_type !== 'general' ? baseCfg : { ...baseCfg, color: colors.text.secondary };
   const creator = post.creator as any;
 
   return (

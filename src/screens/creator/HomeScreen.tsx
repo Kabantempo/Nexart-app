@@ -51,11 +51,11 @@ function eventToCardProps(event: Event, onPress: () => void) {
   return { title: event.title, subtitle: event.event_type, images: images.length ? images : ['', '', ''], stats, description: event.description ?? event.discipline_tags.join(', '), accent, onPress };
 }
 
-const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
+const makeStatusConfig = (colors: ThemeColors): Record<string, { label: string; bg: string; color: string }> => ({
   pending:  { label: 'En attente', bg: colors.text.secondary + '18', color: colors.text.secondary },
   accepted: { label: 'Acceptée',   bg: colors.secondary + '20',      color: colors.secondary },
   refused:  { label: 'Refusée',    bg: colors.error + '18',          color: colors.error },
-};
+});
 
 const EVENT_TYPE_ACCENT: Record<string, string> = {
   permanent: '#3B82F6',
@@ -101,6 +101,7 @@ function EventCard({ event }: { event: Event }) {
 
 function ApplicationItem({ application }: { application: any }) {
   const colors = useThemeColors();
+  const STATUS_CONFIG = useMemo(() => makeStatusConfig(colors), [colors]);
   const s = useMemo(() => makeS(colors), [colors]);
   const cfg = STATUS_CONFIG[application.status] ?? STATUS_CONFIG.pending;
   return (

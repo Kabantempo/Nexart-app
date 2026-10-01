@@ -61,7 +61,7 @@ const TYPE_CONFIG: Record<string, { color: string; gradient: [string, string] }>
   fair:       { color: '#EF4444', gradient: ['#DC2626', '#F87171'] },
 };
 
-const DEFAULT_CONFIG = { color: colors.primary, gradient: ['#4F46E5', '#6366F1'] as [string, string] };
+const DEFAULT_CONFIG = { color: '#6366F1', gradient: ['#4F46E5', '#6366F1'] as [string, string] };
 
 function toIso(d: Date) { return d.toISOString().split('T')[0]; }
 

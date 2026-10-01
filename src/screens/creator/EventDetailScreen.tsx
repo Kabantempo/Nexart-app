@@ -28,11 +28,11 @@ const TYPE_COLORS: Record<string, string> = {
   popup: '#A855F7', salon: '#10B981', fair: '#EF4444',
 };
 
-const STATUS_CONFIG = {
+const makeStatusConfig = (colors: ThemeColors) => ({
   pending:  { label: 'Candidature envoyée',  bg: colors.text.secondary + '20', color: colors.text.secondary },
   accepted: { label: 'Candidature acceptée', bg: colors.secondary + '20',      color: colors.secondary },
   refused:  { label: 'Candidature refusée',  bg: colors.error + '20',          color: colors.error },
-};
+});
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
@@ -67,6 +67,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function ApplySection({ eventId, userId }: { eventId: string; userId: string }) {
   const colors = useThemeColors();
+  const STATUS_CONFIG = useMemo(() => makeStatusConfig(colors), [colors]);
   const s = useMemo(() => makeS(colors), [colors]);
   const { status, loading: statusLoading } = useApplicationStatus(eventId, userId);
   const { apply, loading: applying } = useApply(eventId, userId);

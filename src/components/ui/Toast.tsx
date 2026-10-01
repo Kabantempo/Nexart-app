@@ -34,14 +34,15 @@ const ICONS: Record<ToastType, React.ComponentProps<typeof Ionicons>['name']> = 
   info:    'information-circle',
 };
 
-const BG: Record<ToastType, string> = {
+const makeBg = (colors: ThemeColors): Record<ToastType, string> => ({
   success: colors.secondary,
   error:   colors.error,
   info:    colors.primary,
-};
+});
 
 function Toast({ message, type, onHide }: { message: string; type: ToastType; onHide: () => void }) {
   const colors = useThemeColors();
+  const BG = useMemo(() => makeBg(colors), [colors]);
   const t = useMemo(() => makeT(colors), [colors]);
   const anim = useRef(new Animated.Value(0)).current;
 
