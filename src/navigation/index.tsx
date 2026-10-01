@@ -32,6 +32,8 @@ import PatchNotesScreen    from '../screens/info/PatchNotesScreen';
 import ItineraryScreen     from '../screens/creator/ItineraryScreen';
 import AuditLogScreen      from '../screens/admin/AuditLogScreen';
 import ReportsScreen       from '../screens/admin/ReportsScreen';
+import AdminUsersScreen    from '../screens/admin/AdminUsersScreen';
+import AdminEventsScreen   from '../screens/admin/AdminEventsScreen';
 import BoutiqueScreen      from '../screens/discover/BoutiqueScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
@@ -80,7 +82,7 @@ export default function RootNavigator() {
         ) : profile?.is_banned ? (
           <Stack.Screen name="Banned"    component={BannedScreen} />
         ) : profile?.is_admin ? (
-          <Stack.Screen name="Admin"     component={AdminNavigator} />
+          <Stack.Screen name="AdminHome" component={AdminNavigator} />
         ) : profile?.role === 'creator' ? (
           <Stack.Screen name="Creator"   component={CreatorNavigator} />
         ) : profile?.role === 'organizer' ? (
@@ -136,6 +138,16 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Itinerary"
           component={ItineraryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminUsers"
+          component={AdminUsersScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AdminEvents"
+          component={AdminEventsScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

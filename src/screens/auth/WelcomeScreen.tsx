@@ -56,6 +56,9 @@ const MOCK_CREATOR = mockProfile({
 const MOCK_ORGANIZER = mockProfile({
   id: 'demo-org-1', role: 'organizer', full_name: 'Bob Martin (test)',
 });
+const MOCK_ADMIN = mockProfile({
+  id: 'dev-admin-id', role: 'admin', is_admin: true, full_name: 'Dana Admin (test)',
+});
 const MOCK_VISITOR = mockProfile({
   id: 'dev-visitor-id', role: 'visitor', full_name: 'Clara Visiteur (test)',
 });
@@ -139,6 +142,9 @@ export default function WelcomeScreen({ navigation }: Props) {
                 </TouchableOpacity>
                 <TouchableOpacity style={[s.devBtn, s.devBtnVisitor]} onPress={() => setProfile(MOCK_VISITOR)}>
                   <Text style={s.devBtnText}>Visiteur</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[s.devBtn, s.devBtnVisitor]} onPress={() => setProfile(MOCK_ADMIN)}>
+                  <Text style={s.devBtnText}>Admin</Text>
                 </TouchableOpacity>
               </View>
             </View>
