@@ -20,6 +20,7 @@ import EventAnalyticsScreen from '../screens/organizer/EventAnalyticsScreen';
 import EventStandPlanScreen from '../screens/organizer/EventStandPlanScreen';
 import EventMarketingScreen from '../screens/organizer/EventMarketingScreen';
 import EventRemindersScreen from '../screens/organizer/EventRemindersScreen';
+import EventTasksScreen from '../screens/organizer/EventTasksScreen';
 
 export type OrganizerEventStackParams = {
   ManageEvents: undefined;
@@ -35,6 +36,7 @@ export type OrganizerEventStackParams = {
   EventStandPlan: { eventId: string; eventTitle: string };
   EventMarketing: { eventId: string; eventTitle: string };
   EventReminders: { eventId: string; eventTitle: string };
+  EventTasks: { eventId: string; eventTitle: string };
   EditEvent: { eventId: string };
   EventApplications: { eventId: string; eventTitle: string };
   Review: ReviewScreenParams;
@@ -60,6 +62,7 @@ export default function OrganizerEventStack() {
       <Stack.Screen name="EventStandPlan"     component={EventStandPlanScreen} />
       <Stack.Screen name="EventMarketing"     component={EventMarketingScreen} />
       <Stack.Screen name="EventReminders"     component={EventRemindersScreen} />
+      <Stack.Screen name="EventTasks"         component={EventTasksScreen} />
       <Stack.Screen name="EventApplications"  component={EventApplicationsScreen} />
       <Stack.Screen name="Review"             component={ReviewScreen} />
     </Stack.Navigator>
