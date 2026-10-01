@@ -14,6 +14,9 @@ export async function siteFetch(path: string, init: RequestInit = {}): Promise<R
       ...(init.headers ?? {}),
     },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error ?? `HTTP ${res.status}`);
+  }
   return res;
 }

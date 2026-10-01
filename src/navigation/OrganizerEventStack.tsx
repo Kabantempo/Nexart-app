@@ -9,11 +9,15 @@ import ReviewScreen from '../screens/shared/ReviewScreen';
 import CreateEventScreen from '../screens/organizer/CreateEventScreen';
 import EventWaitlistScreen from '../screens/organizer/EventWaitlistScreen';
 import EventExhibitorsScreen from '../screens/organizer/EventExhibitorsScreen';
+import EventVolunteersScreen from '../screens/organizer/EventVolunteersScreen';
+import EventTeamScreen from '../screens/organizer/EventTeamScreen';
 
 export type OrganizerEventStackParams = {
   ManageEvents: undefined;
   EventWaitlist: { eventId: string; eventTitle: string };
   EventExhibitors: { eventId: string; eventTitle: string };
+  EventVolunteers: { eventId: string; eventTitle: string };
+  EventTeam: { eventId: string; eventTitle: string };
   EditEvent: { eventId: string };
   EventApplications: { eventId: string; eventTitle: string };
   Review: ReviewScreenParams;
@@ -28,6 +32,8 @@ export default function OrganizerEventStack() {
       <Stack.Screen name="EditEvent"          component={CreateEventScreen} />
       <Stack.Screen name="EventWaitlist"      component={EventWaitlistScreen} />
       <Stack.Screen name="EventExhibitors"    component={EventExhibitorsScreen} />
+      <Stack.Screen name="EventVolunteers"    component={EventVolunteersScreen} />
+      <Stack.Screen name="EventTeam"          component={EventTeamScreen} />
       <Stack.Screen name="EventApplications"  component={EventApplicationsScreen} />
       <Stack.Screen name="Review"             component={ReviewScreen} />
     </Stack.Navigator>
