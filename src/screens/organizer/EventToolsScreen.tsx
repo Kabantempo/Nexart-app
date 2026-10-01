@@ -11,6 +11,10 @@ const TOOLS: { route: string; label: string; hint: string; icon: keyof typeof Io
   { route: 'EventVolunteers', label: 'Bénévoles',        hint: 'Bénévoles et créneaux',               icon: 'hand-left-outline' },
   { route: 'EventTeam',       label: 'Équipe',           hint: 'Co-organisateurs, invitation par @pseudo', icon: 'person-add-outline' },
   { route: 'EventCampaigns',  label: 'Campagnes e-mail', hint: 'Écrire et envoyer aux exposants',      icon: 'mail-outline' },
+  { route: 'EventAnalytics',  label: 'Statistiques',     hint: 'Candidatures et remplissage',          icon: 'stats-chart-outline' },
+  { route: 'EventStandPlan',  label: 'Plan des stands',  hint: 'Disponibilité de chaque emplacement',  icon: 'grid-outline' },
+  { route: 'EventMarketing',  label: 'Marketing',        hint: 'Communiqué, presse, échéances',        icon: 'megaphone-outline' },
+  { route: 'EventReminders',  label: 'Rappels',          hint: 'Délais des relances exposants',        icon: 'alarm-outline' },
   { route: 'EventChecklist',  label: 'Checklist',        hint: "Tâches d'organisation",               icon: 'checkbox-outline' },
   { route: 'EventFaqs',       label: 'FAQ',              hint: 'Questions et réponses automatiques',  icon: 'help-circle-outline' },
 ];
