@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import LogoMark from '../../components/ui/LogoMark';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking, Image } from 'react-native';
 import { ThemeColors, colors, spacing, typography, radius } from '../../constants/theme';
 import { useThemeColors } from '../../stores/theme';
@@ -23,7 +24,7 @@ export default function AboutScreen() {
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       {/* Hero */}
       <View style={s.hero}>
-        <Image source={require('../../../assets/logo-mark.png')} style={s.logoMark} />
+        <View style={{ marginBottom: spacing.md }}><LogoMark size={56} /></View>
         <Text style={s.heroTitle}>À propos de Nexart</Text>
         <Text style={s.heroSubtitle}>
           La plateforme qui connecte créateurs artisanaux et organisateurs de marchés en France.

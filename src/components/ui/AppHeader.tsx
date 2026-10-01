@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import LogoMark from './LogoMark';
 import {
   View, TouchableOpacity, StyleSheet, Image, Text,
 } from 'react-native';
@@ -37,7 +38,7 @@ export function AppHeader({
     <View style={[s.header, { paddingTop: insets.top + spacing.sm }]}>
       {/* Logo gauche */}
       <View style={s.logo}>
-        <Image source={require('../../assets/nexart-icon.png')} style={s.logoImg} />
+        <LogoMark size={28} />
         <Text style={s.logoText}>Nexart</Text>
       </View>
 

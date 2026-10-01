@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import LogoMark from '../../components/ui/LogoMark';
 import {
   View,
   Text,
@@ -76,7 +77,7 @@ export default function WelcomeScreen({ navigation }: Props) {
 
         {/* Brand header */}
         <View style={s.header}>
-          <Image source={require('../../../assets/logo-mark.png')} style={s.logoMark} />
+          <LogoMark size={32} />
           <Text style={s.brandName}>Nexart</Text>
         </View>
 
