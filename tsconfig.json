@@ -3,8 +3,6 @@
   "compilerOptions": {
     "strict": true
   },
-  "exclude": [
-    "supabase/functions",
-    "web"
-  ]
+  "exclude": ["supabase/functions",
+    "web", "tests", ".test-build"]
 }
