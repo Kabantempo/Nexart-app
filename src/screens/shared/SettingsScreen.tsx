@@ -79,6 +79,8 @@ export default function SettingsScreen() {
     { label: 'Notifications', icon: 'notifications-outline', route: 'Notifications', show: true },
     { label: 'Parrainage', icon: 'gift-outline', route: 'Referral', show: true },
     { label: 'Recherche', icon: 'search-outline', route: 'Search', show: true },
+    { label: 'Tendances', icon: 'trending-up-outline', route: 'Trends', show: true },
+    { label: 'Comparateur de marchés', icon: 'git-compare-outline', route: 'Compare', show: true },
     { label: 'Calendrier des marchés', icon: 'calendar-outline', route: 'Calendar', show: true },
     { label: 'Blog', icon: 'newspaper-outline', route: 'Blog', show: true },
     { label: 'Mes documents', icon: 'document-text-outline', route: 'Documents', show: isCreator },

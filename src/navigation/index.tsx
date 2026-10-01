@@ -22,6 +22,8 @@ import BannedScreen       from '../screens/info/BannedScreen';
 import UsernameProfileScreen from '../screens/discover/UsernameProfileScreen';
 import CalendarScreen     from '../screens/discover/CalendarScreen';
 import SearchScreen       from '../screens/discover/SearchScreen';
+import TrendsScreen       from '../screens/discover/TrendsScreen';
+import CompareScreen      from '../screens/discover/CompareScreen';
 import SettingsScreen     from '../screens/shared/SettingsScreen';
 import NotificationsScreen from '../screens/shared/NotificationsScreen';
 import ReferralScreen     from '../screens/shared/ReferralScreen';
@@ -97,6 +99,16 @@ export default function RootNavigator() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Referral" component={ReferralScreen} />
+        <Stack.Screen
+          name="Trends"
+          component={TrendsScreen}
+          options={{ headerShown: true, title: 'Tendances', headerBackTitle: 'Retour' }}
+        />
+        <Stack.Screen
+          name="Compare"
+          component={CompareScreen}
+          options={{ headerShown: true, title: 'Comparateur', headerBackTitle: 'Retour' }}
+        />
         <Stack.Screen
           name="Search"
           component={SearchScreen}
